@@ -29,9 +29,12 @@ def _make_node(
     score: float | None,
     status: str = "accepted",
     derivation: list[DerivationStep] | None = None,
-    grounding: list[str] | None = None,
 ) -> Node:
-    """Build a hypothesis Node with a valid refs payload."""
+    """Build a hypothesis Node with a valid refs payload.
+
+    Grounding fact-ids must be supplied via ``derivation[].fact_ids`` per the
+    forge contract (``Node.grounding`` is a Markdown str, not a fact-id list).
+    """
     derivation = derivation or []
     refs = build_hyp_refs(
         kind="hypothesis",
@@ -66,7 +69,6 @@ def _make_node(
         status=status,
         score=score,
         refs=refs,
-        grounding=grounding,
     )
 
 
@@ -92,10 +94,12 @@ def _make_tree(tmp_path, nodes: list[Node]) -> IdeaTree:
 
 def test_get_ranked_returns_required_fields(tmp_path):
     """Returned RankedHypothesis carries ALL required fields."""
+    # Grounding fact-ids live in derivation[].fact_ids per forge contract —
+    # never in Node.grounding (which is a plain Markdown str).
     derivation = [DerivationStep(step="s1", grade="[paper]", fact_ids=["fact_0"])]
     node = _make_node(
         "hyp_1", "Glia encode fear", "neuro", 0.85,
-        derivation=derivation, grounding=["fact_0"]
+        derivation=derivation,
     )
     tree = _make_tree(tmp_path, [node])
 
@@ -273,3 +277,43 @@ def test_nodes_without_refs_are_skipped(tmp_path):
     # Only the hypothesis node, not the root
     assert len(results) == 1
     assert results[0].node_id == "hyp_1"
+
+
+# ---------------------------------------------------------------------------
+# Test: grounding_fact_ids sourced from refs.derivation (regression — forge contract)
+# ---------------------------------------------------------------------------
+
+
+def test_grounding_fact_ids_sourced_from_derivation_not_native_grounding(tmp_path):
+    """grounding_fact_ids must come from refs.derivation[].fact_ids, not Node.grounding.
+
+    This test is the REGRESSION guard for the grounding-source correctness bug.
+    It passes a node whose native Node.grounding == "" (the real executor case)
+    but whose refs.derivation steps carry fact_ids.  The old implementation
+    ``list(node.grounding or [])`` would return [] here (empty string is falsy)
+    — this test FAILS against that implementation and PASSES with the fixed one.
+
+    Also verifies deduplication (order-preserving, first-seen).
+    """
+    # Two derivation steps; fact_1 appears in both — should be deduplicated.
+    derivation = [
+        DerivationStep(step="step_a", grade="[paper]", fact_ids=["fact_0", "fact_1"]),
+        DerivationStep(step="step_b", grade="[inferred]", fact_ids=["fact_1", "fact_2"]),
+    ]
+    node = _make_node(
+        "hyp_grounding", "Astrocytes modulate synaptic plasticity", "neuro", 0.9,
+        derivation=derivation,
+    )
+    # Confirm native grounding is the empty string (vendor default)
+    assert node.grounding == "", "pre-condition: native Node.grounding must be empty string"
+
+    tree = _make_tree(tmp_path, [node])
+    results = RankedHypothesisStore(tree).get_ranked()
+
+    assert len(results) == 1
+    r = results[0]
+    # grounding_fact_ids must be populated from derivation steps, NOT from the empty string
+    assert r.grounding_fact_ids == ["fact_0", "fact_1", "fact_2"], (
+        "grounding_fact_ids should be the union of derivation[].fact_ids, deduped "
+        "and order-preserving (fact_1 appears twice but only once in output)"
+    )

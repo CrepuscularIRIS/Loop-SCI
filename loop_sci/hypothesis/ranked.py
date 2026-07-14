@@ -11,11 +11,14 @@ retrieve hypotheses ranked by score.  Callers never need to import or traverse
 """
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import Any
 
 from loop_sci.hypothesis.schemas import refs_from_dict
 from loop_sci.state.idea_tree import IdeaTree
+
+log = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -117,7 +120,8 @@ class RankedHypothesisStore:
             # Deserialise refs payload; skip malformed nodes gracefully
             try:
                 refs = refs_from_dict(node.refs)
-            except Exception:
+            except Exception as exc:
+                log.warning("ranked: skipping malformed node %r refs payload: %s", node.id, exc)
                 continue
 
             # Skip nodes whose payload lacks a hypothesis block
@@ -141,6 +145,17 @@ class RankedHypothesisStore:
                 for step in refs.derivation
             ]
 
+            # Collect grounding fact-ids from derivation steps (deduped, order-preserving).
+            # Contract (forge.py line 24-25): grounding lives in derivation[].fact_ids
+            # inside hyp_refs — NEVER in the native Node.grounding string.
+            seen: set[str] = set()
+            grounding_fact_ids: list[str] = []
+            for step in refs.derivation:
+                for fid in step.fact_ids:
+                    if fid not in seen:
+                        seen.add(fid)
+                        grounding_fact_ids.append(fid)
+
             results.append(
                 RankedHypothesis(
                     node_id=node.id,
@@ -151,7 +166,7 @@ class RankedHypothesisStore:
                     novelty=novelty,
                     self_consistency=self_consistency,
                     overall_score=node.score,
-                    grounding_fact_ids=list(node.grounding or []),
+                    grounding_fact_ids=grounding_fact_ids,
                 )
             )
 
