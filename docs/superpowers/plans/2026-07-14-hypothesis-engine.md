@@ -684,7 +684,7 @@ git commit -m "feat(hypothesis): implement prospect' stage — mine gap cards fr
 
 LLM prompt returns: `{"candidates": [{"MECHANISM": "...", "KILL": "...", "BRACKET": "...", "DIFF_PREDICTION": "...", "frame": "primary"|"rival", "derivation": [{"step": "...", "grade": "[paper]"|"[inferred]"|"[guess]", "fact_ids": ["..."]}]}]}`.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```python
 # tests/unit/hypothesis/test_forge.py
@@ -756,13 +756,13 @@ async def test_cap_respected(tmp_path):
     assert len(results) <= 4
 ```
 
-- [ ] **Step 2: Run test — verify FAIL**
+- [x] **Step 2: Run test — verify FAIL**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_forge.py -v 2>&1 | tail -5
 ```
 
-- [ ] **Step 3: Implement `loop_sci/hypothesis/stages/forge.py`**
+- [x] **Step 3: Implement `loop_sci/hypothesis/stages/forge.py`**
 
 ```python
 # loop_sci/hypothesis/stages/forge.py
@@ -862,14 +862,14 @@ async def _call_with_retry(provider, prompt: str) -> str | None:
     return None
 ```
 
-- [ ] **Step 4: Run test — verify PASS**
+- [x] **Step 4: Run test — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_forge.py -v
 ```
 Expected: `3 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/hypothesis/stages/forge.py tests/unit/hypothesis/test_forge.py

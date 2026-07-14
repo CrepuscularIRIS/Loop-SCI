@@ -2,10 +2,10 @@
 
 - [x] 1.1 Define the hypothesis schema (problem card `{Q, WHY-NOW, PROBE/KILL, STAKES}`; hypothesis `{MECHANISM, KILL, BRACKET, DIFF-PREDICTION}`; evidence-graded derivation step; scores) and its `Node.refs` payload layout
 - [x] 1.2 Implement `prospect'`: mine gap/contradiction cards from the fact base via its stable query interface (no new fetching, no idea-tree internals); drop cards citing non-existent facts
-- [ ] 1.3 Implement `forge'`: Qwen-driven induction+deduction from a card into candidate hypotheses with rival-frame siblings; record as idea-tree nodes under fact node(s)
-- [ ] 1.4 Implement the relabeling filter (strip-the-new-words ⇒ discard when no distinct diff-prediction survives)
-- [ ] 1.5 Bound generation by a per-run cap (cards × candidates); stop cleanly at the cap
-- [ ] 1.6 Unit tests (offline, mock provider): gap cards derived + fact-grounded; hypotheses carry mechanism/kill/bracket/diff-prediction + rival frame; relabeling discarded; per-run bound respected
+- [x] 1.3 Implement `forge'`: Qwen-driven induction+deduction from a card into candidate hypotheses with rival-frame siblings; record as idea-tree nodes under fact node(s)
+- [x] 1.4 Implement the relabeling filter (strip-the-new-words ⇒ discard when no distinct diff-prediction survives)
+- [x] 1.5 Bound generation by a per-run cap (cards × candidates); stop cleanly at the cap
+- [x] 1.6 Unit tests (offline, mock provider): gap cards derived + fact-grounded; hypotheses carry mechanism/kill/bracket/diff-prediction + rival frame; relabeling discarded; per-run bound respected
 
 ## 2. Hypothesis critique (derivation contract + Qwen-vs-Qwen jury + anti-fabrication)
 
