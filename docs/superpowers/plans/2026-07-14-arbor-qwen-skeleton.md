@@ -1736,7 +1736,7 @@ git commit -m "feat(engine): DispatchUnit/ExecutorResult seam dataclasses and ag
 - Consumes: `DispatchUnit`, vendored `Agent`, `build_agent`, `build_provider`, `hydra_to_agent_config`
 - Produces: `Executor(provider, cfg) .run(unit: DispatchUnit) -> ExecutorResult`
 
-- [ ] **Step 1: Implement `loop_sci/engine/executor.py`**
+- [x] **Step 1: Implement `loop_sci/engine/executor.py`**
 
 ```python
 """Executor: runs one DispatchUnit as a vendored Agent, returns ExecutorResult."""
@@ -1812,7 +1812,7 @@ def _extract_insight(text: str) -> str:
     return sentences[-1][:200] if sentences else ""
 ```
 
-- [ ] **Step 2: Update `loop_sci/engine/__init__.py`**
+- [x] **Step 2: Update `loop_sci/engine/__init__.py`**
 
 ```python
 from .tools import ToolRegistry
@@ -1823,7 +1823,7 @@ from .executor import Executor
 __all__ = ["ToolRegistry", "DispatchUnit", "ExecutorResult", "build_agent", "Executor"]
 ```
 
-- [ ] **Step 3: Verify import**
+- [x] **Step 3: Verify import**
 
 ```bash
 uv run python -c "from loop_sci.engine import Executor; print('Executor OK')"
@@ -1831,7 +1831,7 @@ uv run python -c "from loop_sci.engine import Executor; print('Executor OK')"
 
 Expected: `Executor OK`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add loop_sci/engine/executor.py loop_sci/engine/__init__.py

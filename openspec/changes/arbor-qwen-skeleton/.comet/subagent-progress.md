@@ -27,8 +27,10 @@ Reason: open-phase tasks.md text is stale vs design (1.3 says vendor "orchestrat
 ## FORWARD NOTE for Tasks 11/12: build_agent is CFG-FIRST: build_agent(cfg, *, provider=None, tools=None, bus=..., node_id="", agent_label=..., system_prompt=...). types.py: DispatchUnit(node_id, goal, context, tools); ExecutorResult(status, summary, score, insight, refs) with status Literal {"done","bounded_exit","error"}. (types.py already created in Task 10.)
 ## FORWARD NOTE for Task 12 (coordinator): to update refs via tree.update_node, first override on subclass: Node.MUTABLE_FIELDS = _VendorNode.MUTABLE_FIELDS | {"refs"} (else ValueError). Or set node.refs directly (persists). status/score/insight ARE already mutable. Check is_complete before trusting get_pending_leaves after mark_complete.
 
+## CRITICAL for Task 12 (coordinator): stub session starts with ONLY a pending ROOT at depth 0. get_pending_leaves() EXCLUDES depth 0 -> returns []. So coordinator MUST bootstrap: either (a) dispatch ROOT itself on the first cycle when no pending leaves exist and ROOT is pending, OR (b) seed a child node under ROOT (depth 1) and dispatch that. Ensure >=1 observe->dispatch->record cycle runs on the stub, then session.mark_complete(). Executor is Executor(cfg, *, provider, bus); executor.run(unit) is async -> Coordinator.run is async. Record outcome into node BEFORE next decision (update_node status/score/insight auto-saves; refs via node.refs direct or MUTABLE_FIELDS override). Emit node/lifecycle events via bus.
+
 ### Current task
-- Task 11: Executor (Executor.run(DispatchUnit) -> ExecutorResult)
+- Task 12: Coordinator (observe->dispatch->record->decide loop)
 - Stage: implementing
 - review-fix round: 0 / 2
 
@@ -67,3 +69,4 @@ Plan→OpenSpec mapping (loose/many-to-many; check off openspec sub-tasks as gen
 - Task 8: complete (impl 920143d Opus Approved; atomic cursor write [tmp+Path.replace]; resume + already-complete-no-op proven by real tests; subclass tree so refs survives resume; 6/6 new, 79/79 pristine; 3 Minor [completed_node_ids YAGNI ok; mark_complete/is_complete contract note for Task12; temp-name cosmetic — final review])
 - Task 9: complete (impl c0ad2da Opus Approved; faithful pure re-export EventBus/NullBus/Event+types; NullBus genuine no-op; exception-swallow test matches vendored; 5/5 new, 84/84 pristine; 2 Minor [tighter parity test; unused pytest import ruff-sweep — final review/T17])
 - Task 10: complete (impl 000b508 Opus Approved; build_agent constructs vendored Agent w/ real sig; auto_git=False doubly-asserted; ToolRegistry orthogonal seam no dup dispatch; types.py minimal; 18 new, 102 pristine; deliberate cfg-first build_agent signature; 2 Minor final-review)
+- Task 11: complete (impl 529be18 Opus Approved; status mapping complete [finished->done/max_turns->bounded_exit/sentinel|exc->error]; airtight exception safety no propagation; FakeAgent stub no network; 7/7 new, 109/109 pristine; 3 Minor [sentinel string-match+xref comment; tools dict->Tool fwd for T12; None stop_reason sane])
