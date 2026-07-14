@@ -1480,7 +1480,7 @@ git commit -m "feat(literature/factbase): JSON store + persist verified fact to 
 - Consumes: `Executor(cfg, *, provider, bus)` seam; `DispatchUnit`/`ExecutorResult` from `loop_sci.engine.types`; all Group 1-4 components
 - Produces: `LitMinerExecutor(cfg, *, search_clients, grounding_provider=None, bus=None)` with `async run(unit: DispatchUnit) -> ExecutorResult`; skips already-processed `external_id` (resumability)
 
-- [ ] **Step 9.1: Write failing tests**
+- [x] **Step 9.1: Write failing tests**
 
 ```python
 # tests/unit/literature/test_lit_executor.py
@@ -1565,7 +1565,7 @@ async def test_executor_skips_already_processed(tmp_session, tmp_path):
 Run: `uv run pytest tests/unit/literature/test_lit_executor.py -v`
 Expected: FAIL — module not found
 
-- [ ] **Step 9.2: Implement LitMinerExecutor**
+- [x] **Step 9.2: Implement LitMinerExecutor**
 
 ```python
 # loop_sci/literature/executor.py
@@ -1679,12 +1679,12 @@ class LitMinerExecutor:
         )
 ```
 
-- [ ] **Step 9.3: Run executor tests**
+- [x] **Step 9.3: Run executor tests**
 
 Run: `uv run pytest tests/unit/literature/test_lit_executor.py -v`
 Expected: both tests PASS
 
-- [ ] **Step 9.4: Commit**
+- [x] **Step 9.4: Commit**
 
 ```bash
 git add loop_sci/literature/executor.py tests/unit/literature/test_lit_executor.py
