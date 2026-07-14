@@ -2439,7 +2439,7 @@ git commit -m "test(live): Qwen-via-Bailian smoke test — completion + native t
 **Files:**
 - Create: `tests/live/test_e2e_run.py`
 
-- [ ] **Step 1: Write `tests/live/test_e2e_run.py`**
+- [x] **Step 1: Write `tests/live/test_e2e_run.py`**
 
 ```python
 """End-to-end run + resume against real Qwen-via-Bailian.
@@ -2616,7 +2616,7 @@ async def test_resume_already_complete_is_noop(runs_root):
     print(f"\n[NOOP PASS] steps unchanged at {steps_before}")
 ```
 
-- [ ] **Step 2: Run end-to-end (requires real key)**
+- [x] **Step 2: Run end-to-end (requires real key)**
 
 ```bash
 DASHSCOPE_API_KEY=<your-key> uv run pytest tests/live/test_e2e_run.py -v -m live -s 2>&1
@@ -2624,7 +2624,7 @@ DASHSCOPE_API_KEY=<your-key> uv run pytest tests/live/test_e2e_run.py -v -m live
 
 Expected: all three tests PASS; step count ≥ 1; `idea_tree.json` present; `[RESUME PASS]` printed.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/live/test_e2e_run.py
