@@ -18,14 +18,16 @@
 ## Task ledger — 12 tasks
 
 ### Current task
-- Task 2: Adapters — Semantic Scholar, arXiv, PubMed
+- Task 3: Multi-source dispatch — fan-out, backoff, graceful degrade
 - Stage: implementing
 - review-fix round: 0 / 2
+- NOTE: grok auth expired -> fixes fall back to Sonnet (Opus review still gates). `grok login` to restore.
 
 ## PRE-GUARD RUFF SWEEP (Task 12): unused `field` import in loop_sci/literature/search/schema.py (+ any others). tasks.md checkoff deferred to pre-guard batch.
 
 ### Completed
 - Task 1: complete (impl c748a67 Opus Approved; REAL mockable httpx offline seam [MockTransport, async runs, no socket]; PaperResult all spec fields; leak-free async lifecycle; 13 new/146 pristine; 2 Minor [unused field import->ruff; non-frozen deliberate])
+- Task 2: complete (impl eeff586 mapping/offline/PubMed-2-hop correct; Opus found 1 IMPORTANT [arXiv _strip_version corrupts external_id] -> Sonnet fix e125629 (grok down): anchored vN$ regex + 3 regression tests + malformed-skip tests all 3 adapters + defusedxml -> Opus re-review Approved no regression; 193 passed/5 skipped, ruff clean)
 
 ### Completed
 (none yet)

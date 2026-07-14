@@ -143,7 +143,7 @@ git commit -m "feat(literature): PaperResult schema + SearchClient protocol"
 - Consumes: `PaperResult` from Task 1; `httpx.AsyncClient` with injectable transport
 - Produces: `SemanticScholarClient(http: httpx.AsyncClient)`, `ArxivClient(http: httpx.AsyncClient)`, `PubMedClient(http: httpx.AsyncClient, *, email: str, tool: str)`
 
-- [ ] **Step 2.1: Create fixture files**
+- [x] **Step 2.1: Create fixture files**
 
 Save real-but-minimal recorded API responses (5–10 items each). The key constraint is the structure, not real data:
 
@@ -205,7 +205,7 @@ Save real-but-minimal recorded API responses (5–10 items each). The key constr
 </PubmedArticleSet>
 ```
 
-- [ ] **Step 2.2: Write failing adapter tests**
+- [x] **Step 2.2: Write failing adapter tests**
 
 ```python
 # tests/unit/literature/test_adapters.py
@@ -287,7 +287,7 @@ async def test_pubmed_search_returns_paper_results(pubmed_http):
 Run: `uv run pytest tests/unit/literature/test_adapters.py -v`
 Expected: FAIL — modules not found
 
-- [ ] **Step 2.3: Implement Semantic Scholar adapter**
+- [x] **Step 2.3: Implement Semantic Scholar adapter**
 
 ```python
 # loop_sci/literature/search/semantic_scholar.py
@@ -340,7 +340,7 @@ def _to_paper(d: dict) -> PaperResult:
     )
 ```
 
-- [ ] **Step 2.4: Implement arXiv adapter**
+- [x] **Step 2.4: Implement arXiv adapter**
 
 ```python
 # loop_sci/literature/search/arxiv.py
@@ -396,7 +396,7 @@ def _entry_to_paper(e: ET.Element) -> PaperResult:
     )
 ```
 
-- [ ] **Step 2.5: Implement PubMed adapter**
+- [x] **Step 2.5: Implement PubMed adapter**
 
 ```python
 # loop_sci/literature/search/pubmed.py
@@ -458,12 +458,12 @@ def _article_to_paper(article: ET.Element) -> PaperResult:
     )
 ```
 
-- [ ] **Step 2.6: Run adapter tests**
+- [x] **Step 2.6: Run adapter tests**
 
 Run: `uv run pytest tests/unit/literature/test_adapters.py -v`
 Expected: all 3 adapter tests PASS
 
-- [ ] **Step 2.7: Commit**
+- [x] **Step 2.7: Commit**
 
 ```bash
 git add loop_sci/literature/search/ tests/unit/literature/
