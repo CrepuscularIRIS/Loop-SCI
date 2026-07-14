@@ -608,7 +608,7 @@ git commit -m "feat(provider): credentials, retry, factory for Qwen-via-Bailian"
   - `NativeToolProtocol` — passes `tools` + `tool_choice="auto"` natively
   - `PromptToolProtocol` — injects schemas into system prompt; `parse_tool_calls(text: str, tools: list[dict]) -> list[ToolCall]` extracts JSON tool-call blocks from text
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Append to `tests/unit/test_provider.py`:
 
@@ -639,7 +639,7 @@ def test_prompt_protocol_parse_tool_call():
     assert calls[0]["arguments"]["q"] == "hello"
 ```
 
-- [ ] **Step 2: Run to verify FAIL**
+- [x] **Step 2: Run to verify FAIL**
 
 ```bash
 uv run pytest tests/unit/test_provider.py -k "protocol" -v 2>&1 | head -10
@@ -647,7 +647,7 @@ uv run pytest tests/unit/test_provider.py -k "protocol" -v 2>&1 | head -10
 
 Expected: ImportError
 
-- [ ] **Step 3: Implement `loop_sci/provider/tool_protocol.py`**
+- [x] **Step 3: Implement `loop_sci/provider/tool_protocol.py`**
 
 ```python
 """Tool protocol seam: native tool-calls vs prompt-injected JSON fallback."""
@@ -727,7 +727,7 @@ class PromptToolProtocol(ToolProtocol):
         return results
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 ```bash
 uv run pytest tests/unit/test_provider.py -v
@@ -735,7 +735,7 @@ uv run pytest tests/unit/test_provider.py -v
 
 Expected: all PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/provider/tool_protocol.py tests/unit/test_provider.py
