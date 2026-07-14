@@ -65,7 +65,7 @@ def _build_all(runs_root: pathlib.Path, task: str = STUB_TASK, step_budget: int 
     Returns (coordinator, session) ready to ``await coordinator.run(session)``.
     step_budget is deliberately small to keep API costs minimal.
     """
-    from loop_sci.config.loader import load_config, hydra_to_agent_config
+    from loop_sci.config.loader import load_config
     from loop_sci.provider.factory import build_provider
     from loop_sci.provider.credentials import resolve_key, invocation_record
     from loop_sci.engine import Executor, Coordinator
@@ -89,8 +89,7 @@ def _build_all(runs_root: pathlib.Path, task: str = STUB_TASK, step_budget: int 
         base_url=cfg.provider.base_url,
         timeout=cfg.provider.timeout,
     )
-    agent_cfg = hydra_to_agent_config(cfg)
-    executor = Executor(provider=provider, agent_cfg=agent_cfg)
+    executor = Executor(cfg, provider=provider)
     coordinator = Coordinator(executor=executor, step_budget=step_budget)
     session = RunSession.create(runs_root, task=task)
     return coordinator, session
@@ -98,7 +97,7 @@ def _build_all(runs_root: pathlib.Path, task: str = STUB_TASK, step_budget: int 
 
 def _build_provider_and_executor(runs_root: pathlib.Path):
     """Lightweight helper: build provider + executor without creating a session."""
-    from loop_sci.config.loader import load_config, hydra_to_agent_config
+    from loop_sci.config.loader import load_config
     from loop_sci.provider.factory import build_provider
     from loop_sci.provider.credentials import resolve_key
     from loop_sci.engine import Executor
@@ -114,8 +113,7 @@ def _build_provider_and_executor(runs_root: pathlib.Path):
         base_url=cfg.provider.base_url,
         timeout=cfg.provider.timeout,
     )
-    agent_cfg = hydra_to_agent_config(cfg)
-    executor = Executor(provider=provider, agent_cfg=agent_cfg)
+    executor = Executor(cfg, provider=provider)
     return executor
 
 
