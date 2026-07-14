@@ -35,3 +35,6 @@ logs/
 
 # Local memory sidecar
 .codebase-memory/
+
+# SDD scratch (subagent-driven-development reports/diffs/briefs)
+.superpowers/
