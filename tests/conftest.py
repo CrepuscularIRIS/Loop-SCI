@@ -20,13 +20,23 @@ class MockProvider(LLMProvider):
     - create()         (abstract)
     - count_tokens()   (abstract)
     create_streaming() has a default fallback in the ABC so is not overridden.
+
+    The optional *model* keyword argument lets tests build generator and reviewer
+    MockProviders with distinct identities for the no-self-acquit property:
+
+        gen  = MockProvider(responses=[...], model="qwen-max")
+        rev  = MockProvider(responses=[...], model="qwen-plus")
+
+    Backward-compatible: existing ``MockProvider(responses=[...])`` calls keep
+    working and the instance model stays ``"mock-model"``.
     """
 
     model = "mock-model"
 
-    def __init__(self, responses: list[str]):
+    def __init__(self, responses: list[str], *, model: str = "mock-model"):
         self._responses = list(responses)
         self._index = 0
+        self.model = model
 
     async def create(
         self,
