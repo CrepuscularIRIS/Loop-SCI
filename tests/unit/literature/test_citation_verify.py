@@ -321,9 +321,10 @@ def test_existing_fact_schema_tests_still_pass_after_tightening():
 # ---------------------------------------------------------------------------
 
 
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../"))
-from tests.conftest import MockProvider  # noqa: E402
 
 
 def _pipeline_with_paper(paper: PaperResult, grounding_provider=None) -> VerificationPipeline:

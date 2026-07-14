@@ -265,10 +265,6 @@ async def test_happy_path_verified_fact_in_tree_and_store(tmp_path: Path) -> Non
 
     # --- idea-tree: fact nodes carry verification_status == "verified" ---
     tree = session.tree
-    verified_nodes = [
-        n for n in tree._nodes.values()
-        if n.refs and n.refs.get("verification_status") == "verified"
-    ]
     # persist_fact embeds the full Fact.to_dict() in refs; verification_status key
     # does NOT exist there (the dict key is "verification" → nested dict).
     # So we look for nodes whose refs["verification"]["status"] == "verified":

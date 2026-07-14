@@ -66,14 +66,12 @@ async def _query_with_backoff(
     a ``SourceError`` so siblings are never cancelled.
     """
     attempt = 0
-    last_exc: BaseException | None = None
 
     while True:
         try:
             results = await client.search(query, max_results=max_results)
             return results, None
-        except BaseException as exc:
-            last_exc = exc
+        except Exception as exc:
             if retry_on and isinstance(exc, retry_on) and attempt < max_retries:
                 attempt += 1
                 log.warning(
