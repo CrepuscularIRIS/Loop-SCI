@@ -18,16 +18,19 @@
 ## Task ledger — 12 tasks
 
 ### Current task
-- Task 3: Multi-source dispatch — fan-out, backoff, graceful degrade
+- Task 4: Fact schema (evidence-required, grounding_scope, verification)
 - Stage: implementing
 - review-fix round: 0 / 2
-- NOTE: grok auth expired -> fixes fall back to Sonnet (Opus review still gates). `grok login` to restore.
+- NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
+
+## FINAL-REVIEW minors to flag: dispatch.py except BaseException (swallows CancelledError -> narrow to Exception, async correctness); dispatch.py O(n2) name lookup; + Task1/2 minors (unused-field-import ruff-swept? non-frozen PaperResult; bare-except in adapters).
 
 ## PRE-GUARD RUFF SWEEP (Task 12): unused `field` import in loop_sci/literature/search/schema.py (+ any others). tasks.md checkoff deferred to pre-guard batch.
 
 ### Completed
 - Task 1: complete (impl c748a67 Opus Approved; REAL mockable httpx offline seam [MockTransport, async runs, no socket]; PaperResult all spec fields; leak-free async lifecycle; 13 new/146 pristine; 2 Minor [unused field import->ruff; non-frozen deliberate])
 - Task 2: complete (impl eeff586 mapping/offline/PubMed-2-hop correct; Opus found 1 IMPORTANT [arXiv _strip_version corrupts external_id] -> Sonnet fix e125629 (grok down): anchored vN$ regex + 3 regression tests + malformed-skip tests all 3 adapters + defusedxml -> Opus re-review Approved no regression; 193 passed/5 skipped, ruff clean)
+- Task 3: complete (impl 02553c8 Opus Approved; 3 resilience guarantees [no-propagate/no-sibling-cancel/bounded-retry] all proven by REAL tests [sibling-completion tracked, re-invocation counts]; gather return_exceptions=True + injectable backoff; 9 new/198 pristine; 2 Minor [except BaseException->Exception; O(n2) lookup - final review])
 
 ### Completed
 (none yet)

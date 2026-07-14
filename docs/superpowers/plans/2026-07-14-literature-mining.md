@@ -482,7 +482,7 @@ git commit -m "feat(literature/search): SS + arXiv + PubMed adapters with fixtur
 - Consumes: `SearchClient` Protocol (Task 1); adapters from Task 2
 - Produces: `dispatch(query, sources, *, max_results_per_source) -> list[PaperResult]`; `SourceError(source, reason)`
 
-- [ ] **Step 3.1: Write failing tests for dispatch**
+- [x] **Step 3.1: Write failing tests for dispatch**
 
 ```python
 # tests/unit/literature/test_dispatch.py
@@ -534,7 +534,7 @@ async def test_dispatch_returns_errors_recorded():
 Run: `uv run pytest tests/unit/literature/test_dispatch.py -v`
 Expected: FAIL — module not found
 
-- [ ] **Step 3.2: Implement dispatch**
+- [x] **Step 3.2: Implement dispatch**
 
 ```python
 # loop_sci/literature/search/dispatch.py
@@ -581,12 +581,12 @@ async def dispatch(
     return papers
 ```
 
-- [ ] **Step 3.3: Run dispatch tests**
+- [x] **Step 3.3: Run dispatch tests**
 
 Run: `uv run pytest tests/unit/literature/test_dispatch.py -v`
 Expected: all 3 tests PASS
 
-- [ ] **Step 3.4: Commit**
+- [x] **Step 3.4: Commit**
 
 ```bash
 git add loop_sci/literature/search/dispatch.py tests/unit/literature/test_dispatch.py
