@@ -62,8 +62,9 @@ async def test_one_coordinator_cycle(tmp_path, loop_cfg):
 
     Assertions:
     - session.is_complete is True after coordinator.run().
-    - ROOT node status is "done" (MockProvider returns end_turn → Agent
+    - ROOT node status is strictly "done" (MockProvider returns end_turn → Agent
       finishes → Executor returns status="done").
+    - Mock answer text is recorded in root.insight (in-memory and after reload).
     - idea_tree.json exists on disk and reflects the outcome.
     """
     mock_answer = "The scientific method requires observation. Done."
@@ -80,8 +81,11 @@ async def test_one_coordinator_cycle(tmp_path, loop_cfg):
 
     # Root node should have been processed and recorded "done"
     root = session.tree.get_root()
-    assert root.status in ("done", "needs_retry"), (
-        f"ROOT node status expected 'done' or 'needs_retry', got {root.status!r}"
+    assert root.status == "done", (
+        f"ROOT node status expected 'done', got {root.status!r}"
+    )
+    assert mock_answer in root.insight, (
+        f"Mock answer must be recorded in root.insight, got {root.insight!r}"
     )
 
     # Tree was persisted to disk
@@ -94,6 +98,9 @@ async def test_one_coordinator_cycle(tmp_path, loop_cfg):
     reloaded_root = reloaded_tree.get_root()
     assert reloaded_root.status == root.status, (
         "Reloaded tree status must match in-memory status"
+    )
+    assert mock_answer in reloaded_root.insight, (
+        f"Mock answer must persist in reloaded root.insight, got {reloaded_root.insight!r}"
     )
 
 
