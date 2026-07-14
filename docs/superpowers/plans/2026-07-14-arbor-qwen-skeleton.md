@@ -763,7 +763,7 @@ git commit -m "feat(provider): ToolProtocol seam (NativeToolProtocol + PromptToo
   - `load_config(overrides: list[str]) -> LoopSCIConfig`
   - `hydra_to_agent_config(cfg: LoopSCIConfig, *, bus, node_id) -> AgentConfig`
 
-- [ ] **Step 1: Create Hydra config files**
+- [x] **Step 1: Create Hydra config files**
 
 `conf/config.yaml`:
 ```yaml
@@ -810,7 +810,7 @@ task: "What are three key principles of the scientific method? List them briefly
 run_id: null   # auto-generated if null
 ```
 
-- [ ] **Step 2: Implement `loop_sci/config/schemas.py`**
+- [x] **Step 2: Implement `loop_sci/config/schemas.py`**
 
 ```python
 """Hydra structured config dataclasses."""
@@ -857,7 +857,7 @@ class LoopSCIConfig:
     run: RunConf = field(default_factory=RunConf)
 ```
 
-- [ ] **Step 3: Implement `loop_sci/config/loader.py`**
+- [x] **Step 3: Implement `loop_sci/config/loader.py`**
 
 ```python
 """Load Hydra config and bridge to vendored AgentConfig."""
@@ -935,7 +935,7 @@ def hydra_to_agent_config(
     )
 ```
 
-- [ ] **Step 4: Create `loop_sci/config/__init__.py`**
+- [x] **Step 4: Create `loop_sci/config/__init__.py`**
 
 ```python
 from .schemas import LoopSCIConfig, ProviderConf, AgentConf, EngineConf, RunConf
@@ -947,7 +947,7 @@ __all__ = [
 ]
 ```
 
-- [ ] **Step 5: Verify import**
+- [x] **Step 5: Verify import**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI
@@ -956,7 +956,7 @@ uv run python -c "from loop_sci.config import load_config, hydra_to_agent_config
 
 Expected: `config OK`
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add conf/ loop_sci/config/
