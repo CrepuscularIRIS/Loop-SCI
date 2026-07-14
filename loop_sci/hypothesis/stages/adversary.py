@@ -30,9 +30,15 @@ import uuid
 from typing import Any
 
 from loop_sci.hypothesis.schemas import DerivationStep, Verdict
+from loop_sci.hypothesis.scoring import is_ungrounded_guess
 from loop_sci.literature.factbase.store import FactStore
 
 log = logging.getLogger(__name__)
+
+_STOPWORDS: frozenset[str] = frozenset(
+    {"the", "a", "an", "is", "are", "of", "in", "and", "or", "to", "that",
+     "this", "with", "for", "from", "by", "be", "at", "as", "on", "it"}
+)
 
 _ADVERSARY_SYSTEM = (
     "You are an adversarial scientific reviewer with a KILL bias. "
@@ -53,10 +59,10 @@ _ADVERSARY_SYSTEM = (
 def _has_load_bearing_guess(derivation: list[DerivationStep]) -> bool:
     """Return True if any derivation step is graded ``[guess]``.
 
-    A ``[guess]`` step is load-bearing by definition — it represents an
-    ungrounded inference that has not been tied to a verified fact.
+    Delegates to :func:`~loop_sci.hypothesis.scoring.is_ungrounded_guess` so
+    the predicate is defined in a single place and cannot drift between modules.
     """
-    return any(s.grade == "[guess]" for s in derivation)
+    return any(is_ungrounded_guess(s) for s in derivation)
 
 
 def _mechanism_contradicts_facts(mechanism: str, store: FactStore) -> bool:
@@ -72,12 +78,8 @@ def _mechanism_contradicts_facts(mechanism: str, store: FactStore) -> bool:
     wrong direction so the check is kept simple and keyword-based.
 
     Stopwords are filtered to avoid over-matching on function words.
+    Uses the module-level ``_STOPWORDS`` constant (not rebuilt each call).
     """
-    _STOPWORDS = frozenset(
-        {"the", "a", "an", "is", "are", "of", "in", "and", "or", "to", "that",
-         "this", "with", "for", "from", "by", "be", "at", "as", "on", "it"}
-    )
-
     mech_lower = mechanism.lower()
     mech_tokens = {
         tok for tok in mech_lower.split() if tok not in _STOPWORDS and len(tok) > 2
@@ -147,6 +149,27 @@ async def run_adversary(
             decided_by="deterministic-gate",
         )
 
+    # Ungrounded [paper]/[inferred] citation gate (osp 2.4 anti-fabrication)
+    # A step graded [paper] or [inferred] MUST cite at least one fact_id AND
+    # every cited id MUST resolve in the store.  Checked BEFORE any jury call.
+    valid_ids = {f.fact_id for f in store.all()}
+    for s in derivation:
+        if s.grade in ("[paper]", "[inferred]") and (
+            not s.fact_ids or not all(fid in valid_ids for fid in s.fact_ids)
+        ):
+            log.debug(
+                "adversary: gate fired — ungrounded citation in [%s] step (fact_ids=%s)",
+                s.grade,
+                s.fact_ids,
+            )
+            return Verdict(
+                id=f"det_{uuid.uuid4().hex[:8]}",
+                reviewer_model="deterministic-gate",
+                result="DOWN",
+                reasons=["Ungrounded citation: fact_id not in FactStore"],
+                decided_by="deterministic-gate",
+            )
+
     if _mechanism_contradicts_facts(mechanism, store):
         log.debug("adversary: gate fired — mechanism contradicts a grounding fact")
         return Verdict(
@@ -209,11 +232,12 @@ async def run_adversary(
             result = str(d["result"]).upper()
             if result not in ("UP", "DOWN"):
                 raise ValueError(f"unexpected result value: {result!r}")
+            raw_reasons = d.get("reasons", [])
             return Verdict(
                 id=f"jury_{uuid.uuid4().hex[:8]}",
                 reviewer_model=reviewer_model,
                 result=result,  # type: ignore[arg-type]
-                reasons=list(d.get("reasons", [])),
+                reasons=list(raw_reasons) if isinstance(raw_reasons, list) else [],
                 decided_by="jury",
             )
         except Exception as exc:  # noqa: BLE001

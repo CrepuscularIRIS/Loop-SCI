@@ -38,7 +38,16 @@ from typing import Callable
 from loop_sci.hypothesis.schemas import DerivationStep, Scores
 from loop_sci.literature.extract.fact import Fact
 
-__all__ = ["score_hypothesis"]
+__all__ = ["score_hypothesis", "is_ungrounded_guess"]
+
+
+def is_ungrounded_guess(step: "DerivationStep") -> bool:
+    """Return True if *step* is a load-bearing ``[guess]`` grade.
+
+    Extracted here so that both ``scoring.py`` and ``adversary.py`` share a
+    single definition and cannot drift.
+    """
+    return step.grade == "[guess]"
 
 # ---------------------------------------------------------------------------
 # Constants (defaults; all overridable via constructor / function params)

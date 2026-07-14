@@ -217,6 +217,99 @@ async def test_incoherent_hypothesis_downed_by_jury(tmp_path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Test 9: Ungrounded [paper] step with absent fact_id → DOWN via gate (no jury)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_paper_step_with_absent_fact_id_downed_without_jury(tmp_path) -> None:
+    """A [paper] step citing a fact_id not in the store triggers the deterministic gate.
+
+    The reviewer MUST NOT be called (_index stays 0).
+    """
+    from tests.conftest import MockProvider
+
+    store = _store(tmp_path, ["Neurons fire action potentials."])
+    # fact_ABSENT does not exist in the store (only fact_0 does)
+    derivation = [DerivationStep(step="cited step", grade="[paper]", fact_ids=["fact_ABSENT"])]
+    reviewer = MockProvider(responses=["should not be called"], model="qwen-plus")
+
+    verdict = await run_adversary(
+        _hyp_refs("Some mechanism"),
+        derivation,
+        store,
+        "qwen-max",
+        reviewer,
+    )
+
+    assert verdict.result == "DOWN"
+    assert verdict.decided_by == "deterministic-gate"
+    assert reviewer._index == 0, "reviewer must NOT be called when gate fires on absent fact_id"
+
+
+# ---------------------------------------------------------------------------
+# Test 10: [paper] step with fact_ids=[] (claims grounding, cites nothing) → DOWN via gate
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_paper_step_with_empty_fact_ids_downed_without_jury(tmp_path) -> None:
+    """A [paper] step with fact_ids=[] triggers the deterministic gate (no jury call).
+
+    [paper]/[inferred] MUST cite at least one resolvable fact_id.
+    """
+    from tests.conftest import MockProvider
+
+    store = _store(tmp_path, ["Neurons fire action potentials."])
+    derivation = [DerivationStep(step="empty citation", grade="[paper]", fact_ids=[])]
+    reviewer = MockProvider(responses=["should not be called"], model="qwen-plus")
+
+    verdict = await run_adversary(
+        _hyp_refs("Some mechanism"),
+        derivation,
+        store,
+        "qwen-max",
+        reviewer,
+    )
+
+    assert verdict.result == "DOWN"
+    assert verdict.decided_by == "deterministic-gate"
+    assert reviewer._index == 0, "reviewer must NOT be called when gate fires on empty fact_ids"
+
+
+# ---------------------------------------------------------------------------
+# Test 11: Grounded [paper] step (fact_id resolves) passes gate and reaches jury
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_grounded_paper_step_passes_new_gate_and_reaches_jury(tmp_path) -> None:
+    """A [paper] step whose fact_ids all resolve in the store MUST pass the gate.
+
+    The jury should be called (_index advances to 1).
+    [guess] steps are NOT subject to the citation-resolution rule.
+    """
+    from tests.conftest import MockProvider
+
+    store = _store(tmp_path, ["Neurons fire action potentials."])
+    # All fact_ids resolve (fact_0 is in the store)
+    derivation = [DerivationStep(step="grounded cite", grade="[paper]", fact_ids=["fact_0"])]
+    response = json.dumps({"result": "UP", "reasons": ["well grounded"]})
+    reviewer = MockProvider(responses=[response], model="qwen-plus")
+
+    verdict = await run_adversary(
+        _hyp_refs("A novel mechanism"),
+        derivation,
+        store,
+        "qwen-max",
+        reviewer,
+    )
+
+    assert reviewer._index == 1, "jury should have been called for a grounded [paper] step"
+    assert verdict.decided_by == "jury"
+
+
+# ---------------------------------------------------------------------------
 # Test 6: Ungrounded citation — derivation step with no fact_ids is [guess]
 # ---------------------------------------------------------------------------
 
