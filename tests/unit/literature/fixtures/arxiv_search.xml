@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>ArXiv Query Results</title>
+  <entry>
+    <id>http://arxiv.org/abs/2401.00001v1</id>
+    <title>Spike-based learning</title>
+    <author><name>Jones A</name></author>
+    <published>2024-01-01T00:00:00Z</published>
+    <summary>We study spike-based learning.</summary>
+    <link rel="alternate" href="https://arxiv.org/abs/2401.00001" type="text/html"/>
+  </entry>
+</feed>

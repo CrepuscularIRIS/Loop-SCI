@@ -1,0 +1,14 @@
+{
+  "data": [
+    {
+      "paperId": "s2abc123",
+      "externalIds": {"DOI": "10.1234/test"},
+      "title": "Neural Evidence for X",
+      "authors": [{"name": "Smith J"}, {"name": "Lee K"}],
+      "year": 2023,
+      "venue": "NeurIPS",
+      "abstract": "We show that X is real.",
+      "url": "https://api.semanticscholar.org/paper/s2abc123"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation>
+      <PMID>38000001</PMID>
+      <Article>
+        <ArticleTitle>Cortical circuits for attention</ArticleTitle>
+        <Abstract><AbstractText>We map cortical circuits.</AbstractText></Abstract>
+        <AuthorList>
+          <Author><LastName>Wang</LastName><ForeName>Li</ForeName></Author>
+        </AuthorList>
+        <Journal>
+          <Title>Nature Neuroscience</Title>
+          <JournalIssue>
+            <PubDate><Year>2023</Year></PubDate>
+          </JournalIssue>
+        </Journal>
+      </Article>
+    </MedlineCitation>
+  </PubmedArticle>
+</PubmedArticleSet>
