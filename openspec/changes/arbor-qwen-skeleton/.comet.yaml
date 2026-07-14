@@ -8,7 +8,7 @@ subagent_dispatch: confirmed
 tdd_mode: tdd
 review_mode: thorough
 isolation: branch
-verify_mode: null
+verify_mode: full
 auto_transition: true
 base_ref: fea8876a1653cda4f0891e94db26b2e284402711
 design_doc: docs/superpowers/specs/2026-07-14-arbor-qwen-skeleton-design.md
