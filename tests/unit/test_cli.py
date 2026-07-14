@@ -84,6 +84,33 @@ def test_inspect_shows_status_field(tmp_path):
     assert "Status:" in result.output, f"'Status:' label missing. Output:\n{result.output}"
 
 
+def test_inspect_nonexistent_run_exits_nonzero_with_clean_message(tmp_path):
+    """inspect on a missing run_id must exit nonzero with a clean message, no traceback."""
+    from loop_sci.cli import app
+
+    runner = _make_runner()
+    result = runner.invoke(
+        app,
+        ["inspect", "NONEXISTENT_RUN", "--runs-root", str(tmp_path / "runs")],
+    )
+
+    assert result.exit_code != 0, (
+        f"Expected nonzero exit for missing run_id, got {result.exit_code}.\nOutput:\n{result.output}"
+    )
+    assert "not found" in result.output.lower(), (
+        f"Expected 'not found' message. Got:\n{result.output}"
+    )
+    assert "NONEXISTENT_RUN" in result.output, (
+        f"Expected run_id in error message. Got:\n{result.output}"
+    )
+    assert "Traceback" not in result.output, (
+        f"Raw traceback leaked to user. Got:\n{result.output}"
+    )
+    assert "FileNotFoundError" not in result.output, (
+        f"FileNotFoundError leaked to user. Got:\n{result.output}"
+    )
+
+
 def test_inspect_on_complete_session(tmp_path):
     """inspect on a completed session shows 'done' status."""
     from loop_sci.cli import app
@@ -105,6 +132,33 @@ def test_inspect_on_complete_session(tmp_path):
 # ---------------------------------------------------------------------------
 # resume — pre-created COMPLETE session: exits 0, reports "already complete"
 # ---------------------------------------------------------------------------
+
+
+def test_resume_nonexistent_run_exits_nonzero_with_clean_message(tmp_path):
+    """resume on a missing run_id must exit nonzero with a clean message, no traceback."""
+    from loop_sci.cli import app
+
+    runner = _make_runner()
+    result = runner.invoke(
+        app,
+        ["resume", "NONEXISTENT_RUN", "--runs-root", str(tmp_path / "runs")],
+    )
+
+    assert result.exit_code != 0, (
+        f"Expected nonzero exit for missing run_id, got {result.exit_code}.\nOutput:\n{result.output}"
+    )
+    assert "not found" in result.output.lower(), (
+        f"Expected 'not found' message. Got:\n{result.output}"
+    )
+    assert "NONEXISTENT_RUN" in result.output, (
+        f"Expected run_id in error message. Got:\n{result.output}"
+    )
+    assert "Traceback" not in result.output, (
+        f"Raw traceback leaked to user. Got:\n{result.output}"
+    )
+    assert "FileNotFoundError" not in result.output, (
+        f"FileNotFoundError leaked to user. Got:\n{result.output}"
+    )
 
 
 def test_resume_already_complete_session_exits_0(tmp_path):
@@ -183,6 +237,25 @@ def test_run_missing_api_key_exits_nonzero(tmp_path, monkeypatch):
     # Verify no raw traceback leaks (no "Traceback (most recent call last)")
     assert "Traceback (most recent call last)" not in result.output, (
         f"Raw traceback leaked to user. Got:\n{result.output}"
+    )
+
+
+def test_run_missing_api_key_leaves_no_orphan_session_dir(tmp_path, monkeypatch):
+    """run with missing API key must not create an on-disk session directory."""
+    from loop_sci.cli import app
+
+    monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
+    runs_root = tmp_path / "runs"
+
+    runner = _make_runner()
+    result = runner.invoke(
+        app,
+        ["run", "--task", "test task", "--runs-root", str(runs_root)],
+    )
+
+    assert result.exit_code != 0
+    assert not runs_root.exists() or list(runs_root.iterdir()) == [], (
+        f"Orphan session dir left behind. Contents: {list(runs_root.iterdir()) if runs_root.exists() else 'N/A'}"
     )
 
 

@@ -115,6 +115,18 @@ def _load_cfg(overrides: list[str]):
     )
 
 
+def _load_session_or_exit(runs_root: str, run_id: str):  # type: ignore[no-untyped-def]
+    """Load an existing RunSession or exit with a clean error."""
+    from loop_sci.state.session import RunSession
+
+    session_dir = Path(runs_root) / run_id
+    if not (session_dir / "idea_tree.json").exists():
+        typer.echo(f"Run not found: {run_id}", err=True)
+        raise typer.Exit(code=1)
+
+    return RunSession.load(runs_root, run_id)
+
+
 # ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
@@ -138,14 +150,15 @@ def run(
     cfg.run.task = task
     cfg.run.runs_root = runs_root
 
+    coordinator = _build_coordinator_and_session(cfg)
+
     session = RunSession.create(cfg.run.runs_root, task=cfg.run.task)
     typer.echo(f"Started run: {session.run_id}")
     typer.echo(f"Session dir: {session.session_dir}")
 
-    coordinator = _build_coordinator_and_session(cfg)
     asyncio.run(coordinator.run(session))
 
-    typer.echo(f"Run complete.")
+    typer.echo("Run complete.")
     typer.echo(f"  run_id : {session.run_id}")
     typer.echo(f"  status : {session.cursor.get('status')}")
     typer.echo(f"  steps  : {session.cursor.get('step', 0)}")
@@ -160,13 +173,12 @@ def resume(
 ) -> None:
     """Resume an interrupted run from its last checkpoint."""
     _setup_logging(verbose)
-    from loop_sci.state.session import RunSession
 
     overrides = list(config or [])
     cfg = _load_cfg(overrides)
     cfg.run.runs_root = runs_root
 
-    session = RunSession.load(runs_root, run_id)
+    session = _load_session_or_exit(runs_root, run_id)
     if session.is_complete:
         typer.echo(f"Run {run_id} is already complete. Nothing to resume.")
         raise typer.Exit(0)
@@ -175,7 +187,7 @@ def resume(
     coordinator = _build_coordinator_and_session(cfg)
     asyncio.run(coordinator.run(session))
 
-    typer.echo(f"Resume complete.")
+    typer.echo("Resume complete.")
     typer.echo(f"  run_id : {session.run_id}")
     typer.echo(f"  status : {session.cursor.get('status')}")
     typer.echo(f"  steps  : {session.cursor.get('step', 0)}")
@@ -187,9 +199,7 @@ def inspect(
     runs_root: str = typer.Option("runs", "--runs-root"),
 ) -> None:
     """Print the idea tree and cursor for a run WITHOUT running anything."""
-    from loop_sci.state.session import RunSession
-
-    session = RunSession.load(runs_root, run_id)
+    session = _load_session_or_exit(runs_root, run_id)
     typer.echo(f"Run ID:  {session.run_id}")
     typer.echo(f"Status:  {session.cursor.get('status')}")
     typer.echo(f"Steps:   {session.cursor.get('step', 0)}")
