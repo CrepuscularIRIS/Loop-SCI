@@ -24,7 +24,7 @@ from omegaconf import OmegaConf
 from loop_sci._vendor.arbor.config import AgentConfig
 from loop_sci._vendor.arbor.config_schema import LLMConfig, ContextConfig, TimeoutConfig
 
-from .schemas import AgentConf, EngineConf, LoopSCIConfig, ProviderConf, RunConf
+from .schemas import AgentConf, EngineConf, HypothesisConf, LoopSCIConfig, ProviderConf, RunConf
 
 
 def load_config(
@@ -67,6 +67,7 @@ def load_config(
     a = d.get("agent", {})
     e = d.get("engine", {})
     r = d.get("run", {})
+    h = d.get("hypothesis", {})
 
     # Build real dataclass instances for each sub-config.
     # Filter only known fields to avoid unexpected keyword arguments.
@@ -74,12 +75,14 @@ def load_config(
     agent_fields = {f for f in vars(AgentConf()).keys()}
     engine_fields = {f for f in vars(EngineConf()).keys()}
     run_fields = {f for f in vars(RunConf()).keys()}
+    hypothesis_fields = {f for f in vars(HypothesisConf()).keys()}
 
     return LoopSCIConfig(
         provider=ProviderConf(**{k: v for k, v in p.items() if k in provider_fields}),
         agent=AgentConf(**{k: v for k, v in a.items() if k in agent_fields}),
         engine=EngineConf(**{k: v for k, v in e.items() if k in engine_fields}),
         run=RunConf(**{k: v for k, v in r.items() if k in run_fields}),
+        hypothesis=HypothesisConf(**{k: v for k, v in h.items() if k in hypothesis_fields}),
     )
 
 
