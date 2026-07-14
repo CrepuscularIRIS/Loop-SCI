@@ -92,3 +92,63 @@ def test_build_provider_returns_provider(monkeypatch):
     from loop_sci._vendor.arbor.llm.base import LLMProvider
     assert isinstance(provider, LLMProvider)
     assert provider.model == "qwen-plus"
+
+
+# ---------------------------------------------------------------------------
+# ToolProtocol tests
+# ---------------------------------------------------------------------------
+
+from loop_sci.provider.tool_protocol import NativeToolProtocol, PromptToolProtocol
+
+_SAMPLE_TOOLS = [{"name": "search", "description": "web search", "input_schema": {"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]}}]
+
+
+def test_native_protocol_passes_tools():
+    proto = NativeToolProtocol()
+    kwargs = proto.prepare_tools(_SAMPLE_TOOLS)
+    assert "tools" in kwargs
+    assert kwargs.get("tool_choice") == "auto"
+
+
+def test_prompt_protocol_no_native_tools():
+    proto = PromptToolProtocol()
+    kwargs = proto.prepare_tools(_SAMPLE_TOOLS)
+    assert "tools" not in kwargs
+    assert "system_suffix" in kwargs
+    assert "search" in kwargs["system_suffix"]
+
+
+def test_prompt_protocol_parse_tool_call():
+    proto = PromptToolProtocol()
+    text = 'I will search now.\n```tool_call\n{"name": "search", "arguments": {"q": "hello"}}\n```'
+    calls = proto.parse_tool_calls(text, _SAMPLE_TOOLS)
+    assert len(calls) == 1
+    assert calls[0]["name"] == "search"
+    assert calls[0]["arguments"]["q"] == "hello"
+
+
+def test_prompt_protocol_parse_malformed_json_skipped():
+    proto = PromptToolProtocol()
+    text = '```tool_call\n{bad json!!}\n```\n```tool_call\n{"name": "search", "arguments": {"q": "ok"}}\n```'
+    calls = proto.parse_tool_calls(text, _SAMPLE_TOOLS)
+    assert len(calls) == 1
+    assert calls[0]["name"] == "search"
+
+
+def test_prompt_protocol_parse_no_name_key_skipped():
+    proto = PromptToolProtocol()
+    text = '```tool_call\n{"action": "search", "arguments": {}}\n```'
+    calls = proto.parse_tool_calls(text, _SAMPLE_TOOLS)
+    assert len(calls) == 0
+
+
+def test_native_protocol_empty_tools():
+    proto = NativeToolProtocol()
+    kwargs = proto.prepare_tools([])
+    assert kwargs == {}
+
+
+def test_prompt_protocol_empty_tools():
+    proto = PromptToolProtocol()
+    kwargs = proto.prepare_tools([])
+    assert kwargs == {}

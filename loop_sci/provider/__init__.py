@@ -9,6 +9,7 @@ from .errors import (
     with_retry,
 )
 from .factory import build_provider
+from .tool_protocol import NativeToolProtocol, PromptToolProtocol, ToolProtocol
 
 __all__ = [
     "build_provider",
@@ -21,4 +22,7 @@ __all__ = [
     "AuthError",
     "ServerError",
     "with_retry",
+    "ToolProtocol",
+    "NativeToolProtocol",
+    "PromptToolProtocol",
 ]
