@@ -72,7 +72,7 @@ class PromptToolProtocol(ToolProtocol):
         for match in self._FENCE_RE.finditer(text):
             try:
                 data = json.loads(match.group(1))
-                if "name" in data:
+                if isinstance(data, dict) and "name" in data:
                     results.append({
                         "name": data["name"],
                         "arguments": data.get("arguments", {}),

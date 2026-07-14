@@ -142,6 +142,18 @@ def test_prompt_protocol_parse_no_name_key_skipped():
     assert len(calls) == 0
 
 
+def test_prompt_protocol_parse_non_dict_json_skipped():
+    proto = PromptToolProtocol()
+    text = (
+        '```tool_call\n5\n```\n'
+        '```tool_call\n"let me think"\n```\n'
+        '```tool_call\n{"name": "search", "arguments": {"q": "ok"}}\n```'
+    )
+    calls = proto.parse_tool_calls(text, _SAMPLE_TOOLS)
+    assert len(calls) == 1
+    assert calls[0]["name"] == "search"
+
+
 def test_native_protocol_empty_tools():
     proto = NativeToolProtocol()
     kwargs = proto.prepare_tools([])
