@@ -226,7 +226,7 @@ git commit -m "chore: scaffold loop-sci uv project with pyproject and test marks
 **Interfaces:**
 - Produces: `from loop_sci._vendor.arbor.llm.base import LLMProvider, LLMResponse` works; `from loop_sci._vendor.arbor.events.bus import EventBus, NullBus` works.
 
-- [ ] **Step 1: Copy vendored files**
+- [x] **Step 1: Copy vendored files**
 
 Run this script verbatim. It copies the minimal transitive closure and rewrites internal imports to use the vendor path.
 
@@ -253,7 +253,7 @@ cp $ARBOR/../NOTICE                 $VENDOR/NOTICE 2>/dev/null || true
 echo "Files copied."
 ```
 
-- [ ] **Step 2: Fix internal imports in vendored files**
+- [x] **Step 2: Fix internal imports in vendored files**
 
 All vendored files use paths like `from ..events.types import ...` or `from .config import AgentConfig` that assumed Arbor's original package layout. Rewrite them to be self-contained within `loop_sci/_vendor/arbor/`.
 
@@ -300,7 +300,7 @@ from .bus import EventBus, NullBus, Event
 __all__ = ["EventBus", "NullBus", "Event"]
 ```
 
-- [ ] **Step 3: Smoke-import test**
+- [x] **Step 3: Smoke-import test**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI
@@ -315,7 +315,7 @@ print('vendor imports OK')
 
 Expected: `vendor imports OK`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add loop_sci/_vendor/

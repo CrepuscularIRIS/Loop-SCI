@@ -18,9 +18,17 @@
 
 - Total tasks: 17
 
+## HARD GATE for Tasks 5 (config loader) & 10 (agent runtime): AgentConfig MUST set auto_git=False
+Reason: vendored experiment.py `GitManager` (default auto_git=True at config.py:1150) executes `git checkout`/`git reset --hard`/`checkout -b`. Must stay dormant — never wire it live. Task 5/10 reviewers MUST verify auto_git=False.
+
+## OpenSpec tasks.md checkoff: DEFERRED to a pre-guard batch reconciliation
+Reason: open-phase tasks.md text is stale vs design (1.3 says vendor "orchestrator"; 1.4 says "flat-proxy config" — design chose Hydra & excludes orchestrator). Will fix stale text (small delta) + check all boxes + run comet-state task-checkoff right before the build guard. Per-task tracking lives in this ledger + plan step checkboxes.
+
 ### Current task
-- Task 2: Vendor Arbor snapshot
+- Task 3: Provider layer — credentials, factory, errors, retry
 - Stage: implementing
+- review-fix round: 0 / 2
+- risk task: yes (many files; import-closure rewriting) — expect per-task review to scrutinize vendored edits
 - grok policy: grok:grok-rescue agent for fixes + second-opinion on high-risk tasks (15,16); Opus 4.8 = authoritative per-task gate
 
 ## OpenSpec tasks.md reconciliation (do before build guard)
@@ -45,3 +53,4 @@ Plan→OpenSpec mapping (loose/many-to-many; check off openspec sub-tasks as gen
 
 ### Completed
 - Task 1: complete (impl 5fb5a41, review clean — Opus 4.8; 2 Minor noted for final review; 3/3 tests RED->GREEN)
+- Task 2: complete (impl 65dbcb5, Opus 4.8 Approved; 2 Important ACCEPTED [auto_git=False downstream gate; .arbor kept as faithful-snapshot behavior-preserving], 1 Minor [under-covering import-smoke — add agent/context/experiment imports, for final review]; 8 import-smoke + 11/11 RED->GREEN; fork boundary held, Apache-2.0 + commit 0eae8ad recorded)
