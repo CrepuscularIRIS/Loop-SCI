@@ -4,10 +4,8 @@ TDD: these tests are written BEFORE implementation (RED phase).
 """
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
-import pytest
 
 
 # ---------------------------------------------------------------------------
@@ -75,7 +73,7 @@ class TestSchemas:
         """engine and run must be real dataclass instances, not ad-hoc objects."""
         import dataclasses
 
-        from loop_sci.config.schemas import LoopSCIConfig, EngineConf, RunConf
+        from loop_sci.config.schemas import LoopSCIConfig
 
         cfg = LoopSCIConfig()
         assert type(cfg.engine).__name__ == "EngineConf"
@@ -308,7 +306,6 @@ class TestHydraToAgentConfig:
 
     def test_agent_config_instantiation_succeeds(self):
         """Smoke test: the constructed AgentConfig actually instantiates without error."""
-        from loop_sci._vendor.arbor.config import AgentConfig
         from loop_sci.config import hydra_to_agent_config
 
         cfg = self._base_cfg()

@@ -4,7 +4,6 @@ TDD: all tests written before any production code.
 """
 from __future__ import annotations
 
-import os
 import pytest
 
 # ---------------------------------------------------------------------------
@@ -47,9 +46,7 @@ def test_invocation_record_fields():
 # Retry tests
 # ---------------------------------------------------------------------------
 
-import asyncio
-import pytest
-from loop_sci.provider.errors import RateLimitError, ServerError, with_retry
+from loop_sci.provider.errors import RateLimitError, with_retry
 
 
 @pytest.mark.asyncio
@@ -100,7 +97,17 @@ def test_build_provider_returns_provider(monkeypatch):
 
 from loop_sci.provider.tool_protocol import NativeToolProtocol, PromptToolProtocol
 
-_SAMPLE_TOOLS = [{"name": "search", "description": "web search", "input_schema": {"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]}}]
+_SAMPLE_TOOLS = [
+    {
+        "name": "search",
+        "description": "web search",
+        "input_schema": {
+            "type": "object",
+            "properties": {"q": {"type": "string"}},
+            "required": ["q"],
+        },
+    }
+]
 
 
 def test_native_protocol_passes_tools():

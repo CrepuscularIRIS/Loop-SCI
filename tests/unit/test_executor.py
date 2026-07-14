@@ -16,7 +16,6 @@ Contracts tested:
 """
 from __future__ import annotations
 
-import asyncio
 import pytest
 
 from loop_sci.engine.types import DispatchUnit, ExecutorResult

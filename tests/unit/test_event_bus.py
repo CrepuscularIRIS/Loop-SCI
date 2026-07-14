@@ -8,7 +8,6 @@ Covers:
 - Sync emit swallows subscriber exceptions (fire-and-forget contract)
 """
 
-import pytest
 from loop_sci.events import EventBus, NullBus
 
 

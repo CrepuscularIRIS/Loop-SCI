@@ -191,12 +191,6 @@ async def test_e2e_resume_continues(tmp_path: pathlib.Path) -> None:
     runs_root = tmp_path / "resume_runs"
 
     # ── Build a partially-done session on disk (no API call yet) ─────────────
-    from loop_sci.config.loader import load_config
-    cfg = load_config(
-        config_dir=_CONF_DIR,
-        overrides=[f"run.runs_root={runs_root}"],
-    )
-
     session = RunSession.create(runs_root, task=STUB_TASK)
     run_id = session.run_id
 

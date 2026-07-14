@@ -29,6 +29,29 @@ markers = [
 ]
 asyncio_mode = "auto"
 
+[tool.coverage.run]
+source = ["loop_sci"]
+omit = [
+    "loop_sci/_vendor/*",
+    "tests/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
+
+[tool.ruff]
+extend-exclude = ["loop_sci/_vendor"]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+# E402: module-level imports not at top — test files intentionally group imports by section
+per-file-ignores = { "tests/**" = ["E402"] }
+
 [dependency-groups]
 dev = [
     "pytest>=8",

@@ -20,11 +20,8 @@ NullHandler so the test output is pristine.
 """
 from __future__ import annotations
 
-import asyncio
 import logging
-import os
 
-import pytest
 from typer.testing import CliRunner
 
 # Silence all logging during tests to keep output pristine.
@@ -114,7 +111,6 @@ def test_inspect_nonexistent_run_exits_nonzero_with_clean_message(tmp_path):
 def test_inspect_on_complete_session(tmp_path):
     """inspect on a completed session shows 'done' status."""
     from loop_sci.cli import app
-    from loop_sci.state.session import RunSession
 
     session = _make_session(tmp_path, task="completed task")
     session.mark_complete()
@@ -267,7 +263,6 @@ def test_run_missing_api_key_leaves_no_orphan_session_dir(tmp_path, monkeypatch)
 def test_run_happy_path_with_mock_provider(tmp_path, monkeypatch):
     """run with a mocked provider completes and prints run_id."""
     from loop_sci.cli import app
-    from tests.conftest import MockProvider
 
     # Ensure key is absent so we rely purely on the mock.
     monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)

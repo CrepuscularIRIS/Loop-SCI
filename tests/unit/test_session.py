@@ -1,6 +1,5 @@
 """Tests for RunSession (Task 8): checkpoint and resume."""
 import pytest
-from pathlib import Path
 from loop_sci.state.session import RunSession
 
 
