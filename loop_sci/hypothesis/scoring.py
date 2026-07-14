@@ -9,6 +9,11 @@ The anti-fabrication backstop is unconditional: a derivation that contains
 any ``[guess]`` step is penalised deterministically and cannot be rescued to a
 high self-consistency score by the judge path.
 
+Note: this scorer returns only the two sub-scores (``novelty``,
+``self_consistency``).  The weighted combination
+``w_n * novelty + w_c * self_consistency`` is computed by the **downstream
+caller** (Task 9 ranking / Task 10 executor) using weights from Hydra config.
+
 Public API
 ----------
 .. code-block:: python
@@ -20,8 +25,6 @@ Public API
         mechanism="Glial oscillations encode fear via gap junctions.",
         derivation=[DerivationStep(step="...", grade="[paper]", fact_ids=[])],
         facts=[...],            # list[Fact] from FactStore.all()
-        w_n=0.5,               # novelty weight   (Hydra-configurable)
-        w_c=0.5,               # consistency weight
         low=0.15,              # LOW novelty band boundary
         high=0.60,             # HIGH novelty band boundary
         judge=None,            # injectable / mockable; None → deterministic
@@ -111,7 +114,7 @@ def _novelty_score(
             score = max(0.0, min(1.0, score))
             return score, "judge"
         except Exception:
-            pass  # retry-once→drop: fall through to deterministic interpolation
+            pass  # drop-on-failure: fall through to deterministic interpolation
 
     # Deterministic in-band fallback: 1 - max_overlap ∈ (low, high)
     return 1.0 - max_overlap, "deterministic"
@@ -147,20 +150,20 @@ def score_hypothesis(
     derivation: list[DerivationStep],
     facts: list[Fact],
     *,
-    w_n: float = 0.5,
-    w_c: float = 0.5,
     low: float = _DEFAULT_LOW,
     high: float = _DEFAULT_HIGH,
     judge: Callable[[str, list[Fact]], float] | None = None,
 ) -> Scores:
     """Score a hypothesis on novelty and self-consistency.
 
+    Returns only the two sub-scores; the weighted combination
+    ``w_n * novelty + w_c * self_consistency`` is the downstream caller's
+    responsibility (weights live in Hydra config consumed by ranking/executor).
+
     Args:
         mechanism: The hypothesis mechanism text.
         derivation: Ordered list of :class:`~loop_sci.hypothesis.schemas.DerivationStep`.
         facts: Fact-base snapshot from ``FactStore.all()``; may be empty.
-        w_n: Weight for novelty in the combined score (default 0.5).
-        w_c: Weight for self-consistency in the combined score (default 0.5).
         low: LOW novelty-band boundary (default 0.15, Hydra-configurable).
         high: HIGH novelty-band boundary (default 0.60, Hydra-configurable).
         judge: Optional callable ``(mechanism, facts) -> float`` returning a
@@ -175,8 +178,8 @@ def score_hypothesis(
     novelty, n_decided = _novelty_score(mechanism, facts, low, high, judge)
     consistency, c_decided = _self_consistency_score(derivation)
 
-    # decided_by is "judge" only when BOTH scores used the judge path;
-    # the anti-fab deterministic floor takes precedence.
+    # decided_by is "judge" when EITHER score used the judge path;
+    # the anti-fab deterministic floor takes precedence for consistency.
     decided_by: str
     if n_decided == "judge" or c_decided == "judge":
         decided_by = "judge"

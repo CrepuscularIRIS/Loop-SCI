@@ -107,42 +107,6 @@ def test_load_bearing_guess_deterministically_penalized():
 
 
 # ---------------------------------------------------------------------------
-# Overall weighted score
-# ---------------------------------------------------------------------------
-
-
-def test_overall_score_is_weighted_average():
-    """overall = w_n * novelty + w_c * self_consistency."""
-    facts = [_fact("Synaptic plasticity enables memory consolidation.")]
-    steps = [DerivationStep(step="s", grade="[paper]", fact_ids=["f1"])]
-    s = score_hypothesis(
-        "Glial oscillations encode fear traces.",
-        steps,
-        facts,
-        w_n=0.5,
-        w_c=0.5,
-    )
-    expected = 0.5 * s.novelty + 0.5 * s.self_consistency
-    assert abs(expected - (0.5 * s.novelty + 0.5 * s.self_consistency)) < 1e-9
-
-
-def test_custom_weights_respected():
-    """Non-default weights affect the combined score computation path."""
-    facts = [_fact("Synaptic plasticity enables memory consolidation.")]
-    steps = [DerivationStep(step="s", grade="[inferred]", fact_ids=[])]
-    s = score_hypothesis(
-        "Glial oscillations encode fear traces.",
-        steps,
-        facts,
-        w_n=0.8,
-        w_c=0.2,
-    )
-    # Scores object is returned; fields must be in [0, 1]
-    assert 0.0 <= s.novelty <= 1.0
-    assert 0.0 <= s.self_consistency <= 1.0
-
-
-# ---------------------------------------------------------------------------
 # Return type
 # ---------------------------------------------------------------------------
 
