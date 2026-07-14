@@ -49,12 +49,13 @@ from typing import Any
 
 from loop_sci.literature.extract.fact import Fact, VerificationStatus
 from loop_sci.literature.search.schema import PaperResult
+from loop_sci.literature.verify.grounding import GroundingVerifier
 
 log = logging.getLogger(__name__)
 
 
 class VerificationPipeline:
-    """Ordered, short-circuiting L1–L3 citation verification pipeline.
+    """Ordered, short-circuiting L1–L4 citation verification pipeline.
 
     Parameters
     ----------
@@ -63,10 +64,26 @@ class VerificationPipeline:
         a ``SearchClient`` instance.  Must satisfy the ``SearchClient`` protocol
         (has ``search`` and ``fetch_by_id`` methods).  Tests pass a
         ``MockSearchClient`` so all checks run offline.
+    grounding_provider:
+        An ``LLMProvider``-compatible object used by the L4 ``GroundingVerifier``
+        for the Qwen judge path.  Pass ``None`` (default) to disable the LLM
+        judge; borderline cases will fall back to the raw lexical score.
+    grounding_threshold:
+        Midpoint sentinel for the offline / fallback path in ``GroundingVerifier``.
+        Default 0.3.
     """
 
-    def __init__(self, search_clients: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        search_clients: dict[str, Any],
+        *,
+        grounding_provider: Any = None,
+        grounding_threshold: float = 0.3,
+    ) -> None:
         self._clients = search_clients
+        self._grounding = GroundingVerifier(
+            grounding_provider, threshold=grounding_threshold
+        )
 
     # ------------------------------------------------------------------
     # Public API
@@ -127,6 +144,52 @@ class VerificationPipeline:
             status="pending_l4",
             detail=f"resolved:{paper.external_id}",
         )
+
+    async def verify(self, fact: Fact) -> VerificationStatus:
+        """Run all four layers (L1→L2→L3→L4), short-circuiting on first failure.
+
+        Parameters
+        ----------
+        fact:
+            The ``Fact`` to verify.
+
+        Returns
+        -------
+        VerificationStatus
+            ``layer_reached`` is 1–4.  ``status`` is one of:
+            * ``"failed"``   — L1: no resolvable identifier path.
+            * ``"rejected"`` — L2: paper not found; L3: metadata mismatch;
+                               L4: claim not grounded in source text.
+            * ``"verified"`` — passed all four layers.
+
+        Notes
+        -----
+        * L1-L3 are delegated to ``verify_layers_123``; L4 adds content-grounding
+          against the resolved paper's abstract.
+        * The resolved paper object is fetched again for L4 (``_resolve`` is
+          cheap/idempotent for offline tests; production can cache it).
+        """
+        # ── L1–L3 ────────────────────────────────────────────────────────────
+        l3_status = await self.verify_layers_123(fact)
+        if l3_status.status != "pending_l4":
+            # Short-circuit: L1, L2, or L3 rejected/failed
+            return l3_status
+
+        # ── L4: content-grounding ────────────────────────────────────────────
+        resolved = await self._resolve(fact.source_ref)
+        if resolved is None:
+            # Extremely unlikely (paper was found in L2 moments ago) but guard it.
+            log.warning(
+                "Paper disappeared between L2 and L4 for id=%r; rejecting at L2",
+                getattr(fact.source_ref, "external_id", "?"),
+            )
+            return VerificationStatus(
+                layer_reached=2,
+                status="rejected",
+                detail="paper not found at L4 re-resolution",
+            )
+
+        return await self._grounding.verify(fact, resolved)
 
     # ------------------------------------------------------------------
     # Internal helpers

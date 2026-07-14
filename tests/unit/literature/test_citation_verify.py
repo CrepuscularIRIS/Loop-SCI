@@ -314,3 +314,102 @@ def test_existing_fact_schema_tests_still_pass_after_tightening():
     # Per task brief: keep existing tests green — so "flagged" must remain valid.
     vs = VerificationStatus(layer_reached=1, status="flagged")
     assert vs.status == "flagged"
+
+
+# ---------------------------------------------------------------------------
+# L4 wiring: full verify() (L1→L2→L3→L4) on VerificationPipeline
+# ---------------------------------------------------------------------------
+
+
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../"))
+from tests.conftest import MockProvider  # noqa: E402
+
+
+def _pipeline_with_paper(paper: PaperResult, grounding_provider=None) -> VerificationPipeline:
+    """Build a VerificationPipeline wired with a mock search client returning *paper*."""
+    client = MockSearchClient(result=paper)
+    return VerificationPipeline(
+        search_clients={"semantic_scholar": client},
+        grounding_provider=grounding_provider,
+        grounding_threshold=0.3,
+    )
+
+
+@pytest.mark.asyncio
+async def test_full_pipeline_verified_when_claim_grounded():
+    """L1→L2→L3→L4 happy path: grounded claim → status='verified', layer_reached=4."""
+    # Abstract contains the evidence span verbatim → high lexical score
+    paper = _paper(year=2023, authors=["Smith J"])
+    paper_with_abstract = PaperResult(
+        source=paper.source,
+        external_id=paper.external_id,
+        title=paper.title,
+        authors=paper.authors,
+        year=paper.year,
+        venue=paper.venue,
+        abstract="X causes Y in our study.",
+        url=None,
+    )
+    pipeline = _pipeline_with_paper(paper_with_abstract)
+    fact = _fact(expected_year=2023, expected_authors=["Smith J"])
+    # The default evidence_span is "X causes Y in our study" — high overlap with abstract
+    status = await pipeline.verify(fact)
+    assert status.status == "verified"
+    assert status.layer_reached == 4
+
+
+@pytest.mark.asyncio
+async def test_full_pipeline_rejected_at_l4_when_claim_absent():
+    """L4 catches misattribution: real paper, correct metadata, claim NOT in abstract."""
+    paper_with_unrelated_abstract = PaperResult(
+        source="semantic_scholar",
+        external_id="s2:abc123",
+        title="Protein Folding Study",
+        authors=["Smith J"],
+        year=2023,
+        venue="Nature",
+        abstract="This paper studies protein folding in bacteria and archaea.",
+        url=None,
+    )
+    pipeline = _pipeline_with_paper(paper_with_unrelated_abstract)
+    fact = _fact(expected_year=2023, expected_authors=["Smith J"])
+    # evidence_span="X causes Y in our study" — zero overlap with protein paper
+    status = await pipeline.verify(fact)
+    assert status.status == "rejected"
+    assert status.layer_reached == 4
+
+
+@pytest.mark.asyncio
+async def test_full_pipeline_still_short_circuits_at_l2():
+    """Short-circuit still works: L2 rejection doesn't reach L4."""
+    # Search client returns None → paper not found → rejected at L2
+    client = MockSearchClient(result=None)
+    pipeline = VerificationPipeline(search_clients={"semantic_scholar": client})
+    fact = _fact()
+    status = await pipeline.verify(fact)
+    assert status.layer_reached == 2
+    assert status.status == "rejected"
+
+
+@pytest.mark.asyncio
+async def test_full_pipeline_still_short_circuits_at_l3():
+    """Short-circuit still works: L3 metadata mismatch doesn't reach L4."""
+    paper = _paper(year=1999)  # wrong year
+    pipeline = _pipeline_with_paper(paper)
+    fact = _fact(expected_year=2023)
+    status = await pipeline.verify(fact)
+    assert status.layer_reached == 3
+    assert status.status == "rejected"
+
+
+@pytest.mark.asyncio
+async def test_verify_layers_123_still_returns_pending_l4():
+    """verify_layers_123() must still return pending_l4 (L4 not run here)."""
+    paper = _paper(year=2023, authors=["Smith J"])
+    client = MockSearchClient(result=paper)
+    pipeline = VerificationPipeline(search_clients={"semantic_scholar": client})
+    fact = _fact(expected_year=2023, expected_authors=["Smith J"])
+    status = await pipeline.verify_layers_123(fact)
+    assert status.layer_reached == 3
+    assert status.status == "pending_l4"
