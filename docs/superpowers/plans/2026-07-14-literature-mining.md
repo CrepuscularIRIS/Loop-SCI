@@ -44,7 +44,7 @@ base-ref: 58f6a4b62d917df7af879dcd021e4f3a57e5060f
 - Produces: `PaperResult` dataclass, `SearchClient` Protocol, `MockTransport` test helper
 - Consumed by: Tasks 2, 3, 4 (adapters, dispatch), Task 10 (tools)
 
-- [ ] **Step 1.1: Write failing tests for PaperResult and SearchClient**
+- [x] **Step 1.1: Write failing tests for PaperResult and SearchClient**
 
 ```python
 # tests/unit/literature/test_search_schema.py
@@ -81,7 +81,7 @@ def test_search_client_is_protocol():
 Run: `uv run pytest tests/unit/literature/test_search_schema.py -v`
 Expected: FAIL — module not found
 
-- [ ] **Step 1.2: Implement schema and client**
+- [x] **Step 1.2: Implement schema and client**
 
 ```python
 # loop_sci/literature/search/schema.py
@@ -113,12 +113,12 @@ class SearchClient(Protocol):
     async def fetch_by_id(self, external_id: str) -> PaperResult | None: ...
 ```
 
-- [ ] **Step 1.3: Run tests to verify they pass**
+- [x] **Step 1.3: Run tests to verify they pass**
 
 Run: `uv run pytest tests/unit/literature/test_search_schema.py -v`
 Expected: PASS
 
-- [ ] **Step 1.4: Commit**
+- [x] **Step 1.4: Commit**
 
 ```bash
 git add loop_sci/literature/ tests/unit/literature/
