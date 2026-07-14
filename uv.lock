@@ -558,6 +558,7 @@ name = "loop-sci"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "httpx" },
     { name = "hydra-core" },
     { name = "omegaconf" },
     { name = "openai" },
@@ -579,6 +580,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
     { name = "hydra-core", specifier = ">=1.3" },
     { name = "omegaconf", specifier = ">=2.3" },
     { name = "openai", specifier = ">=1.30" },
