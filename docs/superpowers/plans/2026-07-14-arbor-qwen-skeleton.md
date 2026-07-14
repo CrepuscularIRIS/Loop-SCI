@@ -1145,7 +1145,7 @@ git commit -m "feat(engine): ToolRegistry with structured error on unknown/malfo
 - Produces: re-exported `Node`, `IdeaTree` with `refs: dict | None` field on `Node` (instead of `code_ref` only), and `IdeaTree` with atomic `save()` guaranteed.
 - Key methods: `IdeaTree.add_node(node)`, `IdeaTree.update_node(node_id, **kw)`, `IdeaTree.load_json(path)`, `IdeaTree.get_pending_leaves()`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/unit/test_idea_tree.py
@@ -1242,7 +1242,7 @@ def test_get_pending_leaves(tree):
     assert any(n.id == child_id for n in pending)
 ```
 
-- [ ] **Step 2: Run to verify FAIL**
+- [x] **Step 2: Run to verify FAIL**
 
 ```bash
 uv run pytest tests/unit/test_idea_tree.py -v 2>&1 | head -15
@@ -1250,7 +1250,7 @@ uv run pytest tests/unit/test_idea_tree.py -v 2>&1 | head -15
 
 Expected: ImportError
 
-- [ ] **Step 3: Implement `loop_sci/state/idea_tree.py`**
+- [x] **Step 3: Implement `loop_sci/state/idea_tree.py`**
 
 ```python
 """Re-export vendored IdeaTree/Node; add generic refs field to Node."""
@@ -1279,7 +1279,7 @@ Node = _VendorNode
 __all__ = ["Node", "IdeaTree", "NodeStatus"]
 ```
 
-- [ ] **Step 4: Create `loop_sci/state/__init__.py`**
+- [x] **Step 4: Create `loop_sci/state/__init__.py`**
 
 ```python
 from .idea_tree import Node, IdeaTree, NodeStatus
@@ -1288,7 +1288,7 @@ from .session import RunSession
 __all__ = ["Node", "IdeaTree", "NodeStatus", "RunSession"]
 ```
 
-- [ ] **Step 5: Run tree tests (session tests come after session.py)**
+- [x] **Step 5: Run tree tests (session tests come after session.py)**
 
 ```bash
 uv run pytest tests/unit/test_idea_tree.py -v
@@ -1296,7 +1296,7 @@ uv run pytest tests/unit/test_idea_tree.py -v
 
 Expected: all PASS (the `refs` test and all persistence tests)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add loop_sci/state/idea_tree.py loop_sci/state/__init__.py tests/unit/test_idea_tree.py
