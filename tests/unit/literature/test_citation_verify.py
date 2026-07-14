@@ -413,3 +413,41 @@ async def test_verify_layers_123_still_returns_pending_l4():
     status = await pipeline.verify_layers_123(fact)
     assert status.layer_reached == 3
     assert status.status == "pending_l4"
+
+
+@pytest.mark.asyncio
+async def test_verify_calls_fetch_by_id_exactly_once_for_l4_verified_path():
+    """Cost regression: fetch_by_id must be called EXACTLY ONCE on a full L1→L4 verified path.
+
+    Before the fix, verify() called _resolve() twice: once inside verify_layers_123()
+    (L2 existence) and again in verify() itself (L4 grounding).  The fix inlines
+    L1-L3 inside verify() so the resolved paper object is reused at L4 — only one
+    fetch_by_id call is issued against the real (or mocked) API.
+    """
+    paper_with_abstract = PaperResult(
+        source="semantic_scholar",
+        external_id="s2:abc123",
+        title="Test Paper",
+        authors=["Smith J", "Jones A"],
+        year=2023,
+        venue="NeurIPS",
+        abstract="X causes Y in our study.",
+        url=None,
+    )
+    client = MockSearchClient(result=paper_with_abstract)
+    pipeline = VerificationPipeline(
+        search_clients={"semantic_scholar": client},
+        grounding_threshold=0.3,
+    )
+    fact = _fact(expected_year=2023, expected_authors=["Smith J"])
+    status = await pipeline.verify(fact)
+
+    # Functional: claim is grounded → verified
+    assert status.status == "verified"
+    assert status.layer_reached == 4
+
+    # Cost guard: exactly ONE fetch_by_id call, not two
+    assert len(client.fetch_calls) == 1, (
+        f"Expected exactly 1 fetch_by_id call, got {len(client.fetch_calls)}: "
+        f"{client.fetch_calls!r}"
+    )

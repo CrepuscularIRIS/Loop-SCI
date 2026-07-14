@@ -164,32 +164,43 @@ class VerificationPipeline:
 
         Notes
         -----
-        * L1-L3 are delegated to ``verify_layers_123``; L4 adds content-grounding
-          against the resolved paper's abstract.
-        * The resolved paper object is fetched again for L4 (``_resolve`` is
-          cheap/idempotent for offline tests; production can cache it).
+        * L1-L3 are inlined here so the resolved paper from L2 is reused at L4
+          without a second ``fetch_by_id`` call.
+        * ``verify_layers_123`` remains available for callers that only need L1-L3.
         """
-        # ── L1–L3 ────────────────────────────────────────────────────────────
-        l3_status = await self.verify_layers_123(fact)
-        if l3_status.status != "pending_l4":
-            # Short-circuit: L1, L2, or L3 rejected/failed
-            return l3_status
+        ref = fact.source_ref
 
-        # ── L4: content-grounding ────────────────────────────────────────────
-        resolved = await self._resolve(fact.source_ref)
-        if resolved is None:
-            # Extremely unlikely (paper was found in L2 moments ago) but guard it.
-            log.warning(
-                "Paper disappeared between L2 and L4 for id=%r; rejecting at L2",
-                getattr(fact.source_ref, "external_id", "?"),
+        # ── L1: format / resolvability ───────────────────────────────────────
+        if not self._has_resolvable_identifier(ref):
+            return VerificationStatus(
+                layer_reached=1,
+                status="failed",
+                detail=(
+                    f"no resolvable identifier: source={ref.source!r} not registered "
+                    "and no doi present"
+                ),
             )
+
+        # ── L2: existence ────────────────────────────────────────────────────
+        paper = await self._resolve(ref)
+        if paper is None:
             return VerificationStatus(
                 layer_reached=2,
                 status="rejected",
-                detail="paper not found at L4 re-resolution",
+                detail=f"paper not found via API for id={ref.external_id!r}",
             )
 
-        return await self._grounding.verify(fact, resolved)
+        # ── L3: metadata match ───────────────────────────────────────────────
+        ok, detail = _check_metadata(fact, paper)
+        if not ok:
+            return VerificationStatus(
+                layer_reached=3,
+                status="rejected",
+                detail=detail,
+            )
+
+        # ── L4: content-grounding (paper already resolved above — no second fetch)
+        return await self._grounding.verify(fact, paper)
 
     # ------------------------------------------------------------------
     # Internal helpers
