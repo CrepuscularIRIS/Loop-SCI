@@ -6,10 +6,11 @@ import json
 
 import pytest
 
-from loop_sci.hypothesis.stages.forge import run_forge
+from loop_sci.hypothesis.stages.forge import run_forge, _is_relabeling
 from loop_sci.hypothesis.schemas import ProblemCard, build_card_refs
 from loop_sci.literature.extract.fact import Fact, SourceRef
 from loop_sci.literature.factbase.store import FactStore
+from loop_sci.state.idea_tree import IdeaTree, Node
 
 from tests.conftest import MockProvider
 
@@ -67,10 +68,10 @@ async def test_candidates_have_required_fields(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_relabeling_discarded(tmp_path):
-    """Candidate whose DIFF_PREDICTION identical to MECHANISM after stripping is discarded."""
+async def test_relabeling_verbatim_discarded(tmp_path):
+    """Candidate whose DIFF_PREDICTION is verbatim identical to MECHANISM is discarded."""
     store = _store_with_fact(tmp_path)
-    # DIFF_PREDICTION identical to MECHANISM = relabeling; must be discarded
+    # DIFF_PREDICTION identical to MECHANISM = verbatim relabeling; must be discarded
     response = json.dumps({"candidates": [
         {
             "MECHANISM": "Neurons fire",
@@ -84,6 +85,70 @@ async def test_relabeling_discarded(tmp_path):
     provider = MockProvider(responses=[response])
     results = await run_forge("card_1", _card_refs(), store, provider, max_candidates=4)
     assert len(results) == 0
+
+
+def test_is_relabeling_reworded_discard():
+    """Reordered DIFF_PREDICTION with no new content tokens is classified as a relabeling.
+
+    MECHANISM and DIFF_PREDICTION share exactly the same content tokens
+    ("glial", "coupling", "increases", "neuronal", "gain") rearranged with
+    only stopwords added.  No new predictive token is introduced → DISCARD.
+    """
+    mechanism = "Glial coupling increases neuronal gain"
+    # Same five content tokens, different word order; "and" is a stopword.
+    diff_pred = "Neuronal gain and glial coupling increases"
+    assert _is_relabeling(mechanism, diff_pred) is True
+
+
+def test_is_relabeling_new_token_survives():
+    """DIFF_PREDICTION that introduces a genuinely new predictive token survives.
+
+    "threshold" and "reduces" are content tokens not present in the mechanism,
+    so this is NOT a relabeling and must SURVIVE.
+    """
+    mechanism = "Glial coupling increases neuronal gain"
+    diff_pred = "Glial coupling increases neuronal gain and reduces threshold"
+    assert _is_relabeling(mechanism, diff_pred) is False
+
+
+@pytest.mark.asyncio
+async def test_relabeling_reworded_discarded_end_to_end(tmp_path):
+    """End-to-end: reordered DIFF_PREDICTION with no new tokens is discarded by run_forge."""
+    store = _store_with_fact(tmp_path)
+    response = json.dumps({"candidates": [
+        {
+            "MECHANISM": "Glial coupling increases neuronal gain",
+            "KILL": "k",
+            "BRACKET": "b",
+            # Same five content tokens rearranged with a stopword → relabeling.
+            "DIFF_PREDICTION": "Neuronal gain and glial coupling increases",
+            "frame": "primary",
+            "derivation": [],
+        },
+    ]})
+    provider = MockProvider(responses=[response])
+    results = await run_forge("card_1", _card_refs(), store, provider, max_candidates=4)
+    assert len(results) == 0
+
+
+@pytest.mark.asyncio
+async def test_new_predictive_token_survives_end_to_end(tmp_path):
+    """End-to-end: DIFF_PREDICTION with genuinely new tokens is NOT discarded."""
+    store = _store_with_fact(tmp_path)
+    response = json.dumps({"candidates": [
+        {
+            "MECHANISM": "Glial coupling increases neuronal gain",
+            "KILL": "k",
+            "BRACKET": "b",
+            # "reduces" and "threshold" are new predictive tokens not in MECHANISM.
+            "DIFF_PREDICTION": "Glial coupling increases neuronal gain and reduces threshold",
+            "frame": "primary",
+            "derivation": [],
+        },
+    ]})
+    provider = MockProvider(responses=[response])
+    results = await run_forge("card_1", _card_refs(), store, provider, max_candidates=4)
+    assert len(results) == 1
 
 
 @pytest.mark.asyncio
@@ -152,15 +217,22 @@ async def test_candidate_grounding_fact_ids_in_refs(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_hypothesis_parent_is_card_node(tmp_path):
-    """Returned hyp_node_id is unique and card_node_id is the parent context."""
+async def test_hypothesis_nodes_are_children_and_siblings_of_card_node(tmp_path):
+    """Forge triples attached to a real IdeaTree become children of the card node.
+
+    Verifies:
+    - Both hyp nodes have parent_id == card_node_id (children of card).
+    - Both appear in tree.get_children(card_node_id) (siblings of each other).
+    - hyp_node_ids are unique.
+    """
     store = _store_with_fact(tmp_path)
+    card_node_id = "card_node_xyz"
     response = json.dumps({"candidates": [
         {
             "MECHANISM": "Mech A",
             "KILL": "k",
             "BRACKET": "b",
-            "DIFF_PREDICTION": "Pred A distinct",
+            "DIFF_PREDICTION": "Pred A distinct observable",
             "frame": "primary",
             "derivation": [],
         },
@@ -168,13 +240,51 @@ async def test_hypothesis_parent_is_card_node(tmp_path):
             "MECHANISM": "Rival A",
             "KILL": "rk",
             "BRACKET": "rb",
-            "DIFF_PREDICTION": "Rival pred distinct",
+            "DIFF_PREDICTION": "Rival pred distinct signature",
             "frame": "rival",
             "derivation": [],
         },
     ]})
     provider = MockProvider(responses=[response])
-    results = await run_forge("card_node_xyz", _card_refs(), store, provider, max_candidates=4)
+    results = await run_forge(card_node_id, _card_refs(), store, provider, max_candidates=4)
+
     assert len(results) == 2
-    ids = [r[0] for r in results]
-    assert ids[0] != ids[1]  # unique hyp node ids
+    hyp_node_id_0 = results[0][0]
+    hyp_node_id_1 = results[1][0]
+    # IDs must be unique
+    assert hyp_node_id_0 != hyp_node_id_1
+
+    # Build a real IdeaTree and attach the returned triples as children of the card node.
+    root = Node(id="ROOT", parent_id=None, hypothesis="root topic", depth=0, status="pending")
+    tree = IdeaTree(root=root, json_path=tmp_path / "tree.json")
+
+    card_node = Node(
+        id=card_node_id,
+        parent_id="ROOT",
+        hypothesis="Why neurons synchronize?",
+        depth=1,
+        status="pending",
+    )
+    tree.add_node(card_node)
+
+    # Attach each returned forge triple as a child of the card node.
+    for hyp_node_id, hyp_refs, _derivation in results:
+        hyp_statement = hyp_refs.get("hyp", {}).get("MECHANISM", hyp_node_id)
+        node = Node(
+            id=hyp_node_id,
+            parent_id=card_node_id,
+            hypothesis=hyp_statement,
+            depth=2,
+            status="pending",
+            refs=hyp_refs,
+        )
+        tree.add_node(node)
+
+    # Assert both hypothesis nodes are children of the card node.
+    assert tree.get_node(hyp_node_id_0).parent_id == card_node_id
+    assert tree.get_node(hyp_node_id_1).parent_id == card_node_id
+
+    # Assert tree.get_children returns both — they are siblings under the card node.
+    child_ids = {child.id for child in tree.get_children(card_node_id)}
+    assert hyp_node_id_0 in child_ids
+    assert hyp_node_id_1 in child_ids

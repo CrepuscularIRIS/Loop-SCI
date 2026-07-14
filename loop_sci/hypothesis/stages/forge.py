@@ -10,9 +10,11 @@ Key invariants
 --------------
 * **Rival frame**: every call must include ≥1 rival-frame candidate; the LLM is
   instructed to do so and the test suite verifies it.
-* **Relabeling filter (osp 1.4)**: a candidate whose ``DIFF_PREDICTION`` is
-  identical to ``MECHANISM`` (after whitespace normalisation and lower-casing)
-  conveys no independent prediction and is discarded before returning.
+* **Relabeling filter (osp 1.4)**: a candidate is discarded when its
+  ``DIFF_PREDICTION`` content tokens (after lower-casing, stripping punctuation,
+  and removing stopwords) are entirely contained within the mechanism tokens —
+  i.e. the prediction introduces no new predictive token beyond the mechanism.
+  Verbatim equality (after whitespace normalisation) is a strict subset of this.
 * **Per-run cap (osp 1.5)**: at most ``max_candidates`` candidates are returned
   (Hydra-configurable; default 4).
 * **Retry-once → drop (osp 1.6)**: if the provider returns malformed JSON, one
@@ -57,19 +59,66 @@ _FORGE_SYSTEM = (
 # Relabeling filter (osp 1.4)
 # ---------------------------------------------------------------------------
 
+# Small stopword set — high-frequency function words that carry no predictive
+# content on their own.  Deterministic, no external NLP library required.
+_STOPWORDS: frozenset[str] = frozenset({
+    "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
+    "of", "with", "by", "from", "as", "is", "are", "was", "were", "be",
+    "been", "being", "it", "its", "this", "that", "these", "those",
+    "will", "would", "can", "could", "should", "may", "might", "must",
+    "do", "does", "did", "not", "no", "nor", "so", "yet", "than", "then",
+    "when", "where", "which", "who", "how", "what", "if", "while",
+    "has", "have", "had", "also",
+})
+
 
 def _normalise(s: str) -> str:
     """Lowercase and collapse whitespace for comparison."""
     return re.sub(r"\s+", " ", s.lower().strip())
 
 
-def _is_relabeling(mechanism: str, diff_prediction: str) -> bool:
-    """Return True if diff_prediction is identical to mechanism after normalisation.
+def _content_tokens(s: str) -> frozenset[str]:
+    """Return the set of meaningful content tokens from *s*.
 
-    The "strip-the-new-words" test: if removing the novel terminology leaves no
-    prediction distinct from the mechanism, the candidate is a relabeling.
+    Tokenizes by splitting on whitespace and punctuation, lower-cases every
+    token, then drops single-character tokens and stopwords.  The result is a
+    frozenset so that order and repetition are irrelevant — only unique
+    predictive words matter.
     """
-    return _normalise(mechanism) == _normalise(diff_prediction)
+    # Strip punctuation: replace any non-alphanumeric-non-space character with
+    # a space so that "EEG-signature" → {"eeg", "signature"}.
+    cleaned = re.sub(r"[^a-z0-9\s]", " ", s.lower())
+    tokens = cleaned.split()
+    return frozenset(
+        t for t in tokens if len(t) > 1 and t not in _STOPWORDS
+    )
+
+
+def _is_relabeling(mechanism: str, diff_prediction: str) -> bool:
+    """Return True when diff_prediction introduces no new predictive content.
+
+    Two conditions both count as a relabeling (osp 1.4):
+
+    1. Verbatim echo: *diff_prediction* is identical to *mechanism* after
+       whitespace normalisation (strict subset of condition 2, kept explicit
+       for clarity and backward-compatibility).
+    2. Content containment: after tokenising both strings into content-token
+       sets (lowercase, punctuation-stripped, stopwords removed), every token
+       in *diff_prediction* is already present in *mechanism* — i.e.
+       ``diff_tokens - mechanism_tokens == ∅``.  This catches paraphrases /
+       re-wordings that carry no new predictive information.
+    """
+    # Fast path: verbatim equality after normalisation.
+    if _normalise(mechanism) == _normalise(diff_prediction):
+        return True
+
+    # Content-containment check: diff must introduce ≥1 new token.
+    diff_tokens = _content_tokens(diff_prediction)
+    mechanism_tokens = _content_tokens(mechanism)
+    # If diff has no tokens at all (empty prediction), also treat as relabeling.
+    if not diff_tokens:
+        return True
+    return (diff_tokens - mechanism_tokens) == frozenset()
 
 
 # ---------------------------------------------------------------------------
