@@ -25,7 +25,7 @@ Reason: vendored experiment.py `GitManager` (default auto_git=True at config.py:
 Reason: open-phase tasks.md text is stale vs design (1.3 says vendor "orchestrator"; 1.4 says "flat-proxy config" — design chose Hydra & excludes orchestrator). Will fix stale text (small delta) + check all boxes + run comet-state task-checkoff right before the build guard. Per-task tracking lives in this ledger + plan step checkboxes.
 
 ### Current task
-- Task 6: Tool registry (loop_sci/engine/tools.py)
+- Task 7: Idea-tree state (re-export + generic refs + atomic save)
 - Stage: implementing
 - review-fix round: 0 / 2
 - risk task: yes (many files; import-closure rewriting) — expect per-task review to scrutinize vendored edits
@@ -57,3 +57,4 @@ Plan→OpenSpec mapping (loose/many-to-many; check off openspec sub-tasks as gen
 - Task 3: complete (impl 5009693, Opus 4.8 Approved; 0 Critical/Important; 3 Minor for final review: [with_retry(max_retries=0) raises None — add guard]; [add non-retryable-not-retried test]; [redact always prefixes sk- — cosmetic]; 8/8 provider + 19/19 RED->GREEN; security surface verified)
 - Task 4: complete (impl 98ee1b0; Opus review found 1 IMPORTANT [non-dict JSON crash] -> grok:grok-rescue fix 6b841b7 -> Opus re-review Approved; 16/16; 1 Minor [parser doesn't validate tool name — final review])
 - Task 5: complete (impl 5a9ad8c Opus Approved — 4 HARD gates verified live [auto_git=False, real dataclasses, ContextConfig.window, missing-key-no-crash]; grok hygiene fix 3dcdc74 [OmegaConf warn 11->0, drop unused os import]; 30 new/57 total, pristine, ruff clean)
+- Task 6: complete (impl d59d028 Opus Approved; dispatch provably fail-closed on all escape paths; asyncio.to_thread sync path; 63 passed pristine; 2 Minor [BaseException exclusion is by-design; stronger malformed-args assertion — final review])

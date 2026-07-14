@@ -979,7 +979,7 @@ git commit -m "feat(config): Hydra structured configs + AgentConfig bridge loade
     - `get_definitions() -> list[dict]` — Anthropic-style tool schemas for the provider
     - `dispatch(name, arguments) -> str` (async) — returns result string or structured error JSON
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/unit/test_tool_registry.py
@@ -1029,7 +1029,7 @@ async def test_dispatch_malformed_args_returns_error(registry):
     assert "error" in result
 ```
 
-- [ ] **Step 2: Run to verify FAIL**
+- [x] **Step 2: Run to verify FAIL**
 
 ```bash
 uv run pytest tests/unit/test_tool_registry.py -v 2>&1 | head -10
@@ -1037,7 +1037,7 @@ uv run pytest tests/unit/test_tool_registry.py -v 2>&1 | head -10
 
 Expected: ImportError
 
-- [ ] **Step 3: Implement `loop_sci/engine/tools.py`**
+- [x] **Step 3: Implement `loop_sci/engine/tools.py`**
 
 ```python
 """Tool registry: register by name+schema, dispatch by name."""
@@ -1110,14 +1110,14 @@ class ToolRegistry:
             })
 ```
 
-- [ ] **Step 4: Create `loop_sci/engine/__init__.py`**
+- [x] **Step 4: Create `loop_sci/engine/__init__.py`**
 
 ```python
 from .tools import ToolRegistry
 __all__ = ["ToolRegistry"]
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 ```bash
 uv run pytest tests/unit/test_tool_registry.py -v
@@ -1125,7 +1125,7 @@ uv run pytest tests/unit/test_tool_registry.py -v
 
 Expected: all PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add loop_sci/engine/ tests/unit/test_tool_registry.py
