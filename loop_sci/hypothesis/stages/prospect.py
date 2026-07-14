@@ -39,6 +39,7 @@ async def run_prospect(
     provider: Any,
     *,
     max_cards: int = 5,
+    context: str = "",
 ) -> list[tuple[str, dict[str, Any]]]:
     """Mine gap/contradiction problem cards from the fact base.
 
@@ -47,6 +48,8 @@ async def run_prospect(
         store: FactStore instance to query for verified facts.
         provider: LLM provider implementing ``await create(...) -> LLMResponse``.
         max_cards: Upper bound on cards returned (applied after filtering).
+        context: Optional context string (e.g. pivot lessons) prepended to the
+            prompt.  Empty string (default) means no additional context.
 
     Returns:
         List of ``(node_id, refs_dict)`` tuples ordered by ``STAKES`` descending.
@@ -64,8 +67,9 @@ async def run_prospect(
     fact_index: dict[str, Any] = {f.fact_id: f for f in all_facts if f.fact_id}
 
     fact_summary = "\n".join(f"[{f.fact_id}] {f.claim}" for f in prompt_facts[:50])
+    context_prefix = f"{context}\n\n" if context else ""
     prompt = (
-        f"Topic: {topic}\n\nVerified facts:\n{fact_summary}\n\n"
+        f"{context_prefix}Topic: {topic}\n\nVerified facts:\n{fact_summary}\n\n"
         f"Return up to {max_cards} gap cards as a JSON array."
     )
 

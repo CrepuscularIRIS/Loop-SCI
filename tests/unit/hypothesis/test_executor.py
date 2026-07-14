@@ -8,6 +8,9 @@ RED checklist (TDD):
 - test_executor_never_raises
 - test_executor_caps_respected
 - test_executor_no_self_acquit_honored
+- test_executor_resume_interrupted_does_not_respend   (Finding 1)
+- test_executor_region_close_stops_generation          (Finding 2)
+- test_executor_pivot_injects_lessons                  (Finding 3)
 """
 from __future__ import annotations
 
@@ -197,45 +200,101 @@ async def test_accepted_node_has_score_and_refs_scores(tmp_path):
     scores = node.refs["scores"]
     assert "novelty" in scores
     assert "self_consistency" in scores
+    assert "overall" in scores, "refs['scores'] must include 'overall'"
 
 
 @pytest.mark.asyncio
 async def test_executor_resume_skips_accepted(tmp_path):
-    """On re-run, already-accepted nodes are skipped (no new gen calls for them).
+    """On re-run, already-accepted nodes are skipped (no duplicate nodes in tree).
 
-    Resume strategy: when ALL accepted-eligible hypotheses have already been
-    accepted (as recorded in the VerdictLedger), a second run must not spend
-    any new provider calls for those nodes.  The executor detects this by
-    checking accepted_ids at round start and skipping cards/hyps that already
-    resolved.  Because prospect/forge re-generate fresh UUIDs each call, the
-    resume works at the SESSION level: when the ledger contains ≥1 accepted
-    node AND the tree already has accepted nodes, the executor returns early
-    with no new gen calls.
+    Resume strategy: node ids are now DETERMINISTIC (SHA-1 of content), so the
+    per-node skip guards fire correctly.  On the second run, prospect and forge are
+    still called (to discover any new work), but accepted hypothesis nodes are
+    skipped entirely — no duplicate tree entries and no re-verdict for accepted nodes.
     """
     exec_, session = _make_executor(tmp_path)
     unit = DispatchUnit(node_id="ROOT", goal="neuro")
 
     await exec_.run(unit)
-    gen_calls_after_first = exec_._gen._index
 
     # Verify first run actually produced accepted nodes
-    accepted = [n for n in session.tree.get_all_nodes() if n.status == "accepted"]
-    assert len(accepted) >= 1, "First run must produce ≥1 accepted node"
+    accepted_after_first = [n for n in session.tree.get_all_nodes() if n.status == "accepted"]
+    assert len(accepted_after_first) >= 1, "First run must produce ≥1 accepted node"
+    accepted_ids_after_first = {n.id for n in accepted_after_first}
 
-    # Second run — the executor must detect already-accepted state and skip
+    # Second run — accepted nodes must be skipped (no duplicates, same count)
     await exec_.run(unit)
-    gen_calls_after_second = exec_._gen._index
 
-    assert gen_calls_after_second == gen_calls_after_first, (
-        f"Expected no new gen calls on resume, but got "
-        f"{gen_calls_after_second - gen_calls_after_first} additional call(s)"
+    accepted_after_second = [n for n in session.tree.get_all_nodes() if n.status == "accepted"]
+    accepted_ids_after_second = {n.id for n in accepted_after_second}
+
+    # The set of accepted node ids must be identical (no new accepted from re-run)
+    assert accepted_ids_after_second == accepted_ids_after_first, (
+        "Second run must not produce new accepted nodes for already-accepted hypotheses"
+    )
+    # No duplicate node ids in the tree at all
+    all_node_ids = [n.id for n in session.tree.get_all_nodes()]
+    assert len(all_node_ids) == len(set(all_node_ids)), (
+        "Tree must have no duplicate node ids after resume"
     )
 
 
 @pytest.mark.asyncio
-async def test_executor_never_raises(tmp_path):
-    """run() must never raise — returns status='error' on internal failure."""
-    # Provide a broken gen_provider that raises on every call
+async def test_executor_resume_interrupted_does_not_respend(tmp_path):
+    """Deterministic ids: re-run on same executor does not duplicate accepted nodes.
+
+    With 2 candidates (Glial sync UP, Rival sync DOWN), run once. Then run again.
+    Assert:
+    - accepted node count is still exactly 1 (no duplicate)
+    - tree has no duplicate node ids
+    - accepted node ids set is identical between run 1 and run 2
+    """
+    # Use UP for primary (Glial sync) and DOWN for rival (Rival sync)
+    exec_, session = _make_executor(
+        tmp_path,
+        rev_responses=[_up_verdict_json(), _down_verdict_json()] * 10,
+    )
+    unit = DispatchUnit(node_id="ROOT", goal="neuro")
+
+    # First run — primary (Glial sync) gets UP, rival (Rival sync) gets DOWN
+    await exec_.run(unit)
+
+    accepted_after_first = [n for n in session.tree.get_all_nodes() if n.status == "accepted"]
+    assert len(accepted_after_first) == 1, (
+        f"Expected exactly 1 accepted node after first run, got {len(accepted_after_first)}"
+    )
+    accepted_id_run1 = accepted_after_first[0].id
+
+    # Second run — same executor, same tree, same ledger
+    await exec_.run(unit)
+
+    accepted_after_second = [n for n in session.tree.get_all_nodes() if n.status == "accepted"]
+    # Still exactly 1 accepted (the same one)
+    assert len(accepted_after_second) == 1, (
+        f"Expected 1 accepted node after second run (no duplicate), "
+        f"got {len(accepted_after_second)}"
+    )
+    assert accepted_after_second[0].id == accepted_id_run1, (
+        "Accepted node id must be stable across runs (deterministic id)"
+    )
+    # No duplicate node ids in the entire tree
+    all_node_ids = [n.id for n in session.tree.get_all_nodes()]
+    assert len(all_node_ids) == len(set(all_node_ids)), (
+        "Tree must have no duplicate node ids after resume"
+    )
+
+
+@pytest.mark.asyncio
+async def test_executor_never_raises(tmp_path, monkeypatch):
+    """run() must never raise — returns status='error' on an UNHANDLED internal failure.
+
+    The stages themselves degrade gracefully (retry-once → drop/fallback), so a
+    broken provider alone yields status="done" with 0 accepted.  To exercise the
+    top-level try/except that converts an unhandled internal error into
+    ``status="error"`` (rather than propagating), we force an unhandled failure
+    inside ``_run_loop`` by making the (un-guarded) prospect' stage raise.  The
+    contract is: ``run()`` catches it and returns ``status == "error"``.
+    """
     session = RunSession.create(tmp_path / "runs", task="crash")
     store_path = _seeded_store(tmp_path)
 
@@ -246,6 +305,12 @@ async def test_executor_never_raises(tmp_path):
             raise RuntimeError("simulated provider crash")
 
     from loop_sci.hypothesis.config import HypothesisConfig
+
+    async def _boom(*args, **kwargs):
+        raise RuntimeError("simulated unhandled internal error")
+
+    # Force an unhandled error on the executor's prospect' call site.
+    monkeypatch.setattr("loop_sci.hypothesis.executor.run_prospect", _boom)
 
     executor = HypothesisExecutor(
         session,
@@ -258,7 +323,10 @@ async def test_executor_never_raises(tmp_path):
 
     result = await executor.run(unit)  # must not raise
 
-    assert result.status in ("done", "bounded_exit", "error")
+    assert result.status == "error", (
+        f"Expected status='error' on unhandled internal failure, got {result.status!r}"
+    )
+    assert "error" in result.refs
 
 
 @pytest.mark.asyncio
@@ -336,4 +404,159 @@ async def test_executor_no_self_acquit_honored(tmp_path):
     accepted = [n for n in session.tree.get_all_nodes() if n.status == "accepted"]
     assert len(accepted) == 0, (
         "No hypotheses should be accepted when gen==rev model (no-self-acquit)"
+    )
+
+    # Verify the pruned nodes show "deterministic-gate" decided_by (no-self-acquit path)
+    pruned = [n for n in session.tree.get_all_nodes() if n.status == "pruned"]
+    for node in pruned:
+        if node.refs and "verdict" in node.refs:
+            verdict = node.refs["verdict"]
+            assert verdict.get("decided_by") == "deterministic-gate", (
+                f"no-self-acquit should set decided_by='deterministic-gate', "
+                f"got {verdict.get('decided_by')!r}"
+            )
+
+
+@pytest.mark.asyncio
+async def test_executor_region_close_stops_generation(tmp_path):
+    """region_close_threshold=1: after 1 kill in a region, further hyps in same region are pruned.
+
+    We use threshold=1 so the first DOWN in region 'glial' immediately closes it.
+    The second hypothesis candidate (rival) also maps to 'glial' via the contract.
+    After the first kill, the rival should be pruned without an adversary call.
+    """
+    # Both candidates contract to the same LATENT_ROOT = "glial"
+    same_root_contract = json.dumps({
+        "HYPOTHESIS": "some hyp",
+        "LATENT_ROOT": "glial",
+        "ACCEPT_IF": "EEG differs",
+        "KILL_IF": "No spike",
+    })
+    # Primary gets DOWN verdict, rival contract returns same region → should be pruned
+    gen_responses = [
+        _cards_json(),         # prospect
+        _hyps_json(),          # forge — 2 candidates
+        same_root_contract,    # contract for primary (glial sync)
+        same_root_contract,    # contract for rival (also glial root)
+    ]
+    rev_responses = [
+        _down_verdict_json(),  # primary → DOWN (kills glial region with threshold=1)
+        _up_verdict_json(),    # rival → UP (but should never be called if region is closed)
+    ]
+
+    session = RunSession.create(tmp_path / "runs", task="neuro")
+    store_path = _seeded_store(tmp_path)
+    gen = MockProvider(responses=gen_responses, model="qwen-max")
+    rev = MockProvider(responses=rev_responses, model="qwen-plus")
+
+    executor = HypothesisExecutor(
+        session,
+        gen_provider=gen,
+        rev_provider=rev,
+        store_path=store_path,
+        config=HypothesisConfig(
+            max_cards=1,
+            max_candidates=2,
+            max_rounds=1,
+            region_close_threshold=1,  # close region after just 1 kill
+        ),
+    )
+    unit = DispatchUnit(node_id="ROOT", goal="neuro")
+    await executor.run(unit)
+
+    # With threshold=1: primary is killed (DOWN), glial region closes.
+    # Rival candidate is in the same region → should be pruned without adversary call.
+    # Therefore rev._index should be 1 (only called for primary candidate).
+    assert rev._index == 1, (
+        f"Expected reviewer called exactly once (region closed after first kill), "
+        f"got rev._index={rev._index}"
+    )
+    # No accepted nodes (primary was DOWN, rival was region-pruned)
+    accepted = [n for n in session.tree.get_all_nodes() if n.status == "accepted"]
+    assert len(accepted) == 0, (
+        f"Expected 0 accepted nodes with region close at threshold=1, got {len(accepted)}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_executor_pivot_injects_lessons(tmp_path):
+    """When pivot fires, round 1's prospect'/forge' calls RECEIVE the constraints block.
+
+    The pivot mechanism: round 0 produces all-DOWN verdicts → stall_count reaches
+    pivot_at → action="pivot" → executor sets pivot_context = tree.get_constraints_block()
+    and threads it into round 1's prospect'/forge' via the ``context`` kwarg.
+
+    Bite test: this asserts that the CONTEXT passed to the stages CHANGES between
+    round 0 (empty) and round 1 (non-empty, carrying pruned lessons).  Against the
+    old no-op pivot implementation, round 1's context would still be "" and this
+    fails.  We spy on the ``context`` kwarg that the executor passes to
+    ``run_prospect``.
+    """
+    # Round 0: gen produces cards + hyps + 2 contracts; rev returns DOWN for all.
+    # Round 1: prospect + forge are called again (hyp nodes skip via verdict guard).
+    gen_responses = (
+        _gen_responses_happy()   # round 0: prospect + forge + 2 contracts
+        + _gen_responses_happy() # round 1: prospect + forge
+    )
+    rev_responses = [_down_verdict_json()] * 10  # all DOWN every round
+
+    session = RunSession.create(tmp_path / "runs", task="neuro")
+    store_path = _seeded_store(tmp_path)
+    gen = MockProvider(responses=gen_responses, model="qwen-max")
+    rev = MockProvider(responses=rev_responses, model="qwen-plus")
+
+    # Spy on the context passed to run_prospect on each round.
+    import loop_sci.hypothesis.executor as executor_mod
+
+    captured_contexts: list[str] = []
+    real_run_prospect = executor_mod.run_prospect
+
+    async def _spy_prospect(*args, **kwargs):
+        captured_contexts.append(kwargs.get("context", ""))
+        return await real_run_prospect(*args, **kwargs)
+
+    executor_mod.run_prospect = _spy_prospect
+    try:
+        executor = HypothesisExecutor(
+            session,
+            gen_provider=gen,
+            rev_provider=rev,
+            store_path=store_path,
+            config=HypothesisConfig(
+                max_cards=1,
+                max_candidates=2,
+                max_rounds=2,
+                pivot_at=1,    # pivot after 1 stale round
+                escalate_at=4,
+            ),
+        )
+        unit = DispatchUnit(node_id="ROOT", goal="neuro")
+        result = await executor.run(unit)
+    finally:
+        executor_mod.run_prospect = real_run_prospect
+
+    # Round 0 must produce pruned nodes with insights (DOWN verdicts → autopsy → insight)
+    pruned = [n for n in session.tree.get_all_nodes() if n.status == "pruned"]
+    assert len(pruned) >= 1, "Round 0 must have produced ≥1 pruned nodes (all-DOWN scenario)"
+
+    # Two prospect' calls captured — one per round.
+    assert len(captured_contexts) == 2, (
+        f"Expected prospect' called once per round (2 total), got {len(captured_contexts)}"
+    )
+    # Round 0 context is empty; round 1 context is the injected constraints block.
+    assert captured_contexts[0] == "", "Round 0 must receive an empty context"
+    assert captured_contexts[1], (
+        "Round 1 (post-pivot) must receive a non-empty constraints block context"
+    )
+    assert captured_contexts[1] != captured_contexts[0], (
+        "Pivot must change the context passed to prospect' between round 0 and round 1"
+    )
+    # The injected context must carry the pruned lessons (constraints block content).
+    assert "PRUNED LESSONS" in captured_contexts[1] or "KILL" in captured_contexts[1], (
+        "Round 1 context must surface pruned lessons from get_constraints_block()"
+    )
+
+    # The result refs must record lessons from round 0
+    assert result.refs.get("lessons"), (
+        "Executor result must include non-empty 'lessons' list after a pivot round"
     )

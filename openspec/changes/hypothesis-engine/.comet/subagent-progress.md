@@ -25,9 +25,9 @@
 - Interpreter: `.venv/bin/python` (hydra 1.3.4, ruff 0.15.21). Bare python=conda (no deps). All implementer/fix dispatches MUST use `.venv/bin/python -m pytest` + `.venv/bin/ruff`.
 
 ## Current
-- Tasks 1-8 COMPLETE. Task: 9 (ranked interface) -> osp 4.2
+- Tasks 1-9 COMPLETE. Task: 10a (HypothesisExecutor) -> osp 4.3 (+resume tail 3.5)
 - Stage: task-review (fix round 1)
-- Commit: 2bb483f; reviewer APPROVED but 'Minor' grounding source is actually a real #5-contract bug:
-  ranked read native Node.grounding (str, empty for real nodes) instead of refs.derivation fact_ids.
-- Fix round 1 dispatched: source grounding_fact_ids from refs.derivation fact_ids (dedup, order-preserving) + log on skip + bite-test.
+- Commit: 6d284b2; review CHANGES REQUIRED, 3 Important loop-enforcement gaps:
+  (1) resume not idempotent on interrupted runs (fresh uuids -> re-spend); (2) region-close tracked but not enforced; (3) pivot no-op (lessons not injected).
+- Fix round 1 dispatched: deterministic node ids for per-node resume skip + interrupted-resume bite-test; enforce is_closed w/ configurable threshold; inject get_constraints_block lessons on pivot; + minors (tighten never-raises test, decided_by assert, refs overall).
 - Fix round: 1/2

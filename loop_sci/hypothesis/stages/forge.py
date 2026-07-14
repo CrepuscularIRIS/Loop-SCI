@@ -133,6 +133,7 @@ async def run_forge(
     provider: Any,
     *,
     max_candidates: int = 4,
+    context: str = "",
 ) -> list[tuple[str, dict[str, Any], list[DerivationStep]]]:
     """Generate candidate hypotheses grounded in the problem card and fact base.
 
@@ -145,6 +146,8 @@ async def run_forge(
         provider: LLM provider implementing
             ``await create(*, system, messages, max_tokens) -> LLMResponse``.
         max_candidates: Upper bound on candidates returned (Hydra-configurable).
+        context: Optional context string (e.g. pivot lessons) prepended to the
+            prompt.  Empty string (default) means no additional context.
 
     Returns:
         List of ``(hyp_node_id, hyp_refs, derivation)`` triples.
@@ -162,8 +165,9 @@ async def run_forge(
     card_data = card_refs.get("card", {})
     topic = card_refs.get("topic", "")
 
+    context_prefix = f"{context}\n\n" if context else ""
     prompt = (
-        f"Gap card:\n{json.dumps(card_data, ensure_ascii=False)}\n\n"
+        f"{context_prefix}Gap card:\n{json.dumps(card_data, ensure_ascii=False)}\n\n"
         f"Verified facts:\n{fact_summary}\n\n"
         f"Generate up to {max_candidates} hypothesis candidates "
         f"(include ≥1 rival-frame candidate)."

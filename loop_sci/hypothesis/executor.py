@@ -15,8 +15,11 @@ Pipeline per round
 Resume (osp 3.5)
 ----------------
 On re-run, ``VerdictLedger.accepted_node_ids()`` provides the set of already-
-accepted nodes.  Any hypothesis node found in that set is skipped entirely —
-no re-critique, no new verdict-ledger entry.
+accepted nodes.  Node ids are now DETERMINISTIC (SHA-1 of content) so the same
+card/hypothesis always maps to the same id across runs.  Per-node skip guards
+check both the accepted-ids set and the tree for already-critiqued nodes, so
+resume is truly idempotent at the per-node granularity rather than requiring a
+coarse session-level early-return.
 
 Node scoring
 ------------
@@ -25,6 +28,7 @@ weighted overall score).  The sub-score map is stored in ``node.refs["scores"]``
 """
 from __future__ import annotations
 
+import hashlib
 import logging
 from pathlib import Path
 from typing import Any
@@ -45,6 +49,20 @@ from loop_sci.state.session import RunSession
 log = logging.getLogger(__name__)
 
 __all__ = ["HypothesisExecutor"]
+
+
+def _card_node_id(topic: str, card_q: str) -> str:
+    """Compute a deterministic card node id from topic and card question."""
+    digest = hashlib.sha1(f"{topic}|{card_q}".encode()).hexdigest()[:12]
+    return f"card_{digest}"
+
+
+def _hyp_node_id(card_node_id: str, mechanism: str, frame: str) -> str:
+    """Compute a deterministic hypothesis node id from card id, mechanism and frame."""
+    digest = hashlib.sha1(
+        f"{card_node_id}|{mechanism}|{frame}".encode()
+    ).hexdigest()[:12]
+    return f"hyp_{digest}"
 
 
 class HypothesisExecutor:
@@ -133,37 +151,13 @@ class HypothesisExecutor:
             if n.status == "accepted":
                 accepted_ids.add(n.id)
 
-        # Early-return resume: if we already have accepted hypotheses and the
-        # tree already contains accepted nodes from a prior run, skip all gen
-        # calls — the session's hypothesis work is done.
-        if accepted_ids:
-            accepted_in_tree = [n for n in tree.get_all_nodes() if n.status == "accepted"]
-            if accepted_in_tree:
-                log.info(
-                    "resume: %d accepted nodes already in tree — skipping gen calls",
-                    len(accepted_in_tree),
-                )
-                self._session.advance_step()
-                return ExecutorResult(
-                    status="done",
-                    summary=(
-                        f"Resume: {len(accepted_ids)} hypotheses already accepted; "
-                        "no new gen calls."
-                    ),
-                    score=None,
-                    insight=f"{len(accepted_ids)} accepted (resumed).",
-                    refs={
-                        "accepted_count": len(accepted_ids),
-                        "new_accepted_count": 0,
-                        "lessons": [],
-                    },
-                )
-
         stall = StallLedger(pivot_at=cfg.pivot_at, escalate_at=cfg.escalate_at)
-        region_tracker = RegionTracker()
+        region_tracker = RegionTracker(threshold=cfg.region_close_threshold)
         lessons: list[str] = []
         total_new_accepted = 0
         final_round = 0
+        # Context injected into prospect/forge prompts after a pivot
+        pivot_context: str = ""
 
         for round_n in range(cfg.max_rounds):
             final_round = round_n
@@ -175,16 +169,21 @@ class HypothesisExecutor:
                 self._store,
                 self._gen,
                 max_cards=cfg.max_cards,
+                context=pivot_context,
             )
             new_accepted_this_round = 0
 
-            for card_node_id, card_refs in cards:
-                # Ensure card node exists in tree
-                if card_node_id not in tree._nodes:
+            for _card_id_ignored, card_refs in cards:
+                # Compute deterministic card node id from topic + card question
+                card_q: str = card_refs.get("card", {}).get("Q", "")
+                card_node_id = _card_node_id(topic, card_q)
+
+                # Ensure card node exists in tree (idempotent add)
+                if tree.get_node(card_node_id) is None:
                     card_node = Node(
                         id=card_node_id,
                         parent_id=unit.node_id,
-                        hypothesis=card_refs.get("card", {}).get("Q", ""),
+                        hypothesis=card_q,
                         depth=1,
                         status="pending",
                         refs=dict(card_refs),
@@ -198,20 +197,36 @@ class HypothesisExecutor:
                     self._store,
                     self._gen,
                     max_candidates=cfg.max_candidates,
+                    context=pivot_context,
                 )
 
-                for hyp_node_id, hyp_refs, derivation in candidates:
+                for _hyp_id_ignored, hyp_refs, derivation in candidates:
+                    # Compute deterministic hyp node id
+                    mechanism: str = (hyp_refs.get("hyp") or {}).get("MECHANISM", "")
+                    frame: str = hyp_refs.get("frame", "primary")
+                    hyp_node_id = _hyp_node_id(card_node_id, mechanism, frame)
+
                     # Resume guard: skip already-accepted hypothesis
                     if hyp_node_id in accepted_ids:
                         log.debug("skip already-accepted node %s", hyp_node_id)
                         continue
 
-                    # Ensure hypothesis node exists in tree
-                    if hyp_node_id not in tree._nodes:
+                    # Skip if already critiqued (has verdict in refs)
+                    existing_node = tree.get_node(hyp_node_id)
+                    if (
+                        existing_node is not None
+                        and existing_node.refs is not None
+                        and "verdict" in existing_node.refs
+                    ):
+                        log.debug("skip already-critiqued node %s", hyp_node_id)
+                        continue
+
+                    # Ensure hypothesis node exists in tree (idempotent add)
+                    if tree.get_node(hyp_node_id) is None:
                         hyp_node = Node(
                             id=hyp_node_id,
                             parent_id=card_node_id,
-                            hypothesis=(hyp_refs.get("hyp") or {}).get("MECHANISM", ""),
+                            hypothesis=mechanism,
                             depth=2,
                             status="pending",
                             refs=dict(hyp_refs),
@@ -226,6 +241,21 @@ class HypothesisExecutor:
                         "ACCEPT_IF": contract.ACCEPT_IF,
                         "KILL_IF": contract.KILL_IF,
                     }
+
+                    # -- Region-close enforcement (osp 3.2) -------------------
+                    # After contract gives us LATENT_ROOT, skip if region is closed
+                    if region_tracker.is_closed(contract.LATENT_ROOT):
+                        log.debug(
+                            "skip closed region %r for hyp %s",
+                            contract.LATENT_ROOT,
+                            hyp_node_id,
+                        )
+                        tree.update_node(hyp_node_id, status="pruned")
+                        node = tree._nodes.get(hyp_node_id)
+                        if node is not None:
+                            node.refs = dict(hyp_refs)
+                        tree.save()
+                        continue
 
                     # -- 4. adversary' ----------------------------------------
                     verdict = await run_adversary(
@@ -251,7 +281,6 @@ class HypothesisExecutor:
                     }
 
                     # -- Scoring ----------------------------------------------
-                    mechanism = (hyp_refs.get("hyp") or {}).get("MECHANISM", "")
                     scores = score_hypothesis(
                         mechanism,
                         derivation,
@@ -263,6 +292,9 @@ class HypothesisExecutor:
                     hyp_refs["scores"] = {
                         "novelty": scores.novelty,
                         "self_consistency": scores.self_consistency,
+                        "overall": overall,
+                        "w_n": cfg.w_n,
+                        "w_c": cfg.w_c,
                         "decided_by": scores.decided_by,
                     }
 
@@ -315,9 +347,11 @@ class HypothesisExecutor:
                     "hypothesis: escalating after persistent stall at round %d", round_n
                 )
                 break
-            # pivot: log and continue to next round (lessons injected implicitly)
             if action == "pivot":
                 log.info("hypothesis: pivot at round %d", round_n)
+                # Inject pruned lessons into the next round's prompt
+                pivot_context = tree.get_constraints_block()
+                log.debug("pivot_context length=%d", len(pivot_context))
 
         # ── Advance session cursor ─────────────────────────────────────────────
         self._session.advance_step()

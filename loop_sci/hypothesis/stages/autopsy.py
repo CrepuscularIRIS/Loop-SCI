@@ -162,19 +162,23 @@ class StallLedger:
 
 
 class RegionTracker:
-    """Track kills per latent root and close regions that accumulate ≥2 kills.
+    """Track kills per latent root and close regions that accumulate ≥threshold kills.
 
-    When the same ``latent_root`` is killed twice within a run, that region is
-    CLOSED.  :meth:`record_kill` returns ``True`` at the moment of closure
-    and for all subsequent calls.  The executor (Task 10) checks
+    When the same ``latent_root`` is killed ``threshold`` times within a run,
+    that region is CLOSED.  :meth:`record_kill` returns ``True`` at the moment
+    of closure and for all subsequent calls.  The executor (Task 10) checks
     :meth:`is_closed` before generating new hypotheses in a region.
 
     Region-close logic is fully deterministic — no provider calls.
+
+    Args:
+        threshold: Number of kills required to close a region (default 2).
     """
 
-    def __init__(self) -> None:
+    def __init__(self, threshold: int = 2) -> None:
         self._kills: Counter[str] = Counter()
         self._closed: set[str] = set()
+        self._threshold: int = threshold
 
     def record_kill(self, latent_root: str) -> bool:
         """Record one kill for *latent_root*.
@@ -183,11 +187,11 @@ class RegionTracker:
             latent_root: The ``contract.LATENT_ROOT`` of the killed hypothesis.
 
         Returns:
-            ``True`` if this kill closes the region (i.e. the root now has ≥2
+            ``True`` if this kill closes the region (i.e. the root now has ≥threshold
             kills), ``False`` otherwise.
         """
         self._kills[latent_root] += 1
-        if self._kills[latent_root] >= 2:
+        if self._kills[latent_root] >= self._threshold:
             self._closed.add(latent_root)
             return True
         return False
