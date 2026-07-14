@@ -1186,7 +1186,7 @@ git commit -m "feat(hypothesis): implement adversary' with deterministic gate an
 - Produces: `StallLedger` with `.record_round(new_accepted_count: int) -> Literal["continue", "pivot", "escalate"]`.
 - Produces: `RegionTracker` with `.record_kill(latent_root: str) -> bool` (returns True when ≥2 kills same root = region closed).
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```python
 # tests/unit/hypothesis/test_autopsy.py
@@ -1227,13 +1227,13 @@ def test_region_close_different_roots_no_close():
     assert rt.record_kill("root_b") == False
 ```
 
-- [ ] **Step 2: Run test — verify FAIL**
+- [x] **Step 2: Run test — verify FAIL**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_autopsy.py -v 2>&1 | tail -5
 ```
 
-- [ ] **Step 3: Implement `loop_sci/hypothesis/stages/autopsy.py`**
+- [x] **Step 3: Implement `loop_sci/hypothesis/stages/autopsy.py`**
 
 ```python
 # loop_sci/hypothesis/stages/autopsy.py
@@ -1290,14 +1290,14 @@ class RegionTracker:
         return latent_root in self._closed
 ```
 
-- [ ] **Step 4: Run test — verify PASS**
+- [x] **Step 4: Run test — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_autopsy.py -v
 ```
 Expected: `5 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/hypothesis/stages/autopsy.py tests/unit/hypothesis/test_autopsy.py
