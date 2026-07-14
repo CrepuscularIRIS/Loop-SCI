@@ -30,9 +30,10 @@ Reason: open-phase tasks.md text is stale vs design (1.3 says vendor "orchestrat
 ## CRITICAL for Task 12 (coordinator): stub session starts with ONLY a pending ROOT at depth 0. get_pending_leaves() EXCLUDES depth 0 -> returns []. So coordinator MUST bootstrap: either (a) dispatch ROOT itself on the first cycle when no pending leaves exist and ROOT is pending, OR (b) seed a child node under ROOT (depth 1) and dispatch that. Ensure >=1 observe->dispatch->record cycle runs on the stub, then session.mark_complete(). Executor is Executor(cfg, *, provider, bus); executor.run(unit) is async -> Coordinator.run is async. Record outcome into node BEFORE next decision (update_node status/score/insight auto-saves; refs via node.refs direct or MUTABLE_FIELDS override). Emit node/lifecycle events via bus.
 
 ### Current task
-- Task 15 (HIGH-RISK): Live Qwen tool-call smoke test (@pytest.mark.live)
+- Task 16 (HIGH-RISK): End-to-end run + resume against Qwen (@pytest.mark.live)
 - Stage: implementing
 - review-fix round: 0 / 2
+- CONSTRAINT: no key here -> LIVE-GREEN DEFERRED TO USER (offline integration Task 13 already proves loop w/ MockProvider)
 - note: .superpowers/ now gitignored. Earlier task-7/9/10/12 reports still TRACKED -> git rm --cached in pre-guard cleanup.
 
 ## PRE-GUARD CLEANUP TODO: (1) add `.superpowers/` to .gitignore (SDD report/diff scratch committed) + git rm --cached tracked scratch; (2) sweep ruff (unused `import pytest` in test_event_bus.py, any others) — Task 17 lint gate.
@@ -74,3 +75,4 @@ Plan→OpenSpec mapping (loose/many-to-many; check off openspec sub-tasks as gen
 - Task 12: complete (KEYSTONE; DUAL review. impl 8effdeb -> Opus Approved but GROK 2nd-opinion caught 2 IMPORTANT [executor-exc escapes run; resume orphans "running" nodes] -> grok fix ac0b3b4 (all 4 fixes + regressions) -> Opus re-review Approved (Fix-2 re-observe-running proven bounded: _record moves node out of running each cycle -> needs_retry not re-selected + step budget; happy path untouched); 14 coordinator + 123 full-suite pristine; bootstrap strategy (a); refs node.refs+tree.save)
 - Task 13: complete (impl cb963f8 REAL end-to-end integration [Coordinator->Executor->vendored Agent vs MockProvider, offline]; Opus found 1 IMPORTANT [assertion too weak] -> grok fix 7f25183 tightened to ==done + mock answer asserted in live+reloaded insight; strict done passes deterministically => NO production bug; 4 integration + 127 full-suite pristine. [accepted fix w/o separate re-review: reviewer's exact prescription followed + strict assert passes])
 - Task 14: complete (impl 2779b10 CLI run/resume/inspect; Opus found 1 IMPORTANT [bad run_id raw traceback] -> grok fix 1363b16 clean not-found+Exit(1)+regression tests + 2 Minor fixed [orphan dir; f-strings] -> Opus re-review Approved [guard scoped tight, no over-swallow; happy+missing-key preserved]; 10 CLI + 137 full-suite pristine; async wrap; logging non-polluting)
+- Task 15: complete (impl 6c2bda5 Opus Approved; 2 @pytest.mark.live tests [completion + native tool-call per-tier record]; skips clean+inert no network; provider.create REAL keyword-only sig verified [not DOA when keyed]; tool-call records not crashes; 137 passed/2 skipped; LIVE-GREEN DEFERRED TO USER key; 2 Minor [empty QWEN_TIERS edge; assert True linter])

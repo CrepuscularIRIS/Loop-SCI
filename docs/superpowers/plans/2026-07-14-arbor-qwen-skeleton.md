@@ -2312,9 +2312,9 @@ git commit -m "feat(cli): typer CLI — run / resume / inspect against stub task
 - Skipped automatically when `DASHSCOPE_API_KEY` is absent.
 - Records tool-call support result to stdout (JSON) for documentation.
 
-- [ ] **Step 1: Create `tests/live/__init__.py`** (empty)
+- [x] **Step 1: Create `tests/live/__init__.py`** (empty)
 
-- [ ] **Step 2: Write `tests/live/test_live_qwen.py`**
+- [x] **Step 2: Write `tests/live/test_live_qwen.py`**
 
 ```python
 """Live smoke test — requires DASHSCOPE_API_KEY in environment.
@@ -2413,7 +2413,7 @@ async def test_live_native_tool_call(model):
     assert True
 ```
 
-- [ ] **Step 3: Run smoke test (requires real key)**
+- [x] **Step 3: Run smoke test (requires real key)**
 
 ```bash
 DASHSCOPE_API_KEY=<your-key> uv run pytest tests/live/test_live_qwen.py -v -m live -s
@@ -2423,7 +2423,7 @@ Expected: tests pass; output records `[TOOL-CALL RECORD] {"model": "qwen-plus", 
 
 Based on result: if `supports_native_tool_calls: false` for the default tier, update `conf/provider/bailian.yaml` to `tool_protocol: prompt`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add tests/live/
