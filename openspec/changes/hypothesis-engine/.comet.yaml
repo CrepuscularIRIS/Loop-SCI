@@ -1,6 +1,6 @@
 workflow: full
 language: en
-phase: design
+phase: build
 context_compression: off
 build_mode: null
 build_pause: null
@@ -11,7 +11,7 @@ isolation: null
 verify_mode: null
 auto_transition: true
 base_ref: 57baa12c55831cedee49eea089cd2552f6883600
-design_doc: null
+design_doc: docs/superpowers/specs/2026-07-14-hypothesis-engine-design.md
 plan: null
 verify_result: pending
 verification_report: null
@@ -20,8 +20,8 @@ created_at: 2026-07-14
 verified_at: null
 archived: false
 direct_override: null
-handoff_context: null
-handoff_hash: null
+handoff_context: openspec/changes/hypothesis-engine/.comet/handoff/design-context.json
+handoff_hash: b7ec2d8318a7cdb0de5c8ab462a2434db13624b6ab6cbe82678629d7689da62d
 classic_profile: full
 classic_migration: 1
 run_id: 52223fd7-7900-4320-88ca-3e38d12c4e35

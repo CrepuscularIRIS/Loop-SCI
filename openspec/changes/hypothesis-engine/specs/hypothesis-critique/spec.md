@@ -18,6 +18,10 @@ The system SHALL adjudicate each candidate through an adversarial jury in which 
 - **WHEN** the generator configuration is asked to adjudicate its own candidate
 - **THEN** the system routes the verdict to the distinct reviewer configuration instead, and an accept verdict issued by the generator configuration is rejected
 
+#### Scenario: Deterministic pre-jury gate rejects without spending a jury call
+- **WHEN** a candidate fails a deterministic pre-jury check (its mechanism contradicts a grounding fact, or a load-bearing derivation step is graded `[guess]`) before the reviewer is invoked
+- **THEN** the candidate receives a DOWN verdict from the deterministic gate, no jury (Qwen reviewer) call is made for it, and the recorded reason identifies the failed deterministic check
+
 ### Requirement: Evidence-grade anti-fabrication
 The system SHALL annotate each derivation step with an evidence grade drawn from `[paper] | [inferred] | [guess]`. Any claim or citation not grounded in a fact present in the fact base SHALL be downgraded to an ungrounded hypothesis (never promoted to accepted), enforcing the no-fabrication constraint.
 

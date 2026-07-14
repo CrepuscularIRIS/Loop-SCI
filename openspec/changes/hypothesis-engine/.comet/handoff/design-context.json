@@ -1,0 +1,17 @@
+{
+  "change": "hypothesis-engine",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "b7ec2d8318a7cdb0de5c8ab462a2434db13624b6ab6cbe82678629d7689da62d",
+  "files": [
+    { "path": "openspec/changes/hypothesis-engine/proposal.md", "sha256": "be5ec0c89f62e5dca62c0dd1eff01a3d8fce55f41ba180013924131ea6359f2d" },
+    { "path": "openspec/changes/hypothesis-engine/design.md", "sha256": "64e35ff2e6880ea407d3a7df45ed01cb4a16902348f8ef98788581bf3a5487e4" },
+    { "path": "openspec/changes/hypothesis-engine/tasks.md", "sha256": "d9eea527255f93bd89a4a67a794dd6611bc2541f39e36f055f92856c4a33a2cd" },
+    { "path": "openspec/changes/hypothesis-engine/specs/hypothesis-critique/spec.md", "sha256": "92b958ba8046b808dec86dc62978acd91ef437cc6469e3a624be76b0b8c9bf7a" },
+    { "path": "openspec/changes/hypothesis-engine/specs/hypothesis-generation/spec.md", "sha256": "7d73fa06fcb60bb8bf9377a47f6d072bf62947ca656036c314a08cc78164b0fd" },
+    { "path": "openspec/changes/hypothesis-engine/specs/hypothesis-iteration/spec.md", "sha256": "a856c373e2c6ef796e32c9b10852d56873422d22f7f26218189e2a796268eb96" },
+    { "path": "openspec/changes/hypothesis-engine/specs/hypothesis-ranking/spec.md", "sha256": "891102b48ca5c344cfcc6bb40d488e9041453c82a7d0570b3ca8bb56c8e2c4cf" }
+  ]
+}

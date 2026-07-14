@@ -12,11 +12,15 @@ The system SHALL mine candidate research gaps from the verified fact base (produ
 - **THEN** every cited fact id resolves to a fact present in the fact base, and a card citing a non-existent fact is dropped before ranking
 
 ### Requirement: Logic-driven hypothesis generation
-The system SHALL generate candidate hypotheses from a problem card using both inductive and deductive reasoning over the grounding facts, via the Qwen provider. Each hypothesis SHALL carry `{MECHANISM, KILL, BRACKET, DIFF-PREDICTION}` and SHALL be recorded as an idea-tree node descending from the relevant fact node(s), with rival framings recorded as sibling nodes.
+The system SHALL generate candidate hypotheses from a problem card using both inductive and deductive reasoning over the grounding facts, via the Qwen provider. Each hypothesis SHALL carry `{MECHANISM, KILL, BRACKET, DIFF-PREDICTION}` and SHALL be recorded as an idea-tree node descending from the problem-card node it was forged from, with rival framings recorded as sibling nodes. Grounding into the fact base SHALL be by fact-id reference (recorded on the node), not by making a fact node the tree parent; the hypothesis engine builds its own tree (`topic root → problem-card nodes → hypothesis nodes`) and reads the fact base only through its stable query interface.
 
 #### Scenario: Hypotheses with mechanism and discriminating prediction
 - **WHEN** the engine forges hypotheses from a problem card
 - **THEN** each candidate node states a mechanism, an explicit kill condition, a plausibility bracket, and a diff-prediction that would distinguish it from the status quo, and at least one rival-frame sibling is produced
+
+#### Scenario: Hypotheses attach under the problem-card node, grounded by fact-id
+- **WHEN** a candidate hypothesis is recorded
+- **THEN** its idea-tree parent is the originating problem-card node (not a fact node), and its grounding is a list of fact-id references that each resolve in the fact base's stable query interface
 
 #### Scenario: Relabeling is discarded
 - **WHEN** a candidate's diff-prediction does not survive the "strip-the-new-words" test (removing the novel terminology leaves no distinct prediction)
