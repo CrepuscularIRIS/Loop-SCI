@@ -1020,7 +1020,7 @@ git commit -m "feat(literature/verify): L1-L3 citation verification (format/exis
 - Consumes: `Fact` (Task 4); `LLMProvider`; resolved `PaperResult` (Task 2)
 - Produces: `GroundingVerifier(provider, *, threshold=0.3).verify(fact, paper) -> VerificationStatus`; `VerificationPipeline.verify(fact) -> VerificationStatus` (full 4-layer)
 
-- [ ] **Step 7.1: Write failing grounding tests (FRONT-LOADED — per spec)**
+- [x] **Step 7.1: Write failing grounding tests (FRONT-LOADED — per spec)**
 
 ```python
 # tests/unit/literature/test_grounding.py
@@ -1091,7 +1091,7 @@ async def test_misattributed_claim_rejected_at_l4():
 Run: `uv run pytest tests/unit/literature/test_grounding.py -v`
 Expected: FAIL — module not found
 
-- [ ] **Step 7.2: Implement GroundingVerifier**
+- [x] **Step 7.2: Implement GroundingVerifier**
 
 ```python
 # loop_sci/literature/verify/grounding.py
@@ -1169,7 +1169,7 @@ class GroundingVerifier:
                                       detail=f"fallback:{score:.2f}")
 ```
 
-- [ ] **Step 7.3: Wire L4 into VerificationPipeline.verify()**
+- [x] **Step 7.3: Wire L4 into VerificationPipeline.verify()**
 
 Add `verify_l4` and a full `verify()` method to `loop_sci/literature/verify/citation.py`:
 
@@ -1208,12 +1208,12 @@ async def verify(self, fact: Fact) -> VerificationStatus:
     return await self._grounding.verify(fact, resolved)
 ```
 
-- [ ] **Step 7.4: Run all grounding and pipeline tests**
+- [x] **Step 7.4: Run all grounding and pipeline tests**
 
 Run: `uv run pytest tests/unit/literature/test_grounding.py tests/unit/literature/test_citation_layers_123.py -v`
 Expected: all tests PASS
 
-- [ ] **Step 7.5: Commit**
+- [x] **Step 7.5: Commit**
 
 ```bash
 git add loop_sci/literature/verify/ tests/unit/literature/test_grounding.py

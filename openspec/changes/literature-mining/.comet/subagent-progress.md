@@ -26,9 +26,11 @@
 ## Task 6 minors (final review): year-check false-passes when resolved paper.year is None; surname heuristic=longest-token (loose, false-pass leaning); DOI-fallback to fetch_by_id unverified vs real adapters.
 
 ### Current task
-- Task 7: L4 content-grounding — hybrid lexical pre-filter + Qwen judge
+- Task 8: JSON fact store + persist verified facts to idea-tree
 - Stage: implementing
 - review-fix round: 0 / 2
+- T12 RUFF SWEEP now 5 violations (dispatch.py + test_dispatch.py + test_citation_verify.py 324-326) + earlier.
+- NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
@@ -44,6 +46,7 @@
 - Task 4: complete (impl 9dc8b44 Opus Approved; evidence-required 2-layer enforced + 4 independent tests; lossless round-trip nested SourceRef/VerificationStatus; grounding_scope constrained; SourceRef upgraded to typed dataclass; 17 new/219 pristine; 2 Minor deferred [confidence range->T5; status enum->T6])
 - Task 5: complete (impl 6d434cf; Opus found 1 IMPORTANT [anti-fabrication crux: grounding was prompt-only, not runtime-traceable] -> Sonnet fix 08ad881: normalized span-in-text runtime drop before cap + not-in-source drop test + reflowed-keep test -> Opus re-review Approved [no false-keep loophole, no regression]; confidence clamp; bounded; invalid-JSON->[]; 232 passed/5 skipped; 1 Minor [degenerate short-span match - future])
 - Task 6: complete (impl ea34a36 Opus Approved; CORE holds [L2 rejects hallucinated via real adapter lookup - tested; short-circuit call-count proven]; pending_l4 hook clean; VerificationStatus tightened [Literal status + layer 1-4]; 17 new/FULL 249 passed/5 skipped; 1 IMPORTANT [L3 expected-metadata unwired -> INERT in prod -> HARD GATE for T9] + 3 Minor final-review)
+- Task 7: complete (impl 5db0e5a L4 hybrid grounding [lexical HIGH/LOW->no Qwen, borderline->Qwen judge; genuinely cost-controlled, tested _index==0/==1]; misattributed->reject@L4; Opus found 1 IMPORTANT [double-resolve 2x fetch/fact] -> Sonnet fix d26cb78 resolve-once reuse L2 paper + fetch==1 test -> Opus re-review Approved [byte-identical L1-L3, zero regression]; 265 passed/5 skipped. FULL 4-LAYER VERIFICATION DONE. 1 Minor [L123 block dup])
 
 ### Completed
 (none yet)
