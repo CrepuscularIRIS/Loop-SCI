@@ -1,0 +1,6 @@
+defaults:
+  - provider: bailian
+  - agent: default
+  - engine: default
+  - run: default
+  - _self_

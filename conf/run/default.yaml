@@ -1,0 +1,4 @@
+# @package _global_.run
+runs_root: "runs"
+task: "What are three key principles of the scientific method? List them briefly."
+run_id: null   # auto-generated if null

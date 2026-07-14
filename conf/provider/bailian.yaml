@@ -1,0 +1,7 @@
+# @package _global_.provider
+base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+model: "qwen-plus"
+api_key: "${oc.env:DASHSCOPE_API_KEY,}"
+timeout: 120.0
+max_retries: 3
+tool_protocol: "native"   # "native" | "prompt"

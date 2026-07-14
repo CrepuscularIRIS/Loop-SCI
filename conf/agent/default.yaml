@@ -1,0 +1,6 @@
+# @package _global_.agent
+max_turns: 20
+context_window: 100000
+compact_threshold: 0.85
+compact_keep_recent: 8
+max_tokens: 4096
