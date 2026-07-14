@@ -1,0 +1,8 @@
+{
+  "openspec_proposal": "openspec/changes/arbor-qwen-skeleton/proposal.md",
+  "openspec_design": "openspec/changes/arbor-qwen-skeleton/design.md",
+  "openspec_tasks": "openspec/changes/arbor-qwen-skeleton/tasks.md",
+  "openspec_delta_spec": "openspec/changes/arbor-qwen-skeleton/specs/agent-engine/spec.md",
+  "handoff_context": "openspec/changes/arbor-qwen-skeleton/.comet/handoff/design-context.json",
+  "handoff_markdown": "openspec/changes/arbor-qwen-skeleton/.comet/handoff/design-context.md"
+}

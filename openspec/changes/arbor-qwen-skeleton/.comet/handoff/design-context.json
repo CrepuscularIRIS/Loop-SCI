@@ -1,0 +1,16 @@
+{
+  "change": "arbor-qwen-skeleton",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "380cea1c653888677396f00b8b104fe6300124a53503780bdc6ae27a5968d600",
+  "files": [
+    { "path": "openspec/changes/arbor-qwen-skeleton/proposal.md", "sha256": "01098c76cb3e948ff1b5fab02fc5706a0de9f06ac06ad980be93831a6c3d99ed" },
+    { "path": "openspec/changes/arbor-qwen-skeleton/design.md", "sha256": "2c47abc52e87c2316531652c09e0647e9d8beed76ec5c1416064546ed15c9632" },
+    { "path": "openspec/changes/arbor-qwen-skeleton/tasks.md", "sha256": "8e4dfee6511695ef8fa6bee792d907c8daffe6f389472e4c82ed4799f80a5fa5" },
+    { "path": "openspec/changes/arbor-qwen-skeleton/specs/agent-engine/spec.md", "sha256": "d1b788e76259ab11ae7bad0c675f79e54a516489d5ab363e538310b534657112" },
+    { "path": "openspec/changes/arbor-qwen-skeleton/specs/llm-provider/spec.md", "sha256": "5181247f188bdf99b89ed91a1377d51d36b8d99238a57643ec6441cf1e1baade" },
+    { "path": "openspec/changes/arbor-qwen-skeleton/specs/research-state/spec.md", "sha256": "9eccc5fec65971b93840d51cdff11e3e531c60c1f5158434ff9ba56a9bfa85e9" }
+  ]
+}
