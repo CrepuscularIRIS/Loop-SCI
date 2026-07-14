@@ -1638,7 +1638,7 @@ git commit -m "feat(events): re-export EventBus/NullBus; subscriber parity tests
   - `ExecutorResult(status, summary, score, insight, refs)` — dataclass; `status` in `{"done","bounded_exit","error"}`
   - `build_agent(provider, tools, system_prompt, cfg) -> Agent`
 
-- [ ] **Step 1: Implement `loop_sci/engine/types.py`**
+- [x] **Step 1: Implement `loop_sci/engine/types.py`**
 
 ```python
 """Seam dataclasses: DispatchUnit and ExecutorResult."""
@@ -1667,7 +1667,7 @@ class ExecutorResult:
     refs: dict[str, Any] = field(default_factory=dict)
 ```
 
-- [ ] **Step 2: Implement `loop_sci/engine/agent_runtime.py`**
+- [x] **Step 2: Implement `loop_sci/engine/agent_runtime.py`**
 
 ```python
 """Thin adapter: Hydra config → AgentConfig → vendored Agent."""
@@ -1696,7 +1696,7 @@ def build_agent(
     )
 ```
 
-- [ ] **Step 3: Update `loop_sci/engine/__init__.py`**
+- [x] **Step 3: Update `loop_sci/engine/__init__.py`**
 
 ```python
 from .tools import ToolRegistry
@@ -1706,7 +1706,7 @@ from .agent_runtime import build_agent
 __all__ = ["ToolRegistry", "DispatchUnit", "ExecutorResult", "build_agent"]
 ```
 
-- [ ] **Step 4: Verify import**
+- [x] **Step 4: Verify import**
 
 ```bash
 uv run python -c "
@@ -1718,7 +1718,7 @@ print('engine types OK')
 
 Expected: `DispatchUnit(node_id='1', goal='test' ...) engine types OK`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/engine/types.py loop_sci/engine/agent_runtime.py loop_sci/engine/__init__.py

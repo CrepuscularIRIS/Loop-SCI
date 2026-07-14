@@ -24,11 +24,11 @@ Reason: vendored experiment.py `GitManager` (default auto_git=True at config.py:
 ## OpenSpec tasks.md checkoff: DEFERRED to a pre-guard batch reconciliation
 Reason: open-phase tasks.md text is stale vs design (1.3 says vendor "orchestrator"; 1.4 says "flat-proxy config" — design chose Hydra & excludes orchestrator). Will fix stale text (small delta) + check all boxes + run comet-state task-checkoff right before the build guard. Per-task tracking lives in this ledger + plan step checkboxes.
 
-## FORWARD NOTE for Task 12 (coordinator): to update refs via tree.update_node, first override on subclass: Node.MUTABLE_FIELDS = _VendorNode.MUTABLE_FIELDS | {"refs"} (else ValueError). Or set node.refs directly (persists). status/score/insight ARE already mutable.
-## FORWARD NOTE for Task 8: state/__init__.py must now export RunSession (Task 7 left it out intentionally).
+## FORWARD NOTE for Tasks 11/12: build_agent is CFG-FIRST: build_agent(cfg, *, provider=None, tools=None, bus=..., node_id="", agent_label=..., system_prompt=...). types.py: DispatchUnit(node_id, goal, context, tools); ExecutorResult(status, summary, score, insight, refs) with status Literal {"done","bounded_exit","error"}. (types.py already created in Task 10.)
+## FORWARD NOTE for Task 12 (coordinator): to update refs via tree.update_node, first override on subclass: Node.MUTABLE_FIELDS = _VendorNode.MUTABLE_FIELDS | {"refs"} (else ValueError). Or set node.refs directly (persists). status/score/insight ARE already mutable. Check is_complete before trusting get_pending_leaves after mark_complete.
 
 ### Current task
-- Task 10: Agent runtime adapter (hydra_cfg->AgentConfig; build_agent over vendored Agent)
+- Task 11: Executor (Executor.run(DispatchUnit) -> ExecutorResult)
 - Stage: implementing
 - review-fix round: 0 / 2
 
@@ -66,3 +66,4 @@ Plan→OpenSpec mapping (loose/many-to-many; check off openspec sub-tasks as gen
 - Task 7: complete (impl cea9e0d Opus Approved; refs = REAL persisted subclass field, round-trip verified; load_json faithfully duplicated; no vendored edits; 10/10 new, 73/73 pristine; 3 Minor [keep-in-sync comment on load_json; refs->MUTABLE_FIELDS for Task12; import json placement — final review])
 - Task 8: complete (impl 920143d Opus Approved; atomic cursor write [tmp+Path.replace]; resume + already-complete-no-op proven by real tests; subclass tree so refs survives resume; 6/6 new, 79/79 pristine; 3 Minor [completed_node_ids YAGNI ok; mark_complete/is_complete contract note for Task12; temp-name cosmetic — final review])
 - Task 9: complete (impl c0ad2da Opus Approved; faithful pure re-export EventBus/NullBus/Event+types; NullBus genuine no-op; exception-swallow test matches vendored; 5/5 new, 84/84 pristine; 2 Minor [tighter parity test; unused pytest import ruff-sweep — final review/T17])
+- Task 10: complete (impl 000b508 Opus Approved; build_agent constructs vendored Agent w/ real sig; auto_git=False doubly-asserted; ToolRegistry orthogonal seam no dup dispatch; types.py minimal; 18 new, 102 pristine; deliberate cfg-first build_agent signature; 2 Minor final-review)
