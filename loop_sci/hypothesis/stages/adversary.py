@@ -152,7 +152,8 @@ async def run_adversary(
     # Ungrounded [paper]/[inferred] citation gate (osp 2.4 anti-fabrication)
     # A step graded [paper] or [inferred] MUST cite at least one fact_id AND
     # every cited id MUST resolve in the store.  Checked BEFORE any jury call.
-    valid_ids = {f.fact_id for f in store.all()}
+    # BLOCKER 3: filter falsy ids (None/"") so they cannot spuriously resolve.
+    valid_ids = {f.fact_id for f in store.all() if f.fact_id}
     for s in derivation:
         if s.grade in ("[paper]", "[inferred]") and (
             not s.fact_ids or not all(fid in valid_ids for fid in s.fact_ids)

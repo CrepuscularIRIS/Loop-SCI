@@ -97,8 +97,12 @@ def register_hypothesis_tools(registry: ToolRegistry, executor: Any) -> None:
         if executor is None:
             return json.dumps({"error": "no_executor", "detail": "executor not configured"})
         try:
-            verdict = await executor.run_critique(node_id)
-            return json.dumps({"verdict": verdict, "node_id": node_id})
+            result = await executor.run_critique(node_id)
+            # run_critique returns a structured dict; for backward-compat with
+            # mock executors that return a plain string, normalise here.
+            if isinstance(result, dict):
+                return json.dumps(result)
+            return json.dumps({"verdict": result, "node_id": node_id})
         except Exception as exc:
             log.warning("critique tool error for node %r: %s", node_id, exc)
             return json.dumps({"error": "tool_error", "detail": str(exc)})

@@ -399,3 +399,114 @@ async def test_invalid_json_from_reviewer_falls_back_to_down(tmp_path) -> None:
 
     assert verdict.result == "DOWN"
     assert verdict.decided_by == "jury"
+
+
+# ---------------------------------------------------------------------------
+# BLOCKER 3 bite-test: falsy fact_id in store must NOT satisfy citation gate
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_blocker3_falsy_fact_id_in_store_does_not_satisfy_gate(tmp_path) -> None:
+    """A fact with fact_id='' (falsy) in the store must NOT let an empty-string
+    citation pass the anti-fabrication gate.
+
+    Before the fix, valid_ids would contain '' which means a derivation step
+    citing fact_id='' could resolve and PASS the gate.  After the fix, falsy
+    ids are excluded from valid_ids, so the step is DOWN'd deterministically.
+    """
+    from tests.conftest import MockProvider
+
+    # Build a store with a fact whose fact_id is '' (falsy)
+    store = FactStore(tmp_path / "f.json")
+    f = Fact(
+        claim="Some baseline fact.",
+        source_ref=SourceRef(source="s2", external_id="x0"),
+        evidence_span="Some baseline fact.",
+        confidence=1.0,
+        grounding_scope="abstract",
+    )
+    f.fact_id = ""  # falsy id — must be excluded from valid_ids
+    store.add(f)
+
+    # Derivation cites the empty-string fact_id — should NOT resolve
+    derivation = [DerivationStep(step="cite empty id", grade="[paper]", fact_ids=[""])]
+    reviewer = MockProvider(
+        responses=["should not be called (gate should fire first)"],
+        model="qwen-plus",
+    )
+
+    verdict = await run_adversary(
+        _hyp_refs("Mechanism citing empty fact_id"),
+        derivation,
+        store,
+        "qwen-max",
+        reviewer,
+    )
+
+    assert verdict.result == "DOWN", (
+        "A derivation citing an empty-string fact_id must be DOWN'd by the gate "
+        f"(falsy ids must be excluded from valid_ids). Got result={verdict.result!r}"
+    )
+    assert verdict.decided_by == "deterministic-gate", (
+        f"Expected decided_by='deterministic-gate', got {verdict.decided_by!r}"
+    )
+    assert reviewer._index == 0, (
+        "Reviewer must NOT be called when gate fires on empty-string fact_id"
+    )
+
+
+# ---------------------------------------------------------------------------
+# BLOCKER 2 bite-test: no-self-acquit uses REAL generator identity, not config string
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_blocker2_no_self_acquit_uses_real_gen_identity_not_config_string(
+    tmp_path,
+) -> None:
+    """No-self-acquit must compare REAL generator identity vs reviewer identity.
+
+    Scenario: gen.model="qwen-plus", rev.model="qwen-plus" (same real model),
+    but cfg.generator_model="qwen-max" (stale/wrong config string).
+
+    Old code: compares rev.model("qwen-plus") == cfg.generator_model("qwen-max")
+              → NOT equal → wrongly PASSES no-self-acquit → UP accepted (wrong!).
+    New code: executor passes getattr(gen, "model", cfg) into run_adversary,
+              so comparison is "qwen-plus"=="qwen-plus" → fires → DOWN (correct).
+
+    This test exercises run_adversary directly with generator_model="qwen-plus"
+    (the REAL gen.model value), confirming the gate fires correctly.
+    """
+    from tests.conftest import MockProvider
+
+    store = _store(tmp_path, ["Neurons fire action potentials."])
+    derivation = [DerivationStep(step="established", grade="[paper]", fact_ids=["fact_0"])]
+
+    # reviewer and generator are BOTH "qwen-plus" in reality
+    reviewer = MockProvider(
+        responses=[json.dumps({"result": "UP", "reasons": ["novel"]})],
+        model="qwen-plus",
+    )
+
+    # Pass real_gen_model="qwen-plus" as would happen after the Blocker 2 fix
+    verdict = await run_adversary(
+        _hyp_refs("A novel mechanism"),
+        derivation,
+        store,
+        "qwen-plus",   # real generator identity (not the stale config string "qwen-max")
+        reviewer,      # reviewer.model == "qwen-plus"
+    )
+
+    assert verdict.result == "DOWN", (
+        "No-self-acquit must fire when real gen.model == rev.model, even if "
+        f"cfg.generator_model differs. Got result={verdict.result!r}"
+    )
+    assert verdict.decided_by == "deterministic-gate", (
+        f"Expected decided_by='deterministic-gate', got {verdict.decided_by!r}"
+    )
+    # Reviewer must NOT have been called (no-self-acquit fires before jury)
+    assert reviewer._index == 0, (
+        "Reviewer must not be called when no-self-acquit fires. "
+        f"Got reviewer._index={reviewer._index}"
+    )

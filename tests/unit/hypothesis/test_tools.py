@@ -398,3 +398,188 @@ class TestToolEdgeCases:
         assert result.get("error") == "tool_error", (
             f"rank crash must yield tool_error, got {result!r}"
         )
+
+
+# ---------------------------------------------------------------------------
+# BLOCKER 1 bite-test: critique and rank tools against REAL HypothesisExecutor
+# ---------------------------------------------------------------------------
+
+
+class TestCritiqueAndRankWithRealExecutor:
+    """BLOCKER 1: tools must work against the real HypothesisExecutor.
+
+    Before the fix, HypothesisExecutor had neither run_critique nor ranked_store,
+    so calling the tools against the real executor would always yield a tool_error
+    (for critique) or an empty list (for rank, via the hasattr guard).
+
+    This test suite builds a real HypothesisExecutor with MockProviders and a
+    seeded FactStore, populates a hypothesis node directly (bypassing the full
+    pipeline for speed), then drives critique and rank through the ToolRegistry.
+    """
+
+    @staticmethod
+    def _make_executor(tmp_path):
+        """Build a real HypothesisExecutor with minimal deps."""
+        import sys
+        from pathlib import Path
+
+        sys.path.insert(0, str(Path(__file__).parents[3]))
+        sys.path.insert(0, str(Path(__file__).parents[3] / "tests"))
+
+        from tests.conftest import MockProvider
+        from loop_sci.hypothesis.config import HypothesisConfig
+        from loop_sci.hypothesis.executor import HypothesisExecutor
+        from loop_sci.literature.extract.fact import Fact, SourceRef
+        from loop_sci.literature.factbase.store import FactStore
+        from loop_sci.state.session import RunSession
+
+        store_path = tmp_path / "facts.json"
+        store = FactStore(store_path)
+        f = Fact(
+            claim="Neurons fire action potentials.",
+            source_ref=SourceRef(source="s2", external_id="x0"),
+            evidence_span="Neurons fire action potentials.",
+            confidence=0.9,
+            grounding_scope="abstract",
+        )
+        f.fact_id = "fact_0"
+        store.add(f)
+
+        session = RunSession.create(tmp_path / "runs", task="test-topic")
+        gen = MockProvider(
+            responses=["{}"] * 20,
+            model="qwen-max",
+        )
+        rev = MockProvider(
+            responses=[json.dumps({"result": "UP", "reasons": ["grounded"]})],
+            model="qwen-plus",
+        )
+        cfg = HypothesisConfig(max_rounds=1, max_cards=1, max_candidates=1)
+        return HypothesisExecutor(
+            session,
+            gen_provider=gen,
+            rev_provider=rev,
+            store_path=store_path,
+            config=cfg,
+        )
+
+    @staticmethod
+    def _plant_hypothesis_node(executor, node_id: str) -> None:
+        """Insert a hypothesis node into the executor's tree with a derivation."""
+        from loop_sci.state.idea_tree import Node
+
+        refs = {
+            "kind": "hypothesis",
+            "topic": "test-topic",
+            "hyp": {
+                "MECHANISM": "Glial sync drives fear",
+                "KILL": "No signal",
+                "BRACKET": "plausible",
+                "DIFF_PREDICTION": "Distinct BOLD",
+            },
+            "frame": "primary",
+            "grounding_fact_ids": ["fact_0"],
+            "derivation": [
+                {"step": "literature grounding", "grade": "[paper]", "fact_ids": ["fact_0"]}
+            ],
+        }
+        node = Node(
+            id=node_id,
+            parent_id="ROOT",
+            hypothesis="Glial sync drives fear",
+            depth=2,
+            status="accepted",
+            score=0.75,
+            refs=refs,
+        )
+        executor._session.tree.add_node(node)
+
+    @pytest.mark.asyncio
+    async def test_blocker1_critique_tool_against_real_executor(self, tmp_path) -> None:
+        """critique tool must return a structured result from the REAL executor.
+
+        Before the fix: executor.run_critique does not exist → tool_error.
+        After the fix: returns structured dict with result/reviewer_model/decided_by.
+        """
+        executor = self._make_executor(tmp_path)
+        node_id = "hyp_test_001"
+        self._plant_hypothesis_node(executor, node_id)
+
+        from loop_sci.engine.tools import ToolRegistry
+        from loop_sci.hypothesis.tools import register_hypothesis_tools
+
+        registry = ToolRegistry()
+        register_hypothesis_tools(registry, executor=executor)
+
+        result_str = await registry.dispatch("critique", {"node_id": node_id})
+        result = json.loads(result_str)
+
+        assert isinstance(result, dict), f"Expected dict result, got {type(result)}"
+        assert "error" not in result or result.get("error") != "tool_error", (
+            f"critique tool must NOT return tool_error against real executor. "
+            f"Got: {result}"
+        )
+        # The structured result must carry result/decided_by/reviewer_model
+        assert "result" in result, (
+            f"Structured critique result must have 'result' key. Got: {result}"
+        )
+        assert result["result"] in ("UP", "DOWN"), (
+            f"result must be UP or DOWN, got {result['result']!r}"
+        )
+        assert "decided_by" in result, (
+            f"Structured critique result must have 'decided_by'. Got: {result}"
+        )
+        assert "reviewer_model" in result, (
+            f"Structured critique result must have 'reviewer_model'. Got: {result}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_blocker1_critique_unknown_node_returns_error_not_exception(
+        self, tmp_path
+    ) -> None:
+        """critique on an unknown node_id must return structured error, not raise."""
+        executor = self._make_executor(tmp_path)
+
+        from loop_sci.engine.tools import ToolRegistry
+        from loop_sci.hypothesis.tools import register_hypothesis_tools
+
+        registry = ToolRegistry()
+        register_hypothesis_tools(registry, executor=executor)
+
+        result_str = await registry.dispatch("critique", {"node_id": "nonexistent_node"})
+        result = json.loads(result_str)
+        assert isinstance(result, dict)
+        # Should be an error dict with "error" key, not a Python exception
+        assert "error" in result, (
+            f"Unknown node_id must return a structured error dict. Got: {result}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_blocker1_rank_tool_against_real_executor(self, tmp_path) -> None:
+        """rank tool must use the REAL ranked_store method on the executor.
+
+        Before the fix: executor has no ranked_store → hasattr guard returns []
+        even when hypothesis nodes exist.
+        After the fix: returns non-empty ranked list reflecting tree contents.
+        """
+        executor = self._make_executor(tmp_path)
+        node_id = "hyp_test_002"
+        self._plant_hypothesis_node(executor, node_id)
+
+        from loop_sci.engine.tools import ToolRegistry
+        from loop_sci.hypothesis.tools import register_hypothesis_tools
+
+        registry = ToolRegistry()
+        register_hypothesis_tools(registry, executor=executor)
+
+        result_str = await registry.dispatch("rank", {"status": "accepted"})
+        result = json.loads(result_str)
+
+        assert isinstance(result, list), f"rank must return a list, got {type(result)}"
+        assert len(result) >= 1, (
+            "rank must return ≥1 item when accepted hypothesis nodes exist in the tree. "
+            f"Got: {result}"
+        )
+        assert result[0]["node_id"] == node_id, (
+            f"Top ranked item must be the planted node {node_id!r}. Got: {result[0]}"
+        )

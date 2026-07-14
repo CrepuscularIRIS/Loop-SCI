@@ -36,6 +36,7 @@ from typing import Any
 from loop_sci.engine.types import DispatchUnit, ExecutorResult
 from loop_sci.hypothesis.config import HypothesisConfig
 from loop_sci.hypothesis.ledger import VerdictLedger
+from loop_sci.hypothesis.ranked import RankedHypothesisStore
 from loop_sci.hypothesis.scoring import score_hypothesis
 from loop_sci.hypothesis.stages.adversary import run_adversary
 from loop_sci.hypothesis.stages.autopsy import RegionTracker, StallLedger, classify_kill
@@ -132,6 +133,86 @@ class HypothesisExecutor:
                 insight="",
                 refs={"error": str(exc)},
             )
+
+    def ranked_store(self) -> RankedHypothesisStore:
+        """Return a :class:`RankedHypothesisStore` backed by the session tree.
+
+        Used by the ``rank`` tool to retrieve hypotheses ranked by score.
+        """
+        return RankedHypothesisStore(self._session.tree)
+
+    async def run_critique(self, node_id: str) -> dict[str, Any]:
+        """Critique an existing hypothesis node in the tree by *node_id*.
+
+        Reads the node's ``hyp_refs`` and ``derivation`` from the tree, runs
+        the full adversary' stage (deterministic gate + jury), and returns a
+        structured result dict.
+
+        Returns a dict with keys:
+        - ``result``: ``"UP"`` or ``"DOWN"``
+        - ``reviewer_model``: str
+        - ``decided_by``: ``"deterministic-gate"`` or ``"jury"``
+        - ``reasons``: list[str]
+        - ``verdict_id``: str
+        - ``node_id``: str
+
+        If the node is unknown a structured error dict is returned (no raise).
+        """
+        node = self._session.tree.get_node(node_id)
+        if node is None:
+            log.debug("run_critique: unknown node_id=%r", node_id)
+            return {
+                "error": "unknown_node",
+                "detail": f"No node with id {node_id!r} found in the tree",
+                "node_id": node_id,
+            }
+
+        hyp_refs: dict[str, Any] = dict(node.refs) if node.refs else {}
+
+        # Reconstruct derivation from stored refs
+        from loop_sci.hypothesis.schemas import DerivationStep
+
+        raw_derivation = hyp_refs.get("derivation", [])
+        derivation: list[DerivationStep] = []
+        for step in raw_derivation:
+            if isinstance(step, DerivationStep):
+                derivation.append(step)
+            elif isinstance(step, dict):
+                derivation.append(
+                    DerivationStep(
+                        step=step.get("step", ""),
+                        grade=step.get("grade", "[guess]"),
+                        fact_ids=list(step.get("fact_ids", [])),
+                    )
+                )
+
+        # Use the real generator identity (same as _run_loop)
+        real_gen_model = getattr(self._gen, "model", self._cfg.generator_model)
+
+        try:
+            verdict = await run_adversary(
+                hyp_refs,
+                derivation,
+                self._store,
+                real_gen_model,
+                self._rev,
+            )
+        except Exception as exc:  # noqa: BLE001
+            log.warning("run_critique: adversary failed for node=%r: %s", node_id, exc)
+            return {
+                "error": "adversary_error",
+                "detail": str(exc),
+                "node_id": node_id,
+            }
+
+        return {
+            "result": verdict.result,
+            "reviewer_model": verdict.reviewer_model,
+            "decided_by": verdict.decided_by,
+            "reasons": verdict.reasons,
+            "verdict_id": verdict.id,
+            "node_id": node_id,
+        }
 
     # ------------------------------------------------------------------
     # Internal pipeline
@@ -258,11 +339,14 @@ class HypothesisExecutor:
                         continue
 
                     # -- 4. adversary' ----------------------------------------
+                    # BLOCKER 2: use the real generator identity, not the config
+                    # string, so no-self-acquit compares actual .model values.
+                    real_gen_model = getattr(self._gen, "model", cfg.generator_model)
                     verdict = await run_adversary(
                         hyp_refs,
                         derivation,
                         self._store,
-                        cfg.generator_model,
+                        real_gen_model,
                         self._rev,
                     )
                     self._ledger.append(
