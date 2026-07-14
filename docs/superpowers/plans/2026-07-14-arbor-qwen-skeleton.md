@@ -342,7 +342,7 @@ git commit -m "chore(vendor): snapshot Arbor engine primitives at 0eae8ad"
   - `RateLimitError`, `TimeoutError`, `AuthError`, `ServerError` (all inherit `ProviderError`)
   - `with_retry(coro, max_retries, base_delay, max_delay) -> T` — async retry wrapper
 
-- [ ] **Step 1: Write failing tests for credentials**
+- [x] **Step 1: Write failing tests for credentials**
 
 ```python
 # tests/unit/test_provider.py
@@ -375,7 +375,7 @@ def test_invocation_record_fields():
     assert "api_key" not in str(rec)
 ```
 
-- [ ] **Step 2: Run to verify FAIL**
+- [x] **Step 2: Run to verify FAIL**
 
 ```bash
 uv run pytest tests/unit/test_provider.py -v 2>&1 | head -20
@@ -383,7 +383,7 @@ uv run pytest tests/unit/test_provider.py -v 2>&1 | head -20
 
 Expected: `ModuleNotFoundError` or `ImportError`
 
-- [ ] **Step 3: Implement `loop_sci/provider/errors.py`**
+- [x] **Step 3: Implement `loop_sci/provider/errors.py`**
 
 ```python
 """Typed provider errors."""
@@ -410,7 +410,7 @@ class ServerError(ProviderError):
     """Provider returned 5xx or internal error."""
 ```
 
-- [ ] **Step 4: Implement `loop_sci/provider/credentials.py`**
+- [x] **Step 4: Implement `loop_sci/provider/credentials.py`**
 
 ```python
 """Credential resolution, redaction, and invocation logging."""
@@ -451,7 +451,7 @@ def invocation_record(model: str, base_url: str) -> dict:
     }
 ```
 
-- [ ] **Step 5: Create `loop_sci/provider/__init__.py`**
+- [x] **Step 5: Create `loop_sci/provider/__init__.py`**
 
 ```python
 from .factory import build_provider
@@ -465,7 +465,7 @@ __all__ = [
 ]
 ```
 
-- [ ] **Step 6: Write failing tests for retry and factory**
+- [x] **Step 6: Write failing tests for retry and factory**
 
 Append to `tests/unit/test_provider.py`:
 
@@ -513,7 +513,7 @@ def test_build_provider_returns_provider(monkeypatch):
     assert provider.model == "qwen-plus"
 ```
 
-- [ ] **Step 7: Implement `loop_sci/provider/errors.py`** — add `with_retry`
+- [x] **Step 7: Implement `loop_sci/provider/errors.py`** — add `with_retry`
 
 Append to `loop_sci/provider/errors.py`:
 
@@ -548,7 +548,7 @@ async def with_retry(
     raise last_exc  # type: ignore[misc]
 ```
 
-- [ ] **Step 8: Implement `loop_sci/provider/factory.py`**
+- [x] **Step 8: Implement `loop_sci/provider/factory.py`**
 
 ```python
 """Factory: construct an LLM provider for Qwen via Bailian."""
@@ -579,7 +579,7 @@ def build_provider(
     )
 ```
 
-- [ ] **Step 9: Run tests**
+- [x] **Step 9: Run tests**
 
 ```bash
 uv run pytest tests/unit/test_provider.py -v
@@ -587,7 +587,7 @@ uv run pytest tests/unit/test_provider.py -v
 
 Expected: all PASS
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add loop_sci/provider/ tests/unit/test_provider.py
