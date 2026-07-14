@@ -28,7 +28,7 @@ Reason: open-phase tasks.md text is stale vs design (1.3 says vendor "orchestrat
 ## FORWARD NOTE for Task 8: state/__init__.py must now export RunSession (Task 7 left it out intentionally).
 
 ### Current task
-- Task 8: RunSession (checkpoint and resume)
+- Task 9: Event bus re-export + subscriber-parity test
 - Stage: implementing
 - review-fix round: 0 / 2
 - risk task: yes (many files; import-closure rewriting) — expect per-task review to scrutinize vendored edits
@@ -62,3 +62,4 @@ Plan→OpenSpec mapping (loose/many-to-many; check off openspec sub-tasks as gen
 - Task 5: complete (impl 5a9ad8c Opus Approved — 4 HARD gates verified live [auto_git=False, real dataclasses, ContextConfig.window, missing-key-no-crash]; grok hygiene fix 3dcdc74 [OmegaConf warn 11->0, drop unused os import]; 30 new/57 total, pristine, ruff clean)
 - Task 6: complete (impl d59d028 Opus Approved; dispatch provably fail-closed on all escape paths; asyncio.to_thread sync path; 63 passed pristine; 2 Minor [BaseException exclusion is by-design; stronger malformed-args assertion — final review])
 - Task 7: complete (impl cea9e0d Opus Approved; refs = REAL persisted subclass field, round-trip verified; load_json faithfully duplicated; no vendored edits; 10/10 new, 73/73 pristine; 3 Minor [keep-in-sync comment on load_json; refs->MUTABLE_FIELDS for Task12; import json placement — final review])
+- Task 8: complete (impl 920143d Opus Approved; atomic cursor write [tmp+Path.replace]; resume + already-complete-no-op proven by real tests; subclass tree so refs survives resume; 6/6 new, 79/79 pristine; 3 Minor [completed_node_ids YAGNI ok; mark_complete/is_complete contract note for Task12; temp-name cosmetic — final review])

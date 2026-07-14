@@ -1324,7 +1324,7 @@ git commit -m "feat(state): re-export IdeaTree+Node with generic refs field"
     - `mark_complete() -> None` — persists cursor with `status="done"`
     - `advance_step() -> None` — increments cursor step, persists
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/unit/test_session.py
@@ -1401,7 +1401,7 @@ def test_resume_already_complete_is_noop(runs_root):
     assert loaded.tree.get_pending_leaves() == []
 ```
 
-- [ ] **Step 2: Run to verify FAIL**
+- [x] **Step 2: Run to verify FAIL**
 
 ```bash
 uv run pytest tests/unit/test_session.py -v 2>&1 | head -10
@@ -1409,7 +1409,7 @@ uv run pytest tests/unit/test_session.py -v 2>&1 | head -10
 
 Expected: ImportError
 
-- [ ] **Step 3: Implement `loop_sci/state/session.py`**
+- [x] **Step 3: Implement `loop_sci/state/session.py`**
 
 ```python
 """RunSession: per-run directory, tree, cursor, checkpoint, resume."""
@@ -1496,7 +1496,7 @@ def _write_cursor(path: Path, cursor: dict[str, Any]) -> None:
     tmp.replace(path)
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 ```bash
 uv run pytest tests/unit/test_session.py -v
@@ -1504,7 +1504,7 @@ uv run pytest tests/unit/test_session.py -v
 
 Expected: all PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/state/session.py tests/unit/test_session.py
