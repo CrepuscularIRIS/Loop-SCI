@@ -25,9 +25,8 @@
 - Interpreter: `.venv/bin/python` (hydra 1.3.4, ruff 0.15.21). Bare python=conda (no deps). All implementer/fix dispatches MUST use `.venv/bin/python -m pytest` + `.venv/bin/ruff`.
 
 ## Current
-- Tasks 1-9 + 10a COMPLETE. Task: 10b (coordinator+tools+config) -> osp 4.4,4.5,4.6
-- Stage: task-review (fix round 1 — test-tightening)
-- Commit: 7828ae9; review APPROVED, backward-compat clean; 3 near-vacuous tests + __all__ omission.
-- Fix round 1 dispatched: tighten generate(status/count)/critique(verdict UP)/plan(context substring) asserts + export HypothesisConf.
-- Minors for final review: HypothesisConf/HypothesisConfig duplicate dataclasses (drift risk); import-in-_generate.
-- Fix round: 1/2
+- Tasks 1-10 COMPLETE. Task: 11 (integration+live+README+coverage) -> osp 5.1,5.2,5.3 [FINAL]
+- Stage: task-review
+- Commit: 58a25a5 (integration 497 + live 108 + README 48 + schemas fix 11 + tools cov 118, +781); 4 integration GREEN + 1 live-skip; coverage loop_sci/hypothesis 95.84%; full suite 443 passed/7 skipped/0 regressions; ruff clean
+- INTEGRATION CAUGHT REAL PROD BUG: refs_from_dict crashed on refs["scores"] extra keys (overall/w_n/w_c from 10a) -> Scores(**d) TypeError; fixed 11-line tolerant deserialize in schemas.py.
+- review-fix round: 0/2; Reviewer: Opus dispatched (scrutinize schemas.py fix) — review-c192eff..58a25a5.diff

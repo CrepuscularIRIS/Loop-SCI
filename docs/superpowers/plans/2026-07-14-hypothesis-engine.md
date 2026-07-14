@@ -1867,7 +1867,7 @@ git commit -m "feat(hypothesis): implement HypothesisExecutor, HypothesisCoordin
 **Interfaces:**
 - Consumes: all of Tasks 1–10.
 
-- [ ] **Step 1: Write offline integration test**
+- [x] **Step 1: Write offline integration test**
 
 ```python
 # tests/integration/test_hypothesis_pipeline.py
@@ -1950,14 +1950,14 @@ async def test_pipeline_produces_accepted_ranked_hypothesis(tmp_path):
             assert verdict.get("reviewer_model") != "qwen-max"
 ```
 
-- [ ] **Step 2: Run integration test — verify PASS**
+- [x] **Step 2: Run integration test — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/integration/test_hypothesis_pipeline.py -v
 ```
 Expected: `1 passed`.
 
-- [ ] **Step 3: Write live test**
+- [x] **Step 3: Write live test**
 
 ```python
 # tests/live/test_hypothesis_live.py
@@ -2001,7 +2001,7 @@ async def test_live_hypothesis_neuro_topic(tmp_path):
     assert result.refs.get("accepted_count", 0) >= 0  # may be 0 if all killed
 ```
 
-- [ ] **Step 4: Run coverage gate**
+- [x] **Step 4: Run coverage gate**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/ tests/integration/test_hypothesis_pipeline.py \
@@ -2009,14 +2009,14 @@ cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/ test
 ```
 Expected: coverage ≥ 80%, all tests pass.
 
-- [ ] **Step 5: Run ruff**
+- [x] **Step 5: Run ruff**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && ruff check loop_sci/hypothesis/ tests/unit/hypothesis/ tests/integration/test_hypothesis_pipeline.py
 ```
 Expected: no errors. Fix any flagged issues before continuing.
 
-- [ ] **Step 6: Add README section**
+- [x] **Step 6: Add README section**
 
 Open `README.md` and append (after the Literature Mining section or at the end of the pipeline overview):
 
@@ -2063,7 +2063,7 @@ DASHSCOPE_API_KEY=<key> python -m pytest tests/live/test_hypothesis_live.py -v -
 ```
 ```
 
-- [ ] **Step 7: Commit all**
+- [x] **Step 7: Commit all**
 
 ```bash
 git add tests/integration/test_hypothesis_pipeline.py tests/live/test_hypothesis_live.py README.md

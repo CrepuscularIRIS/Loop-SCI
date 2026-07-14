@@ -34,6 +34,6 @@
 
 ## 5. End-to-end, tests & docs
 
-- [ ] 5.1 Offline integration test: coordinator dispatches `HypothesisExecutor` against a mock provider + populated fact base → ≥1 accepted, scored hypothesis in the idea-tree, retrievable via the ranked interface; no network, no git; anti-fabrication (ungrounded downgraded) and no-self-acquit pinned
-- [ ] 5.2 Opt-in `@pytest.mark.live` e2e: real Qwen generator + real Qwen reviewer over a small neuro topic on a seeded fact base (skip-verified without `DASHSCOPE_API_KEY`)
-- [ ] 5.3 Coverage gate (≥80% on new code, excl. vendored) + ruff clean + README section (pipeline overview, Qwen-vs-Qwen jury, budget/env, ranked output for #5, live-tests-need-keys)
+- [x] 5.1 Offline integration test: coordinator dispatches `HypothesisExecutor` against a mock provider + populated fact base → ≥1 accepted, scored hypothesis in the idea-tree, retrievable via the ranked interface; no network, no git; anti-fabrication (ungrounded downgraded) and no-self-acquit pinned
+- [x] 5.2 Opt-in `@pytest.mark.live` e2e: real Qwen generator + real Qwen reviewer over a small neuro topic on a seeded fact base (skip-verified without `DASHSCOPE_API_KEY`)
+- [x] 5.3 Coverage gate (≥80% on new code, excl. vendored) + ruff clean + README section (pipeline overview, Qwen-vs-Qwen jury, budget/env, ranked output for #5, live-tests-need-keys)
