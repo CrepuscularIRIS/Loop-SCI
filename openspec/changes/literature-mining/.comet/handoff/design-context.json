@@ -1,0 +1,17 @@
+{
+  "change": "literature-mining",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "a3a91665a162c83a7a215af26acea299d16825bb05e2806533fe7668eb9be317",
+  "files": [
+    { "path": "openspec/changes/literature-mining/proposal.md", "sha256": "7cc06dc358a0ff26a065fe9173b3f284ed09d8031078bc24136dfc168cf12407" },
+    { "path": "openspec/changes/literature-mining/design.md", "sha256": "dd1aad9fa8915d9d46621130648d917f341001f5ef33e3b8b448ddd676c9d51d" },
+    { "path": "openspec/changes/literature-mining/tasks.md", "sha256": "641a34152dd45a44aeb5aba46201155dcc8d00e449d85e1cb8c89b73322deb35" },
+    { "path": "openspec/changes/literature-mining/specs/citation-verification/spec.md", "sha256": "5cf93a26bf220724a45e714e7b1b4faef10c7788e5af3c1e0c6af129f9c3654a" },
+    { "path": "openspec/changes/literature-mining/specs/fact-base/spec.md", "sha256": "2cd2a1bf9615784c6eb10ca89e3095b2bc2fc375d3445b5bb79f45ebbdb00281" },
+    { "path": "openspec/changes/literature-mining/specs/fact-extraction/spec.md", "sha256": "f4b3e33d0edd353e56d69b9e3989fed4dd7ad2300b4bd2a097bb390aaaba5172" },
+    { "path": "openspec/changes/literature-mining/specs/literature-search/spec.md", "sha256": "cddb72ec27bd0f46278fc82f754621b77a45d0bba55035ba7664ec77e11a2be0" }
+  ]
+}

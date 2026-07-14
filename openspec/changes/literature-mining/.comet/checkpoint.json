@@ -1,8 +1,8 @@
 {
   "runId": "8af3e6ba-405c-4595-956c-382253c3a7b8",
-  "stateVersion": 1,
-  "trajectoryOffset": 2,
-  "contextHash": null,
-  "artifactsHash": "e21901105612e372195e24c380c98acad1e4b704561ef1c8be6d9124668fedc9",
-  "createdAt": "2026-07-14T10:43:51.778Z"
+  "stateVersion": 2,
+  "trajectoryOffset": 4,
+  "contextHash": "c163202731ea008a4eb43ed1fd9297d39da5c3eb831aa5d0a868757e4e71fc8b",
+  "artifactsHash": "88444866ca2f6a5fedd53c2432b41564b4262c5d342eee7c6b8a2da53b38af54",
+  "createdAt": "2026-07-14T10:45:01.485Z"
 }

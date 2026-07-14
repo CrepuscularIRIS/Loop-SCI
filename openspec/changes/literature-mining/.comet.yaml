@@ -1,6 +1,6 @@
 workflow: full
 language: en
-phase: design
+phase: build
 context_compression: off
 build_mode: null
 build_pause: null
@@ -11,7 +11,7 @@ isolation: null
 verify_mode: null
 auto_transition: true
 base_ref: 47115daa79b0526ba578d514c41bef63ef43f207
-design_doc: null
+design_doc: docs/superpowers/specs/2026-07-14-literature-mining-design.md
 plan: null
 verify_result: pending
 verification_report: null
@@ -20,8 +20,8 @@ created_at: 2026-07-14
 verified_at: null
 archived: false
 direct_override: null
-handoff_context: null
-handoff_hash: null
+handoff_context: openspec/changes/literature-mining/.comet/handoff/design-context.json
+handoff_hash: a3a91665a162c83a7a215af26acea299d16825bb05e2806533fe7668eb9be317
 classic_profile: full
 classic_migration: 1
 run_id: 8af3e6ba-405c-4595-956c-382253c3a7b8
