@@ -26,7 +26,7 @@
 ## 4. Ranking, output interface, and foundation integration
 
 - [x] 4.1 Implement novelty + self-consistency scoring on `Node.score` + `Node.refs` subscore map (novelty measured against the fact base); reproducible offline
-- [ ] 4.2 Implement the stable ranked-hypothesis query interface (retrieve-all ranked, filter by topic/status) returning problem + derivation chain w/ evidence grades + diff-prediction + scores + grounding refs, without exposing idea-tree internals
+- [x] 4.2 Implement the stable ranked-hypothesis query interface (retrieve-all ranked, filter by topic/status) returning problem + derivation chain w/ evidence grades + diff-prediction + scores + grounding refs, without exposing idea-tree internals
 - [ ] 4.3 Implement `HypothesisExecutor` over the foundation Executor seam (consume fact base → generate → critique → iterate → record); no coordinator-interface change; `auto_git` stays off
 - [ ] 4.4 Implement the score-priority coordinator subclass (`_observe()` score-sorted expansion, `_plan()` fact-base context injection)
 - [ ] 4.5 Register `generate`/`critique`/`rank` tools in the ToolRegistry wrapping the same pipeline with injected deps; structured results/errors

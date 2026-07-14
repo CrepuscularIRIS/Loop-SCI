@@ -25,7 +25,9 @@
 - Interpreter: `.venv/bin/python` (hydra 1.3.4, ruff 0.15.21). Bare python=conda (no deps). All implementer/fix dispatches MUST use `.venv/bin/python -m pytest` + `.venv/bin/ruff`.
 
 ## Current
-- Tasks 1-7 COMPLETE. Task: 8 (autopsy'+stall+region) -> osp 3.1,3.2,3.3,3.5
-- Stage: task-review
-- Commit: 0d11fba (autopsy.py 197 + test 224, +429); 19/19, 71 total, 0 regressions; ruff clean; deterministic
-- review-fix round: 0/2; Reviewer: Opus dispatched (review-08e57c4..0d11fba.diff)
+- Tasks 1-8 COMPLETE. Task: 9 (ranked interface) -> osp 4.2
+- Stage: task-review (fix round 1)
+- Commit: 2bb483f; reviewer APPROVED but 'Minor' grounding source is actually a real #5-contract bug:
+  ranked read native Node.grounding (str, empty for real nodes) instead of refs.derivation fact_ids.
+- Fix round 1 dispatched: source grounding_fact_ids from refs.derivation fact_ids (dedup, order-preserving) + log on skip + bite-test.
+- Fix round: 1/2

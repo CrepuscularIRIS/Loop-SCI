@@ -1319,7 +1319,7 @@ git commit -m "feat(hypothesis): implement autopsy' with CONSTRAINT/CANDIDATE/RE
 - Produces: `RankedHypothesisStore(tree: IdeaTree)`, method `get_ranked(*, topic: str | None = None, status: str | None = None) -> list[RankedHypothesis]`.
 - `RankedHypothesis` is a plain dataclass with: `node_id`, `problem`, `mechanism`, `derivation_chain`, `diff_prediction`, `novelty`, `self_consistency`, `overall_score`, `grounding_fact_ids`. Does NOT expose IdeaTree node objects.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```python
 # tests/unit/hypothesis/test_ranked.py
@@ -1379,13 +1379,13 @@ def test_get_ranked_ordered_best_first(tmp_path):
     assert scores == sorted(scores, reverse=True)
 ```
 
-- [ ] **Step 2: Run test — verify FAIL**
+- [x] **Step 2: Run test — verify FAIL**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_ranked.py -v 2>&1 | tail -5
 ```
 
-- [ ] **Step 3: Implement `loop_sci/hypothesis/ranked.py`**
+- [x] **Step 3: Implement `loop_sci/hypothesis/ranked.py`**
 
 ```python
 # loop_sci/hypothesis/ranked.py
@@ -1455,14 +1455,14 @@ class RankedHypothesisStore:
         return sorted(results, key=lambda x: x.overall_score, reverse=True)
 ```
 
-- [ ] **Step 4: Run test — verify PASS**
+- [x] **Step 4: Run test — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_ranked.py -v
 ```
 Expected: `2 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/hypothesis/ranked.py tests/unit/hypothesis/test_ranked.py
