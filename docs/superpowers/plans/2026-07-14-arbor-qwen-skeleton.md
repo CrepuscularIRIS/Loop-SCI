@@ -2638,7 +2638,7 @@ git commit -m "test(live): e2e run + resume + already-complete no-op on Qwen-via
 **Files:**
 - Create: `README.md`
 
-- [ ] **Step 1: Run full offline test suite with coverage**
+- [x] **Step 1: Run full offline test suite with coverage**
 
 ```bash
 uv run pytest tests/unit/ tests/integration/ --cov=loop_sci --cov-report=term-missing -v
@@ -2646,7 +2646,7 @@ uv run pytest tests/unit/ tests/integration/ --cov=loop_sci --cov-report=term-mi
 
 Expected: ≥80% line coverage. If below, identify uncovered branches from the report and add targeted tests for them (typically: error paths in `coordinator._record`, `executor._extract_insight` empty-text case, `credentials.redact` short-key branch).
 
-- [ ] **Step 2: Add missing coverage tests if needed**
+- [x] **Step 2: Add missing coverage tests if needed**
 
 Example — if `executor` error path is uncovered, add to `tests/integration/test_coordinator_cycle.py`:
 
@@ -2670,7 +2670,7 @@ async def test_executor_error_marks_needs_retry(tmp_path, agent_cfg):
     assert root.status == "needs_retry"
 ```
 
-- [ ] **Step 3: Write `README.md`**
+- [x] **Step 3: Write `README.md`**
 
 ```markdown
 # Loop-SCI
@@ -2722,7 +2722,7 @@ DASHSCOPE_API_KEY=sk-... uv run pytest tests/live/ -m live -v -s
 See `loop_sci/_vendor/arbor/LICENSE` for terms.
 ```
 
-- [ ] **Step 4: Final commit**
+- [x] **Step 4: Final commit**
 
 ```bash
 git add README.md

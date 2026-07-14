@@ -29,11 +29,8 @@ Reason: open-phase tasks.md text is stale vs design (1.3 says vendor "orchestrat
 
 ## CRITICAL for Task 12 (coordinator): stub session starts with ONLY a pending ROOT at depth 0. get_pending_leaves() EXCLUDES depth 0 -> returns []. So coordinator MUST bootstrap: either (a) dispatch ROOT itself on the first cycle when no pending leaves exist and ROOT is pending, OR (b) seed a child node under ROOT (depth 1) and dispatch that. Ensure >=1 observe->dispatch->record cycle runs on the stub, then session.mark_complete(). Executor is Executor(cfg, *, provider, bus); executor.run(unit) is async -> Coordinator.run is async. Record outcome into node BEFORE next decision (update_node status/score/insight auto-saves; refs via node.refs direct or MUTABLE_FIELDS override). Emit node/lifecycle events via bus.
 
-### Current task
-- Task 17: Coverage gate + README (FINAL task)
-- Stage: implementing
-- review-fix round: 0 / 2
-- ALSO do ruff sweep here: F401 unused `import pytest` in tests/unit/test_event_bus.py; F841 unused `cfg` at tests/live/test_live_e2e.py:195; any others. Coverage: measure loop_sci EXCLUDING _vendor/ (vendored Arbor is 3rd-party) — target >=80% on OUR code.
+### Current stage: ALL 17 TASKS COMPLETE -> FINAL WHOLE-BRANCH REVIEW (thorough mode)
+- Next: (1) final complete review (Opus, most capable) over merge-base..HEAD; (2) pre-guard cleanup (git rm --cached early SDD reports); (3) reconcile openspec/tasks.md (fix stale 1.3 orchestrator/1.4 Hydra text + check all boxes + comet-state task-checkoff); (4) comet-guard build --apply -> verify.
 - note: .superpowers/ now gitignored. Earlier task-7/9/10/12 reports still TRACKED -> git rm --cached in pre-guard cleanup.
 
 ## PRE-GUARD CLEANUP TODO: (1) add `.superpowers/` to .gitignore (SDD report/diff scratch committed) + git rm --cached tracked scratch; (2) sweep ruff (unused `import pytest` in test_event_bus.py, any others) — Task 17 lint gate.
@@ -77,3 +74,4 @@ Plan→OpenSpec mapping (loose/many-to-many; check off openspec sub-tasks as gen
 - Task 14: complete (impl 2779b10 CLI run/resume/inspect; Opus found 1 IMPORTANT [bad run_id raw traceback] -> grok fix 1363b16 clean not-found+Exit(1)+regression tests + 2 Minor fixed [orphan dir; f-strings] -> Opus re-review Approved [guard scoped tight, no over-swallow; happy+missing-key preserved]; 10 CLI + 137 full-suite pristine; async wrap; logging non-polluting)
 - Task 15: complete (impl 6c2bda5 Opus Approved; 2 @pytest.mark.live tests [completion + native tool-call per-tier record]; skips clean+inert no network; provider.create REAL keyword-only sig verified [not DOA when keyed]; tool-call records not crashes; 137 passed/2 skipped; LIVE-GREEN DEFERRED TO USER key; 2 Minor [empty QWEN_TIERS edge; assert True linter])
 - Task 16: complete (impl 7c34df2 skip-safety+assertions correct; Opus found 1 IMPORTANT [all 3 live tests DOA-when-keyed: wrong Executor(agent_cfg=) sig] -> grok fix 29a7961 Executor(cfg, provider=provider) at both sites, construct-OK proof verified => DOA eliminated; 137 passed/5 skipped; LIVE-GREEN DEFERRED TO USER. [accepted fix w/o separate re-review: construct-OK proof = direct closure evidence]. F841 unused cfg L195 -> T17 ruff sweep)
+- Task 17: complete (impl 890f050+2994eee Opus Approved; coverage 96% excl _vendor [config omits vendor+tests]; ruff clean [excludes _vendor; 24 lint fixed]; README accurate [Bailian creds, run/resume/inspect, live-needs-key, Arbor Apache-2.0 @0eae8ad provenance]; no production logic changed; 137 passed/5 skipped; 2 Minor cosmetic)
