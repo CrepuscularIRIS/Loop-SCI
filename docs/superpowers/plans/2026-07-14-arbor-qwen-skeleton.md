@@ -1850,7 +1850,7 @@ git commit -m "feat(engine): Executor maps DispatchUnit->Agent->ExecutorResult"
 - Produces: `Coordinator(executor, bus, step_budget).run(session) -> None`
 - Loop invariant: tree is persisted BEFORE the coordinator decides its next step.
 
-- [ ] **Step 1: Implement `loop_sci/engine/coordinator.py`**
+- [x] **Step 1: Implement `loop_sci/engine/coordinator.py`**
 
 ```python
 """Thin coordinator: observe→dispatch→record(persist)→decide."""
@@ -1975,7 +1975,7 @@ class Coordinator:
         return bool(session.tree.get_pending_leaves())
 ```
 
-- [ ] **Step 2: Update `loop_sci/engine/__init__.py`**
+- [x] **Step 2: Update `loop_sci/engine/__init__.py`**
 
 ```python
 from .tools import ToolRegistry
@@ -1990,7 +1990,7 @@ __all__ = [
 ]
 ```
 
-- [ ] **Step 3: Verify import**
+- [x] **Step 3: Verify import**
 
 ```bash
 uv run python -c "from loop_sci.engine import Coordinator; print('Coordinator OK')"
@@ -1998,7 +1998,7 @@ uv run python -c "from loop_sci.engine import Coordinator; print('Coordinator OK
 
 Expected: `Coordinator OK`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add loop_sci/engine/coordinator.py loop_sci/engine/__init__.py
