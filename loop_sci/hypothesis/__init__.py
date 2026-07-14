@@ -1,6 +1,7 @@
 """loop_sci.hypothesis — hypothesis schema and lifecycle sub-package."""
 
 from loop_sci.hypothesis.ledger import VerdictLedger
+from loop_sci.hypothesis.ranked import RankedHypothesis, RankedHypothesisStore
 from loop_sci.hypothesis.schemas import (
     Autopsy,
     Contract,
@@ -24,6 +25,8 @@ __all__ = [
     "HypothesisRefs",
     "Iteration",
     "ProblemCard",
+    "RankedHypothesis",
+    "RankedHypothesisStore",
     "Scores",
     "Verdict",
     "VerdictLedger",
