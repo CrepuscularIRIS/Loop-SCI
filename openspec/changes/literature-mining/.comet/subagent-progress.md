@@ -27,7 +27,12 @@
 
 ## FORWARD Task 11 (integration tests): HARDEN the L3-mismatch test to assert VerificationStatus.layer_reached==3 explicitly (currently asserts verified_count==0 — non-vacuous only because L4 would verify; make it robust to L4/fixture changes).
 
-### Current stage: ALL 12 TASKS COMPLETE -> FINAL WHOLE-BRANCH REVIEW (thorough)
+### Current stage: BUILD COMPLETE -> phase=verify (final review PASSED, guard applied)
+- FINAL WHOLE-BRANCH REVIEW (Opus, 58f6a4b..a4147b9): **READY TO MERGE** — 0 Critical/0 Important. Anti-fab chain airtight (extract-drop->L2->L3->L4->persist-guard; persist_fact sole store-write; no bypass; L3 genuinely wired in executor). No secret-leak path. Default suite offline (318 pass/6 live-skipped, reviewer re-ran). All minors cosmetic/tool-surface-only -> DEFER #3.
+- tasks.md reconciled (23/23 checked, commit 07f5617); fresh ruff clean + 318 passed/6 deselected.
+- build guard PASS (COMET_SKIP_BUILD=1) -> phase=verify, verify_result=pending. NEXT: comet-verify.
+
+### (historical) prior stage: ALL 12 TASKS COMPLETE -> FINAL WHOLE-BRANCH REVIEW (thorough)
 - Task 12 complete (impl eb7d3c6+f58780a Opus Approved; ruff CLEAN [6 fixed incl except BaseException->Exception = closes T3 minor]; coverage 96% excl vendor; README literature-mining section accurate; 318 passed/6 skipped; 1 Minor [README env-var names not os.environ-wired - convention])
 - Next: (1) final whole-branch review (Opus most-capable) over merge-base..HEAD; (2) reconcile openspec/tasks.md (check all boxes + comet-state task-checkoff); (3) comet-guard build --apply (COMET_SKIP_BUILD=1, Python) -> verify.
 - DEFERRED-to-#3 minors summary: dispatch O(n2) lookup; extractor degenerate-short-span; L123 block dup in citation; store.add unguarded; README env-var wiring; DOI provenance in _extract tool.
