@@ -26,8 +26,8 @@
 
 ## Current
 - Tasks 1-9 COMPLETE. Task: 10a (HypothesisExecutor) -> osp 4.3 (+resume tail 3.5)
-- Stage: task-review (fix round 1)
-- Commit: 6d284b2; review CHANGES REQUIRED, 3 Important loop-enforcement gaps:
-  (1) resume not idempotent on interrupted runs (fresh uuids -> re-spend); (2) region-close tracked but not enforced; (3) pivot no-op (lessons not injected).
-- Fix round 1 dispatched: deterministic node ids for per-node resume skip + interrupted-resume bite-test; enforce is_closed w/ configurable threshold; inject get_constraints_block lessons on pivot; + minors (tighten never-raises test, decided_by assert, refs overall).
-- Fix round: 1/2
+- Stage: task-review (fix round 1 re-review)
+- Commit: 570e063; fixer reports all 3 Important fixed + minors; executor 9 passed, full suite 409/0 regressions.
+- Stage sig changes (backward-compat): run_prospect/run_forge context="" kwarg; RegionTracker(threshold=2).
+- Re-review (Opus) dispatched on fix diff 6d284b2..570e063.
+- Fix round: 1/2 (re-review pending)
