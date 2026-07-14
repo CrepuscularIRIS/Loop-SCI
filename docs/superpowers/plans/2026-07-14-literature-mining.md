@@ -2148,7 +2148,7 @@ git commit -m "test(literature): offline integration anti-fabrication + resume +
 - Modify: `README.md` (add Literature Mining section)
 - Verify: coverage ≥ 80% on `loop_sci/literature/`
 
-- [ ] **Step 12.1: Run full offline test suite with coverage**
+- [x] **Step 12.1: Run full offline test suite with coverage**
 
 ```bash
 uv run pytest tests/unit/literature/ tests/integration/test_lit_miner_e2e.py \
@@ -2157,7 +2157,7 @@ uv run pytest tests/unit/literature/ tests/integration/test_lit_miner_e2e.py \
 
 Expected: coverage ≥ 80% on `loop_sci/literature/`; if below, add targeted tests for uncovered branches.
 
-- [ ] **Step 12.2: Run ruff clean**
+- [x] **Step 12.2: Run ruff clean**
 
 ```bash
 uv run ruff check loop_sci/literature/ tests/unit/literature/ tests/integration/test_lit_miner_e2e.py
@@ -2165,7 +2165,7 @@ uv run ruff check loop_sci/literature/ tests/unit/literature/ tests/integration/
 
 Expected: no errors. Fix any lint issues (unused imports, missing type annotations, etc.)
 
-- [ ] **Step 12.3: Add README section**
+- [x] **Step 12.3: Add README section**
 
 Open `README.md` and append a `## Literature Mining` section covering:
 - Configured sources (Semantic Scholar, arXiv, PubMed) and where to set credentials (`SEMANTIC_SCHOLAR_API_KEY`, `PUBMED_EMAIL` in `.env` or config)
@@ -2173,7 +2173,7 @@ Open `README.md` and append a `## Literature Mining` section covering:
 - How to run offline tests: `uv run pytest tests/unit/literature/ tests/integration/test_lit_miner_e2e.py`
 - How to run live tests: `DASHSCOPE_API_KEY=... uv run pytest tests/live/test_lit_miner_live.py --run-live` (need `@pytest.mark.live` in `conftest.py` — already registered)
 
-- [ ] **Step 12.4: Final commit**
+- [x] **Step 12.4: Final commit**
 
 ```bash
 git add README.md

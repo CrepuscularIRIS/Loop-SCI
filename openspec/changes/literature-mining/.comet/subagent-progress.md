@@ -27,12 +27,10 @@
 
 ## FORWARD Task 11 (integration tests): HARDEN the L3-mismatch test to assert VerificationStatus.layer_reached==3 explicitly (currently asserts verified_count==0 — non-vacuous only because L4 would verify; make it robust to L4/fixture changes).
 
-### Current task
-- Task 12 (FINAL): Coverage gate + ruff clean + README section
-- Stage: implementing
-- review-fix round: 0 / 2
-- RUFF SWEEP ALL accumulated: unused imports in dispatch.py/test_dispatch.py, test_citation_verify.py 324-326, schema.py field, test_event_bus.py pytest, + dead code in test_lit_miner_e2e verified_nodes comprehension. Coverage: source loop_sci omit _vendor, >=80% (esp new literature/). README literature-mining section (sources, DASHSCOPE_API_KEY, fact-base output, live-needs-keys).
-- NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
+### Current stage: ALL 12 TASKS COMPLETE -> FINAL WHOLE-BRANCH REVIEW (thorough)
+- Task 12 complete (impl eb7d3c6+f58780a Opus Approved; ruff CLEAN [6 fixed incl except BaseException->Exception = closes T3 minor]; coverage 96% excl vendor; README literature-mining section accurate; 318 passed/6 skipped; 1 Minor [README env-var names not os.environ-wired - convention])
+- Next: (1) final whole-branch review (Opus most-capable) over merge-base..HEAD; (2) reconcile openspec/tasks.md (check all boxes + comet-state task-checkoff); (3) comet-guard build --apply (COMET_SKIP_BUILD=1, Python) -> verify.
+- DEFERRED-to-#3 minors summary: dispatch O(n2) lookup; extractor degenerate-short-span; L123 block dup in citation; store.add unguarded; README env-var wiring; DOI provenance in _extract tool.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
