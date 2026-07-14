@@ -28,7 +28,7 @@
 ## FORWARD Task 11 (integration tests): HARDEN the L3-mismatch test to assert VerificationStatus.layer_reached==3 explicitly (currently asserts verified_count==0 — non-vacuous only because L4 would verify; make it robust to L4/fixture changes).
 
 ### Current task
-- Task 10: ToolRegistry tools — search / fetch / extract / verify
+- Task 11: Offline integration tests — anti-fabrication + resume-no-reverify (+ HARDEN L3 assert layer_reached==3 per T9 fwd note)
 - Stage: implementing
 - review-fix round: 0 / 2
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
@@ -50,6 +50,7 @@
 - Task 7: complete (impl 5db0e5a L4 hybrid grounding [lexical HIGH/LOW->no Qwen, borderline->Qwen judge; genuinely cost-controlled, tested _index==0/==1]; misattributed->reject@L4; Opus found 1 IMPORTANT [double-resolve 2x fetch/fact] -> Sonnet fix d26cb78 resolve-once reuse L2 paper + fetch==1 test -> Opus re-review Approved [byte-identical L1-L3, zero regression]; 265 passed/5 skipped. FULL 4-LAYER VERIFICATION DONE. 1 Minor [L123 block dup])
 - Task 8: complete (impl 23e1133 Opus Approved; ONLY-verified guard airtight [persist_fact guards before any write; rejected/pending/None -> NEITHER tree nor store, all tested]; root->paper->fact nodes + Node.refs payload round-trips disk; JSON store retrieve-all/filter lossless; same-paper dedup test present; 26 new/291 passed/5 skipped; 1 Minor [store.add unguarded - use persist_fact in T9])
 - Task 9: complete (impl 7bc3551 INDEPENDENT Opus Approved [impl self-review NOT trusted]; ALL 3 HARD REQS met — L3 WIRED [expected_year/authors from PaperResult] + test MUTATION-VERIFIED non-vacuous [reviewer: no-wiring->verified@4, wiring->rejected@3]; dedup one-paper-node keyed external_id; persist_fact guarded no store.add; resume durable via tree refs; 6 offline tests; 297 passed/5 skipped; 2 Minor [assert layer_reached==3 explicit->T11; advance_step no mark_complete intentional])
+- Task 10: complete (impl ecdc329 Opus Approved; 4 tools [lit_search/fetch/extract/verify] real schemas + async dispatch->JSON string + structured errors from real registry; genuine Task1-9 wrap w/ injected deps offline; 2 shortcuts PROVABLY BENIGN [verify never reads confidence; extract only reads abstract; L3-noop is hint-gated by design]; 15 new/312 passed/5 skipped; 2 Minor [DOI provenance in _extract; 1 under-asserting test])
 
 ### Completed
 (none yet)

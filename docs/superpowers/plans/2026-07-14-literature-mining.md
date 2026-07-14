@@ -1703,7 +1703,7 @@ git commit -m "feat(literature): LitMinerExecutor with resume (skip already-proc
 - Consumes: `ToolRegistry` from `loop_sci.engine.tools`; all literature sub-packages
 - Produces: `register_literature_tools(registry: ToolRegistry, *, search_clients, extractor, pipeline) -> None`
 
-- [ ] **Step 10.1: Write failing tests**
+- [x] **Step 10.1: Write failing tests**
 
 ```python
 # tests/unit/literature/test_lit_tools.py
@@ -1758,7 +1758,7 @@ async def test_search_tool_registered_and_dispatches():
 Run: `uv run pytest tests/unit/literature/test_lit_tools.py -v`
 Expected: FAIL — module not found
 
-- [ ] **Step 10.2: Implement register_literature_tools**
+- [x] **Step 10.2: Implement register_literature_tools**
 
 ```python
 # loop_sci/literature/tools.py
@@ -1887,12 +1887,12 @@ def register_literature_tools(
     )
 ```
 
-- [ ] **Step 10.3: Run tool tests**
+- [x] **Step 10.3: Run tool tests**
 
 Run: `uv run pytest tests/unit/literature/test_lit_tools.py -v`
 Expected: PASS
 
-- [ ] **Step 10.4: Commit**
+- [x] **Step 10.4: Commit**
 
 ```bash
 git add loop_sci/literature/tools.py tests/unit/literature/test_lit_tools.py
