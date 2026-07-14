@@ -64,14 +64,16 @@ class Coordinator:
         *,
         executor: Any = None,
         bus: Any = None,
-        step_budget: int = 10,
+        step_budget: int | None = None,
     ) -> None:
-        # Resolve step budget from cfg if available and not overridden
-        if cfg is not None:
-            try:
-                step_budget = cfg.engine.step_budget
-            except AttributeError:
-                pass  # cfg has no engine.step_budget; use the kwarg default
+        # Explicit kwarg wins; fall back to cfg.engine.step_budget, then 10.
+        if step_budget is None:
+            step_budget = 10
+            if cfg is not None:
+                try:
+                    step_budget = cfg.engine.step_budget
+                except AttributeError:
+                    pass  # cfg has no engine.step_budget; keep default
 
         if executor is not None:
             self.executor = executor
@@ -114,7 +116,11 @@ class Coordinator:
                 "goal": unit.goal,
             })
 
-            result: ExecutorResult = await self.executor.run(unit)
+            try:
+                result: ExecutorResult = await self.executor.run(unit)
+            except Exception as exc:
+                log.exception("executor.run failed for node %s", node.id)
+                result = ExecutorResult(status="error", summary=str(exc))
 
             # INVARIANT: persist BEFORE next decision
             self._record(session, node, result)
@@ -137,19 +143,34 @@ class Coordinator:
     # ── Observe ───────────────────────────────────────────────────────
 
     def _observe(self, session: RunSession) -> Node | None:
-        """Pick the next pending leaf node (depth > 0), or ROOT if no leaves yet.
+        """Pick the next dispatchable leaf node, or ROOT when bootstrapping.
 
         Bootstrap: get_pending_leaves() excludes depth-0 nodes. If the tree
         has no pending leaves but ROOT is still pending, return ROOT itself
         so that the first cycle always dispatches something.
+
+        Resume: stale ``running`` leaves (crash-interrupted mid-dispatch) are
+        re-observed and re-dispatched. Completed ``done`` nodes are never
+        returned.
         """
         pending = session.tree.get_pending_leaves()
         if pending:
-            return pending[0]
+            return sorted(pending, key=lambda n: n.id)[0]
 
-        # Bootstrap: fall back to ROOT if it is still pending
         root = session.tree.get_root()
         if root.status == "pending":
+            return root
+
+        running = [
+            n for n in session.tree.get_all_nodes()
+            if n.status == "running"
+            and not n.children_ids
+            and n.depth > 0
+        ]
+        if running:
+            return sorted(running, key=lambda n: n.id)[0]
+
+        if root.status == "running":
             return root
 
         return None

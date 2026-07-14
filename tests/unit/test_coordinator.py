@@ -50,6 +50,18 @@ class StubExecutor:
         return result
 
 
+class RaisingStubExecutor:
+    """Fake Executor that raises on run()."""
+
+    def __init__(self, message: str = "executor exploded") -> None:
+        self._message = message
+        self._calls: list[DispatchUnit] = []
+
+    async def run(self, unit: DispatchUnit) -> ExecutorResult:
+        self._calls.append(unit)
+        raise RuntimeError(self._message)
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -299,3 +311,109 @@ async def test_refs_recorded_in_node(tmp_path):
     assert len(done_nodes) >= 1
     done_node = done_nodes[0]
     assert done_node.refs == refs, f"Expected refs={refs}, got {done_node.refs}"
+
+
+# ---------------------------------------------------------------------------
+# Regression tests — reviewer-identified bugs
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_executor_exception_does_not_escape_run(tmp_path):
+    """Executor exceptions must be caught; run() still finalizes the session."""
+    from loop_sci.engine.coordinator import Coordinator
+
+    session = _make_session(tmp_path)
+    stub = RaisingStubExecutor("boom")
+    coordinator = Coordinator(cfg=None, executor=stub, step_budget=5)
+
+    await coordinator.run(session)  # must NOT raise
+
+    assert stub._calls, "Interrupted node must have been dispatched"
+    interrupted = session.tree.get_node(stub._calls[0].node_id)
+    assert interrupted.status == "needs_retry"
+    assert session.is_complete
+
+
+@pytest.mark.asyncio
+async def test_resume_redispatches_interrupted_running_node(tmp_path):
+    """A crash-interrupted 'running' node must be re-dispatched on resume."""
+    from loop_sci.engine.coordinator import Coordinator
+
+    session = _make_session(tmp_path)
+    session.tree.update_node("ROOT", status="done")
+
+    done_id = session.tree.next_child_id("ROOT")
+    session.tree.add_node(Node(
+        id=done_id, parent_id="ROOT", hypothesis="Already done", depth=1, status="done",
+    ))
+    running_id = session.tree.next_child_id("ROOT")
+    session.tree.add_node(Node(
+        id=running_id, parent_id="ROOT", hypothesis="Interrupted", depth=1, status="running",
+    ))
+
+    loaded = RunSession.load(tmp_path / "runs", session.run_id)
+    stub = StubExecutor([_done_result()])
+    coordinator = Coordinator(cfg=None, executor=stub, step_budget=5)
+    await coordinator.run(loaded)
+
+    assert [c.node_id for c in stub._calls] == [running_id]
+    assert loaded.tree.get_node(running_id).status == "done"
+    assert loaded.tree.get_node(done_id).status == "done"
+    assert loaded.is_complete
+
+
+@pytest.mark.asyncio
+async def test_observe_picks_siblings_deterministically(tmp_path):
+    """Pending sibling pick must be stable (sorted by node id)."""
+    from loop_sci.engine.coordinator import Coordinator
+
+    session = _make_session(tmp_path)
+    session.tree.update_node("ROOT", status="done")
+
+    ids = []
+    for label in ("charlie", "alpha", "bravo"):
+        child_id = session.tree.next_child_id("ROOT")
+        ids.append(child_id)
+        session.tree.add_node(Node(
+            id=child_id, parent_id="ROOT", hypothesis=label, depth=1, status="pending",
+        ))
+
+    stub = StubExecutor([
+        ExecutorResult(status="done", summary="first"),
+        ExecutorResult(status="done", summary="second"),
+        ExecutorResult(status="done", summary="third"),
+    ])
+    coordinator = Coordinator(cfg=None, executor=stub, step_budget=1)
+    await coordinator.run(session)
+
+    assert stub._calls[0].node_id == sorted(ids)[0]
+
+
+@pytest.mark.asyncio
+async def test_step_budget_kwarg_overrides_cfg(tmp_path):
+    """Explicit step_budget kwarg must win over cfg.engine.step_budget."""
+    from loop_sci.config.schemas import (
+        AgentConf, EngineConf, LoopSCIConfig, ProviderConf, RunConf,
+    )
+    from loop_sci.engine.coordinator import Coordinator
+
+    cfg = LoopSCIConfig(
+        provider=ProviderConf(model="m", api_key="k", base_url="http://x"),
+        agent=AgentConf(),
+        engine=EngineConf(step_budget=99),
+        run=RunConf(runs_root="runs", task="t"),
+    )
+
+    session = _make_session(tmp_path)
+    for i in range(3):
+        child_id = session.tree.next_child_id("ROOT")
+        session.tree.add_node(Node(
+            id=child_id, parent_id="ROOT", hypothesis=f"H{i}", depth=1, status="pending",
+        ))
+
+    stub = StubExecutor([ExecutorResult(status="done", summary="done")] * 3)
+    coordinator = Coordinator(cfg=cfg, executor=stub, step_budget=1)
+    await coordinator.run(session)
+
+    assert stub._call_index == 1
