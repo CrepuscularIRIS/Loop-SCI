@@ -38,3 +38,6 @@ logs/
 
 # SDD scratch (subagent-driven-development reports/diffs/briefs)
 .superpowers/
+
+# Competition problem PDF (kept local, never published)
+PDF/
