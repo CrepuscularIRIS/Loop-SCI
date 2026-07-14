@@ -30,7 +30,7 @@ Reason: open-phase tasks.md text is stale vs design (1.3 says vendor "orchestrat
 ## CRITICAL for Task 12 (coordinator): stub session starts with ONLY a pending ROOT at depth 0. get_pending_leaves() EXCLUDES depth 0 -> returns []. So coordinator MUST bootstrap: either (a) dispatch ROOT itself on the first cycle when no pending leaves exist and ROOT is pending, OR (b) seed a child node under ROOT (depth 1) and dispatch that. Ensure >=1 observe->dispatch->record cycle runs on the stub, then session.mark_complete(). Executor is Executor(cfg, *, provider, bus); executor.run(unit) is async -> Coordinator.run is async. Record outcome into node BEFORE next decision (update_node status/score/insight auto-saves; refs via node.refs direct or MUTABLE_FIELDS override). Emit node/lifecycle events via bus.
 
 ### Current task
-- Task 13: Integration test — coordinator cycle vs MockProvider (offline, CI default)
+- Task 14: CLI (typer: run / resume / inspect)
 - Stage: implementing
 - review-fix round: 0 / 2
 
@@ -71,3 +71,4 @@ Plan→OpenSpec mapping (loose/many-to-many; check off openspec sub-tasks as gen
 - Task 10: complete (impl 000b508 Opus Approved; build_agent constructs vendored Agent w/ real sig; auto_git=False doubly-asserted; ToolRegistry orthogonal seam no dup dispatch; types.py minimal; 18 new, 102 pristine; deliberate cfg-first build_agent signature; 2 Minor final-review)
 - Task 11: complete (impl 529be18 Opus Approved; status mapping complete [finished->done/max_turns->bounded_exit/sentinel|exc->error]; airtight exception safety no propagation; FakeAgent stub no network; 7/7 new, 109/109 pristine; 3 Minor [sentinel string-match+xref comment; tools dict->Tool fwd for T12; None stop_reason sane])
 - Task 12: complete (KEYSTONE; DUAL review. impl 8effdeb -> Opus Approved but GROK 2nd-opinion caught 2 IMPORTANT [executor-exc escapes run; resume orphans "running" nodes] -> grok fix ac0b3b4 (all 4 fixes + regressions) -> Opus re-review Approved (Fix-2 re-observe-running proven bounded: _record moves node out of running each cycle -> needs_retry not re-selected + step budget; happy path untouched); 14 coordinator + 123 full-suite pristine; bootstrap strategy (a); refs node.refs+tree.save)
+- Task 13: complete (impl cb963f8 REAL end-to-end integration [Coordinator->Executor->vendored Agent vs MockProvider, offline]; Opus found 1 IMPORTANT [assertion too weak] -> grok fix 7f25183 tightened to ==done + mock answer asserted in live+reloaded insight; strict done passes deterministically => NO production bug; 4 integration + 127 full-suite pristine. [accepted fix w/o separate re-review: reviewer's exact prescription followed + strict assert passes])

@@ -2016,7 +2016,7 @@ git commit -m "feat(engine): Coordinator observe->dispatch->record->decide loop"
 **Interfaces:**
 - `MockProvider` — deterministic `LLMProvider` with scripted responses; no network.
 
-- [ ] **Step 1: Implement `MockProvider` in `tests/conftest.py`**
+- [x] **Step 1: Implement `MockProvider` in `tests/conftest.py`**
 
 ```python
 # tests/conftest.py — FULL FILE (replace skeleton)
@@ -2058,7 +2058,7 @@ def mock_provider():
     return MockProvider(responses=["I have completed the task. The answer is 42."])
 ```
 
-- [ ] **Step 2: Write integration test**
+- [x] **Step 2: Write integration test**
 
 ```python
 # tests/integration/test_coordinator_cycle.py
@@ -2133,7 +2133,7 @@ async def test_step_budget_stops_loop(tmp_path, agent_cfg):
     assert session.cursor["step"] == 0
 ```
 
-- [ ] **Step 3: Run integration tests**
+- [x] **Step 3: Run integration tests**
 
 ```bash
 uv run pytest tests/integration/test_coordinator_cycle.py -v
@@ -2141,7 +2141,7 @@ uv run pytest tests/integration/test_coordinator_cycle.py -v
 
 Expected: all PASS (no network required)
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add tests/conftest.py tests/integration/
