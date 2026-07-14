@@ -113,7 +113,7 @@ conf/
 **Interfaces:**
 - Produces: installable package `loop-sci`; `uv run pytest` works.
 
-- [ ] **Step 1: Write `pyproject.toml`**
+- [x] **Step 1: Write `pyproject.toml`**
 
 ```toml
 [build-system]
@@ -158,7 +158,7 @@ dev = [
 ]
 ```
 
-- [ ] **Step 2: Create `.env.example`**
+- [x] **Step 2: Create `.env.example`**
 
 ```bash
 # Copy to .env and fill in. Never commit .env.
@@ -168,13 +168,13 @@ BAILIAN_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 QWEN_MODEL=qwen-plus
 ```
 
-- [ ] **Step 3: Create `loop_sci/__init__.py`** (empty)
+- [x] **Step 3: Create `loop_sci/__init__.py`** (empty)
 
 ```python
 """Loop-SCI — foundation multi-agent research harness."""
 ```
 
-- [ ] **Step 4: Create `tests/conftest.py`** (skeleton — marks only for now)
+- [x] **Step 4: Create `tests/conftest.py`** (skeleton — marks only for now)
 
 ```python
 import pytest
@@ -183,7 +183,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "live: requires DASHSCOPE_API_KEY")
 ```
 
-- [ ] **Step 5: Verify install**
+- [x] **Step 5: Verify install**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI
@@ -193,7 +193,7 @@ uv run python -c "import loop_sci; print('ok')"
 
 Expected: `ok`
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add pyproject.toml .env.example loop_sci/__init__.py tests/conftest.py
