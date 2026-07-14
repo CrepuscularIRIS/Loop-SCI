@@ -560,3 +560,80 @@ async def test_executor_pivot_injects_lessons(tmp_path):
     assert result.refs.get("lessons"), (
         "Executor result must include non-empty 'lessons' list after a pivot round"
     )
+
+
+# ---------------------------------------------------------------------------
+# BLOCKER 2 executor-level bite-test: executor wiring passes REAL gen.model
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_blocker2_executor_uses_real_gen_model_not_config_string(tmp_path) -> None:
+    """HypothesisExecutor must pass getattr(gen, 'model', cfg.generator_model) to
+    run_adversary, NOT the stale cfg.generator_model string.
+
+    Scenario
+    --------
+    gen.model  = "qwen-plus"  (the REAL generator identity)
+    rev.model  = "qwen-plus"  (same — no-self-acquit SHOULD fire)
+    cfg.generator_model = "qwen-max"  (stale/wrong config string)
+
+    Failure mode matrix (at the executor level):
+      OLD executor (passes cfg.generator_model="qwen-max"):
+        run_adversary receives generator_model="qwen-max"
+        → comparison: rev.model "qwen-plus" != "qwen-max" → no-self-acquit SKIPPED
+        → jury receives UP response → candidate ACCEPTED
+        → len(accepted_nodes) >= 1 → assertion `len(accepted_nodes)==0` FAILS
+        → test bites the old code ✓
+      NEW executor (passes getattr(gen, 'model', cfg.generator_model)="qwen-plus"):
+        run_adversary receives generator_model="qwen-plus"
+        → comparison: rev.model "qwen-plus" == "qwen-plus" → no-self-acquit FIRES
+        → DOWN for all candidates
+        → len(accepted_nodes)==0 → assertion PASSES ✓
+    """
+    session = RunSession.create(tmp_path / "runs", task="neuro")
+    store_path = _seeded_store(tmp_path)
+
+    # CRITICAL: both gen and rev share the SAME real model "qwen-plus",
+    # but cfg.generator_model is deliberately set to "qwen-max" (stale config).
+    gen = MockProvider(
+        responses=_gen_responses_happy(),
+        model="qwen-plus",  # REAL gen identity — same as rev → no-self-acquit MUST fire
+    )
+    rev = MockProvider(
+        responses=[_up_verdict_json()] * 10,  # UP so old code would accept
+        model="qwen-plus",  # same model as gen
+    )
+    config = HypothesisConfig(
+        max_cards=1,
+        max_candidates=2,
+        max_rounds=1,
+        generator_model="qwen-max",  # stale/wrong config string — must NOT be used
+    )
+    executor = HypothesisExecutor(
+        session,
+        gen_provider=gen,
+        rev_provider=rev,
+        store_path=store_path,
+        config=config,
+    )
+    unit = DispatchUnit(node_id="ROOT", goal="neuro")
+    await executor.run(unit)
+
+    accepted_nodes = [n for n in session.tree.get_all_nodes() if n.status == "accepted"]
+    assert len(accepted_nodes) == 0, (
+        "No-self-acquit must fire: gen.model=='qwen-plus'==rev.model, so no candidate "
+        f"can be accepted. Got {len(accepted_nodes)} accepted node(s). "
+        "If this fails, the executor is still passing cfg.generator_model ('qwen-max') "
+        "instead of getattr(self._gen, 'model', ...) ('qwen-plus') to run_adversary."
+    )
+
+    # Also verify that the pruned nodes carry the no-self-acquit gate verdict.
+    pruned = [n for n in session.tree.get_all_nodes() if n.status == "pruned"]
+    for node in pruned:
+        if node.refs and "verdict" in node.refs:
+            verdict = node.refs["verdict"]
+            assert verdict.get("decided_by") == "deterministic-gate", (
+                "No-self-acquit path must set decided_by='deterministic-gate', "
+                f"got {verdict.get('decided_by')!r}"
+            )
