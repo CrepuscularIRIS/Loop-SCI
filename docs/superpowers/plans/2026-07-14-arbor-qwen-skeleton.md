@@ -2158,7 +2158,7 @@ git commit -m "test(integration): coordinator cycle + event bus vs MockProvider 
 **Interfaces:**
 - Produces: `loop-sci run --task TEXT [--config KEY=VAL ...]`, `loop-sci resume RUN_ID`, `loop-sci inspect RUN_ID`
 
-- [ ] **Step 1: Implement `loop_sci/cli.py`**
+- [x] **Step 1: Implement `loop_sci/cli.py`**
 
 ```python
 """CLI entry point: run / resume / inspect."""
@@ -2283,7 +2283,7 @@ def inspect(
     typer.echo(session.tree.to_compact_summary())
 ```
 
-- [ ] **Step 2: Verify CLI help works**
+- [x] **Step 2: Verify CLI help works**
 
 ```bash
 uv run loop-sci --help
@@ -2291,7 +2291,7 @@ uv run loop-sci --help
 
 Expected: shows `run`, `resume`, `inspect` sub-commands.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add loop_sci/cli.py
