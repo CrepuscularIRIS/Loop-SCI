@@ -608,7 +608,7 @@ git commit -m "feat(literature/search): multi-source dispatch with graceful degr
 - Produces: `Fact` dataclass; `VerificationStatus` dataclass
 - Consumed by: Tasks 5, 6, 7, 8, 9
 
-- [ ] **Step 4.1: Write failing tests**
+- [x] **Step 4.1: Write failing tests**
 
 ```python
 # tests/unit/literature/test_fact_schema.py
@@ -645,7 +645,7 @@ def test_fact_with_verification():
 Run: `uv run pytest tests/unit/literature/test_fact_schema.py -v`
 Expected: FAIL — module not found
 
-- [ ] **Step 4.2: Implement Fact and VerificationStatus**
+- [x] **Step 4.2: Implement Fact and VerificationStatus**
 
 ```python
 # loop_sci/literature/extract/fact.py
@@ -679,12 +679,12 @@ class Fact:
             raise ValueError("Fact.source_ref must contain 'source' and 'external_id'")
 ```
 
-- [ ] **Step 4.3: Run tests**
+- [x] **Step 4.3: Run tests**
 
 Run: `uv run pytest tests/unit/literature/test_fact_schema.py -v`
 Expected: all 3 tests PASS
 
-- [ ] **Step 4.4: Commit**
+- [x] **Step 4.4: Commit**
 
 ```bash
 git add loop_sci/literature/extract/ tests/unit/literature/test_fact_schema.py
