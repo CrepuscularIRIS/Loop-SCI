@@ -25,9 +25,7 @@
 - Interpreter: `.venv/bin/python` (hydra 1.3.4, ruff 0.15.21). Bare python=conda (no deps). All implementer/fix dispatches MUST use `.venv/bin/python -m pytest` + `.venv/bin/ruff`.
 
 ## Current
-- Task: 2 (Scoring) -> osp 4.1
-- Stage: task-review (fix round 1)
-- Commit: d0817d7; reviewer APPROVED, anti-fab floor genuinely enforced.
-- Important fixed round 1: remove dead w_n/w_c (weighting is downstream Task 9/10 job), delete tautological/vacuous weight tests; 2 minor comment fixes.
-- NOTE for Task 9/10: Node.score = w_n*novelty + w_c*self_consistency (w_n=w_c=0.5, Hydra conf/hypothesis/default.yaml) is set by ranking/executor, NOT by scoring.py.
-- Fix round: 1/2 dispatched
+- Tasks 1,2 COMPLETE. Task: 3 (Verdict ledger) -> osp 3.4
+- Stage: task-review
+- Commit: e50638a (ledger.py 108 + test 98, +208); 7/7, 18 total, 0 regressions; no risk signals
+- review-fix round: 0/2; Reviewer: Opus dispatched (review-c9b564e..e50638a.diff)

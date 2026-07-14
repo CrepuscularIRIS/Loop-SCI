@@ -409,7 +409,7 @@ git commit -m "feat(hypothesis): add deterministic novelty+self-consistency scor
 **Interfaces:**
 - Produces: `VerdictLedger(path: Path)`, methods `append(verdict_id, node_id, reviewer_model, result, round_n)`, `accepted_node_ids() -> set[str]`, `all_entries() -> list[dict]`.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```python
 # tests/unit/hypothesis/test_ledger.py
@@ -441,13 +441,13 @@ def test_resume_loads_existing(tmp_path):
     assert "n0" in ledger.accepted_node_ids()
 ```
 
-- [ ] **Step 2: Run test — verify FAIL**
+- [x] **Step 2: Run test — verify FAIL**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_ledger.py -v 2>&1 | tail -5
 ```
 
-- [ ] **Step 3: Implement `loop_sci/hypothesis/ledger.py`**
+- [x] **Step 3: Implement `loop_sci/hypothesis/ledger.py`**
 
 ```python
 # loop_sci/hypothesis/ledger.py
@@ -480,14 +480,14 @@ class VerdictLedger:
         return list(self._entries)
 ```
 
-- [ ] **Step 4: Run test — verify PASS**
+- [x] **Step 4: Run test — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_ledger.py -v
 ```
 Expected: `3 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/hypothesis/ledger.py tests/unit/hypothesis/test_ledger.py

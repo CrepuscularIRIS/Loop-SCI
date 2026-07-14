@@ -20,7 +20,7 @@
 - [ ] 3.1 Implement `autopsy'`: convert each kill into CONSTRAINT/CANDIDATE/REGION-CLOSE; prune killed node retaining reason; feed outcome back into ranking
 - [ ] 3.2 Implement region-close (≥2 mechanisms killed by same root ⇒ stop generating in that region within the run)
 - [ ] 3.3 Implement the multi-round loop with the stall ledger: track new findings per round; structural pivot at stale≥2; escalate (stop nudging) at stale≥4
-- [ ] 3.4 Implement the acceptance ledger (`done`≠`accepted` with durable verdict ids) + a recovery anchor for resumability
+- [x] 3.4 Implement the acceptance ledger (`done`≠`accepted` with durable verdict ids) + a recovery anchor for resumability
 - [ ] 3.5 Unit tests: kill → constraint reweights queue; region-close halts re-exploration; pivot@2 and escalate@4; resume skips accepted nodes without re-critique or re-spend
 
 ## 4. Ranking, output interface, and foundation integration
