@@ -8,7 +8,7 @@ Public surface
 * :func:`hydra_to_agent_config` — bridge to the vendored :class:`AgentConfig`
 """
 
-from .schemas import AgentConf, EngineConf, LoopSCIConfig, ProviderConf, RunConf
+from .schemas import AgentConf, EngineConf, HypothesisConf, LoopSCIConfig, ProviderConf, RunConf
 from .loader import load_config, hydra_to_agent_config
 
 __all__ = [
@@ -17,6 +17,7 @@ __all__ = [
     "AgentConf",
     "EngineConf",
     "RunConf",
+    "HypothesisConf",
     "load_config",
     "hydra_to_agent_config",
 ]

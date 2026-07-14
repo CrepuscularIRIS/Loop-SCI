@@ -115,9 +115,11 @@ class TestGenerateTool:
         result_str = await registry.dispatch("generate", {"topic": "neuro"})
         result = json.loads(result_str)
         assert isinstance(result, dict)
-        # Should have some key indicating success or accepted count
-        assert "error" not in result or result.get("accepted_count") is not None or \
-               "status" in result or "accepted_count" in result
+        # Mock executor returns status="done" and refs={"accepted_count": 2}
+        assert result["status"] == "done", f"Expected status='done', got {result.get('status')!r}"
+        assert result["accepted_count"] == 2, (
+            f"Expected accepted_count=2, got {result.get('accepted_count')!r}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -155,6 +157,10 @@ class TestCritiqueTool:
         result_str = await registry.dispatch("critique", {"node_id": "hyp_123"})
         result = json.loads(result_str)
         assert isinstance(result, dict)
+        # Mock executor returns "UP"; the critique tool must propagate it as verdict
+        assert result["verdict"] == "UP", (
+            f"Expected verdict='UP' from mock executor, got {result.get('verdict')!r}"
+        )
 
 
 # ---------------------------------------------------------------------------

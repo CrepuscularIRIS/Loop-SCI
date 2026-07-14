@@ -174,8 +174,14 @@ class TestHypothesisCoordinatorPlan:
         coord = HypothesisCoordinator(cfg=None, executor=object(), step_budget=1)
         unit = coord._plan(node)
 
-        # context must be non-empty and carry something about the card/topic
+        # context must be non-empty and contain both the topic and the problem-card question
         assert unit.context, "context must be non-empty for a problem-card node"
+        assert "Why do neurons sync?" in unit.context, (
+            f"Expected card question 'Why do neurons sync?' in context, got: {unit.context!r}"
+        )
+        assert "neuro" in unit.context, (
+            f"Expected topic 'neuro' in context, got: {unit.context!r}"
+        )
 
     def test_plan_empty_context_for_non_card_node(self, tmp_path):
         """_plan sets context appropriately for non-card nodes (may be empty)."""
