@@ -28,9 +28,10 @@
 ## FORWARD Task 11 (integration tests): HARDEN the L3-mismatch test to assert VerificationStatus.layer_reached==3 explicitly (currently asserts verified_count==0 — non-vacuous only because L4 would verify; make it robust to L4/fixture changes).
 
 ### Current task
-- Task 11: Offline integration tests — anti-fabrication + resume-no-reverify (+ HARDEN L3 assert layer_reached==3 per T9 fwd note)
+- Task 12 (FINAL): Coverage gate + ruff clean + README section
 - Stage: implementing
 - review-fix round: 0 / 2
+- RUFF SWEEP ALL accumulated: unused imports in dispatch.py/test_dispatch.py, test_citation_verify.py 324-326, schema.py field, test_event_bus.py pytest, + dead code in test_lit_miner_e2e verified_nodes comprehension. Coverage: source loop_sci omit _vendor, >=80% (esp new literature/). README literature-mining section (sources, DASHSCOPE_API_KEY, fact-base output, live-needs-keys).
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
@@ -51,6 +52,7 @@
 - Task 8: complete (impl 23e1133 Opus Approved; ONLY-verified guard airtight [persist_fact guards before any write; rejected/pending/None -> NEITHER tree nor store, all tested]; root->paper->fact nodes + Node.refs payload round-trips disk; JSON store retrieve-all/filter lossless; same-paper dedup test present; 26 new/291 passed/5 skipped; 1 Minor [store.add unguarded - use persist_fact in T9])
 - Task 9: complete (impl 7bc3551 INDEPENDENT Opus Approved [impl self-review NOT trusted]; ALL 3 HARD REQS met — L3 WIRED [expected_year/authors from PaperResult] + test MUTATION-VERIFIED non-vacuous [reviewer: no-wiring->verified@4, wiring->rejected@3]; dedup one-paper-node keyed external_id; persist_fact guarded no store.add; resume durable via tree refs; 6 offline tests; 297 passed/5 skipped; 2 Minor [assert layer_reached==3 explicit->T11; advance_step no mark_complete intentional])
 - Task 10: complete (impl ecdc329 Opus Approved; 4 tools [lit_search/fetch/extract/verify] real schemas + async dispatch->JSON string + structured errors from real registry; genuine Task1-9 wrap w/ injected deps offline; 2 shortcuts PROVABLY BENIGN [verify never reads confidence; extract only reads abstract; L3-noop is hint-gated by design]; 15 new/312 passed/5 skipped; 2 Minor [DOI provenance in _extract; 1 under-asserting test])
+- Task 11: complete (impl cb8c942 Opus Approved; 6 offline integration scenarios drive REAL executor+pipeline [mock only network seams]; anti-fab LAYER-PINNED [hallucinated@L2, misattributed@L4, L3 mismatch@3]; L3 hardening NON-VACUOUS [resolved abstract scores 1.0 so L4 would pass -> only L3 rejects]; persistence checked after disk reload; only-verified; resume; + bonus live e2e skip-guarded; 318 passed/6 skipped; 3 cosmetic Minor)
 
 ### Completed
 (none yet)

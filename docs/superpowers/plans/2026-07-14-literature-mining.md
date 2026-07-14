@@ -1912,7 +1912,7 @@ git commit -m "feat(literature): register lit_search/fetch/extract/verify in Too
 **Interfaces:**
 - Consumes: all Groups 1–4 components; `MockProvider`; `RunSession`
 
-- [ ] **Step 11.1: Write failing offline integration tests (FRONT-LOADED per spec)**
+- [x] **Step 11.1: Write failing offline integration tests (FRONT-LOADED per spec)**
 
 ```python
 # tests/integration/test_lit_miner_e2e.py
@@ -2075,7 +2075,7 @@ async def test_resume_no_reverify(session, tmp_path):
 Run: `uv run pytest tests/integration/test_lit_miner_e2e.py -v`
 Expected: FAIL (until Groups 1–4 are complete)
 
-- [ ] **Step 11.2: Add live test stub**
+- [x] **Step 11.2: Add live test stub**
 
 ```python
 # tests/live/test_lit_miner_live.py
@@ -2133,7 +2133,7 @@ async def test_live_literature_mining_small_neuro_topic(api_key, tmp_path):
 Run: `uv run pytest tests/integration/test_lit_miner_e2e.py -v`
 (After Groups 1–4 complete) Expected: all 4 integration tests PASS
 
-- [ ] **Step 11.3: Commit**
+- [x] **Step 11.3: Commit**
 
 ```bash
 git add tests/integration/test_lit_miner_e2e.py tests/live/test_lit_miner_live.py
