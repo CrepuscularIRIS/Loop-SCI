@@ -25,8 +25,7 @@
 - Interpreter: `.venv/bin/python` (hydra 1.3.4, ruff 0.15.21). Bare python=conda (no deps). All implementer/fix dispatches MUST use `.venv/bin/python -m pytest` + `.venv/bin/ruff`.
 
 ## Current
-- Tasks 1-10 COMPLETE. Task: 11 (integration+live+README+coverage) -> osp 5.1,5.2,5.3 [FINAL]
-- Stage: task-review
-- Commit: 58a25a5 (integration 497 + live 108 + README 48 + schemas fix 11 + tools cov 118, +781); 4 integration GREEN + 1 live-skip; coverage loop_sci/hypothesis 95.84%; full suite 443 passed/7 skipped/0 regressions; ruff clean
-- INTEGRATION CAUGHT REAL PROD BUG: refs_from_dict crashed on refs["scores"] extra keys (overall/w_n/w_c from 10a) -> Scores(**d) TypeError; fixed 11-line tolerant deserialize in schemas.py.
-- review-fix round: 0/2; Reviewer: Opus dispatched (scrutinize schemas.py fix) — review-c192eff..58a25a5.diff
+- ALL 11 TASKS COMPLETE — all 25 OpenSpec tasks checked. suite 443 passed/7 skipped/0 regressions; coverage loop_sci/hypothesis 95.84%; ruff clean.
+- Stage: final-review (thorough mode: one final complete whole-branch review)
+- MERGE_BASE for final review = git merge-base main HEAD
+- After final review passes -> return to comet-build exit checks -> build guard -> verify phase.
