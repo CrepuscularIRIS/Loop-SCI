@@ -3,4 +3,5 @@ defaults:
   - agent: default
   - engine: default
   - run: default
+  - hypothesis: default
   - _self_

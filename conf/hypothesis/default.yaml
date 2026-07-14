@@ -1,0 +1,15 @@
+# @package _global_.hypothesis
+# HypothesisConfig defaults — caps, thresholds, and model names.
+# Mirrors the HypothesisConfig dataclass defaults in loop_sci/hypothesis/config.py.
+max_cards: 5
+max_candidates: 4
+max_rounds: 3
+novelty_low: 0.15
+novelty_high: 0.60
+w_n: 0.5
+w_c: 0.5
+pivot_at: 2
+escalate_at: 4
+region_close_threshold: 2
+generator_model: "qwen-max"
+reviewer_model: "qwen-plus"

@@ -48,6 +48,33 @@ class RunConf:
 
 
 @dataclass
+class HypothesisConf:
+    """Hypothesis engine settings surfaced by conf/hypothesis/default.yaml.
+
+    Fields mirror :class:`~loop_sci.hypothesis.config.HypothesisConfig` so
+    that ``LoopSCIConfig.hypothesis`` carries the same caps, thresholds, and
+    model names.  Callers may convert to a ``HypothesisConfig`` via::
+
+        from loop_sci.hypothesis.config import HypothesisConfig
+        hyp_cfg = HypothesisConfig(**{f: getattr(cfg.hypothesis, f)
+                                      for f in vars(HypothesisConfig())})
+    """
+
+    max_cards: int = 5
+    max_candidates: int = 4
+    max_rounds: int = 3
+    novelty_low: float = 0.15
+    novelty_high: float = 0.60
+    w_n: float = 0.5
+    w_c: float = 0.5
+    pivot_at: int = 2
+    escalate_at: int = 4
+    region_close_threshold: int = 2
+    generator_model: str = "qwen-max"
+    reviewer_model: str = "qwen-plus"
+
+
+@dataclass
 class LoopSCIConfig:
     """Top-level config composed of all sub-configs."""
 
@@ -55,3 +82,4 @@ class LoopSCIConfig:
     agent: AgentConf = field(default_factory=AgentConf)
     engine: EngineConf = field(default_factory=EngineConf)
     run: RunConf = field(default_factory=RunConf)
+    hypothesis: HypothesisConf = field(default_factory=HypothesisConf)
