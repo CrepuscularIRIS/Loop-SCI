@@ -1,5 +1,7 @@
 """loop_sci.hypothesis — hypothesis schema and lifecycle sub-package."""
 
+from loop_sci.hypothesis.config import HypothesisConfig
+from loop_sci.hypothesis.executor import HypothesisExecutor
 from loop_sci.hypothesis.ledger import VerdictLedger
 from loop_sci.hypothesis.ranked import RankedHypothesis, RankedHypothesisStore
 from loop_sci.hypothesis.schemas import (
@@ -21,6 +23,8 @@ __all__ = [
     "Autopsy",
     "Contract",
     "DerivationStep",
+    "HypothesisConfig",
+    "HypothesisExecutor",
     "HypothesisHyp",
     "HypothesisRefs",
     "Iteration",
