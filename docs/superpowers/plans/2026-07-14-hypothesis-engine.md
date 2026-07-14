@@ -101,7 +101,7 @@ tests/live/
 - Produces: `build_card_refs(kind, frame, topic, card) -> dict`, `build_hyp_refs(...) -> dict`, `refs_from_dict(d) -> HypothesisRefs`.
 - All dicts must round-trip through `json.dumps` / `json.loads` and through `Node.to_dict()` / `Node.from_dict()`.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```python
 # tests/unit/hypothesis/test_schemas.py
@@ -134,14 +134,14 @@ def test_hyp_refs_verdict_serializable():
     assert back.verdict.decided_by == "deterministic-gate"
 ```
 
-- [ ] **Step 2: Run test — verify FAIL**
+- [x] **Step 2: Run test — verify FAIL**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_schemas.py -v 2>&1 | tail -5
 ```
 Expected: `ModuleNotFoundError` or `ImportError`.
 
-- [ ] **Step 3: Implement `loop_sci/hypothesis/schemas.py`**
+- [x] **Step 3: Implement `loop_sci/hypothesis/schemas.py`**
 
 ```python
 # loop_sci/hypothesis/schemas.py
@@ -253,14 +253,14 @@ def refs_from_dict(d: dict[str, Any]) -> HypothesisRefs:
 
 Create `loop_sci/hypothesis/__init__.py` (empty for now) and `tests/unit/hypothesis/__init__.py` (empty).
 
-- [ ] **Step 4: Run test — verify PASS**
+- [x] **Step 4: Run test — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_schemas.py -v
 ```
 Expected: `2 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/hypothesis/__init__.py loop_sci/hypothesis/schemas.py tests/unit/hypothesis/__init__.py tests/unit/hypothesis/test_schemas.py

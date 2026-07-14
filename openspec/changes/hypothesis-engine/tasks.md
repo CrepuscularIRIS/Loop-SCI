@@ -1,6 +1,6 @@
 ## 1. Hypothesis generation (prospect' + forge')
 
-- [ ] 1.1 Define the hypothesis schema (problem card `{Q, WHY-NOW, PROBE/KILL, STAKES}`; hypothesis `{MECHANISM, KILL, BRACKET, DIFF-PREDICTION}`; evidence-graded derivation step; scores) and its `Node.refs` payload layout
+- [x] 1.1 Define the hypothesis schema (problem card `{Q, WHY-NOW, PROBE/KILL, STAKES}`; hypothesis `{MECHANISM, KILL, BRACKET, DIFF-PREDICTION}`; evidence-graded derivation step; scores) and its `Node.refs` payload layout
 - [ ] 1.2 Implement `prospect'`: mine gap/contradiction cards from the fact base via its stable query interface (no new fetching, no idea-tree internals); drop cards citing non-existent facts
 - [ ] 1.3 Implement `forge'`: Qwen-driven induction+deduction from a card into candidate hypotheses with rival-frame siblings; record as idea-tree nodes under fact node(s)
 - [ ] 1.4 Implement the relabeling filter (strip-the-new-words ⇒ discard when no distinct diff-prediction survives)
