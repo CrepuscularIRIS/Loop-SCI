@@ -511,7 +511,7 @@ git commit -m "feat(hypothesis): add append-only VerdictLedger for resume and au
 
 LLM prompt returns JSON array: `[{"Q": "...", "WHY_NOW": "...", "PROBE_KILL": "...", "STAKES": 0.0–1.0, "fact_ids": ["..."]}]`. Invalid JSON → retry once → drop.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```python
 # tests/unit/hypothesis/test_prospect.py
@@ -566,13 +566,13 @@ async def test_invalid_json_retried_then_dropped(tmp_path):
     assert cards == []
 ```
 
-- [ ] **Step 2: Run test — verify FAIL**
+- [x] **Step 2: Run test — verify FAIL**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_prospect.py -v 2>&1 | tail -5
 ```
 
-- [ ] **Step 3: Implement `loop_sci/hypothesis/stages/prospect.py`**
+- [x] **Step 3: Implement `loop_sci/hypothesis/stages/prospect.py`**
 
 ```python
 # loop_sci/hypothesis/stages/prospect.py
@@ -654,14 +654,14 @@ async def _call_with_retry(provider, prompt: str) -> str | None:
 
 Create `loop_sci/hypothesis/stages/__init__.py` (empty).
 
-- [ ] **Step 4: Run test — verify PASS**
+- [x] **Step 4: Run test — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_prospect.py -v
 ```
 Expected: `3 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/hypothesis/stages/__init__.py loop_sci/hypothesis/stages/prospect.py tests/unit/hypothesis/test_prospect.py

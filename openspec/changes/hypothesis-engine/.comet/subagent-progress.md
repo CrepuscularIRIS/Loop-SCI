@@ -25,7 +25,7 @@
 - Interpreter: `.venv/bin/python` (hydra 1.3.4, ruff 0.15.21). Bare python=conda (no deps). All implementer/fix dispatches MUST use `.venv/bin/python -m pytest` + `.venv/bin/ruff`.
 
 ## Current
-- Tasks 1,2 COMPLETE. Task: 3 (Verdict ledger) -> osp 3.4
+- Tasks 1,2,3 COMPLETE. Task: 4 (prospect') -> osp 1.2
 - Stage: task-review
-- Commit: e50638a (ledger.py 108 + test 98, +208); 7/7, 18 total, 0 regressions; no risk signals
-- review-fix round: 0/2; Reviewer: Opus dispatched (review-c9b564e..e50638a.diff)
+- Commit: 48bc9d0 (prospect.py 125 + test 117, +243); 5/5, 23 total, 0 regressions; no risk
+- review-fix round: 0/2; Reviewer: Opus dispatched (review-45e0a7d..48bc9d0.diff)
