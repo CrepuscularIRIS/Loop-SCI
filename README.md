@@ -174,6 +174,54 @@ The live test at `tests/live/test_lit_miner_live.py` is skipped automatically un
 
 ---
 
+## Hypothesis Engine (change #4)
+
+### Pipeline overview
+
+```
+FactStore (read-only) → prospect' → forge' → contract → adversary' → autopsy'
+                                                                    → ranked hypotheses
+```
+
+1. **prospect'** mines gap cards `{Q, WHY_NOW, PROBE_KILL, STAKES}` from `FactStore.filter()`. Cards citing non-existent `fact_id`s are dropped before ranking.
+2. **forge'** generates `{MECHANISM, KILL, BRACKET, DIFF_PREDICTION}` candidates (Qwen-Max) with ≥1 rival-frame sibling per card. Relabeling candidates are discarded.
+3. **contract** freezes `{HYPOTHESIS, LATENT_ROOT, ACCEPT_IF, KILL_IF}` as derivation tripwires before any verdict.
+4. **adversary'** runs a deterministic pre-jury gate first (contradictions or load-bearing `[guess]` or ungrounded `[paper]`/`[inferred]` citations → DOWN without a reviewer call), then the Qwen-Plus KILL-persona jury. The generator cannot issue its own accept.
+5. **autopsy'** converts kills to `CONSTRAINT / CANDIDATE / REGION_CLOSE`, feeds back into ranking, and tracks stall/escalate (pivot@2, escalate@4).
+
+### Qwen-vs-Qwen jury
+
+- Generator: `qwen-max` · Reviewer: `qwen-plus` with adversarial KILL-biased persona.
+- **No self-acquit:** an UP verdict from the same model tier as the generator is rejected at the routing layer before any verdict is recorded.
+- **Deterministic gate:** mechanism-contradicts-grounding, load-bearing `[guess]`, or ungrounded `[paper]`/`[inferred]` citation → DOWN without spending a reviewer call.
+
+### Budget & environment
+
+Per-run caps (Hydra-configurable in `conf/hypothesis/default.yaml`): ≤5 cards · ≤4 candidates/card · ≤3 rounds. Jury fires once per surviving candidate after the deterministic gate.
+
+Set `DASHSCOPE_API_KEY` for live runs. Offline tests use `MockProvider` (no key needed).
+
+### Ranked output for downstream plan-assembler (#5)
+
+```python
+from loop_sci.hypothesis import RankedHypothesisStore
+ranked = RankedHypothesisStore(session.tree).get_ranked(topic="neuro", status="accepted")
+# each RankedHypothesis: node_id, mechanism, derivation_chain, diff_prediction,
+#                        novelty, self_consistency, overall_score, grounding_fact_ids
+```
+
+Results are sorted best-first by `overall_score` (= `w_n * novelty + w_c * self_consistency`).
+
+### Live tests
+
+```bash
+DASHSCOPE_API_KEY=<key> python -m pytest tests/live/test_hypothesis_live.py -v -m live
+```
+
+Skipped automatically when `DASHSCOPE_API_KEY` is absent.
+
+---
+
 ## Vendored Arbor
 
 `loop_sci/_vendor/arbor/` is a pinned snapshot of

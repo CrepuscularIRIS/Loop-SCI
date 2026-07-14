@@ -192,7 +192,16 @@ def refs_from_dict(d: dict[str, Any]) -> HypothesisRefs:
     verdict_d = d.get("verdict")
     verdict = Verdict(**verdict_d) if verdict_d else None
     scores_d = d.get("scores")
-    scores = Scores(**scores_d) if scores_d else None
+    if scores_d:
+        # The executor persists extra keys (overall, w_n, w_c) alongside the Scores
+        # fields; extract only the fields that Scores accepts to avoid TypeError.
+        scores = Scores(
+            novelty=scores_d["novelty"],
+            self_consistency=scores_d["self_consistency"],
+            decided_by=scores_d.get("decided_by", "deterministic"),
+        )
+    else:
+        scores = None
     autopsy_d = d.get("autopsy")
     autopsy = Autopsy(**autopsy_d) if autopsy_d else None
     iteration = Iteration(**(d.get("iteration") or {}))

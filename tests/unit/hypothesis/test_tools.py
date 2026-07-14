@@ -280,3 +280,121 @@ class TestHypothesisConfig:
 
         cfg = load_config(config_dir=self.CONF_DIR, overrides=["hypothesis.max_cards=2"])
         assert cfg.hypothesis.max_cards == 2
+
+
+# ---------------------------------------------------------------------------
+# Targeted coverage tests — uncovered edge-cases in tools.py
+# ---------------------------------------------------------------------------
+
+
+class TestToolEdgeCases:
+    """Cover remaining uncovered branches in loop_sci/hypothesis/tools.py."""
+
+    @pytest.mark.asyncio
+    async def test_generate_invalid_topic_empty_string_returns_error(self):
+        """generate with empty topic returns invalid_input error (line 53)."""
+        from loop_sci.engine.tools import ToolRegistry
+        from loop_sci.hypothesis.tools import register_hypothesis_tools
+
+        registry = ToolRegistry()
+        register_hypothesis_tools(registry, executor=object())  # non-None executor
+
+        result_str = await registry.dispatch("generate", {"topic": ""})
+        result = json.loads(result_str)
+        assert result.get("error") == "invalid_input", (
+            f"Empty topic must yield invalid_input error, got {result!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_generate_executor_raises_returns_tool_error(self):
+        """generate where executor.run raises returns tool_error JSON (lines 66-68)."""
+        from loop_sci.engine.tools import ToolRegistry
+        from loop_sci.hypothesis.tools import register_hypothesis_tools
+
+        class _BrokenExecutor:
+            async def run(self, unit):
+                raise RuntimeError("simulated executor crash")
+
+        registry = ToolRegistry()
+        register_hypothesis_tools(registry, executor=_BrokenExecutor())
+
+        result_str = await registry.dispatch("generate", {"topic": "neuro"})
+        result = json.loads(result_str)
+        assert result.get("error") == "tool_error", (
+            f"Executor crash must yield tool_error, got {result!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_critique_invalid_node_id_returns_error(self):
+        """critique with empty node_id returns invalid_input error (line 96)."""
+        from loop_sci.engine.tools import ToolRegistry
+        from loop_sci.hypothesis.tools import register_hypothesis_tools
+
+        registry = ToolRegistry()
+        register_hypothesis_tools(registry, executor=object())  # non-None executor
+
+        result_str = await registry.dispatch("critique", {"node_id": ""})
+        result = json.loads(result_str)
+        assert result.get("error") == "invalid_input", (
+            f"Empty node_id must yield invalid_input error, got {result!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_critique_executor_raises_returns_tool_error(self):
+        """critique where executor.run_critique raises returns tool_error (lines 102-104)."""
+        from loop_sci.engine.tools import ToolRegistry
+        from loop_sci.hypothesis.tools import register_hypothesis_tools
+
+        class _CrashExecutor:
+            async def run_critique(self, node_id: str) -> str:
+                raise RuntimeError("critique crash")
+
+        registry = ToolRegistry()
+        register_hypothesis_tools(registry, executor=_CrashExecutor())
+
+        result_str = await registry.dispatch("critique", {"node_id": "hyp_123"})
+        result = json.loads(result_str)
+        assert result.get("error") == "tool_error", (
+            f"Critique crash must yield tool_error, got {result!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_rank_executor_without_ranked_store_returns_empty(self):
+        """rank when executor has no ranked_store method returns [] (line 136)."""
+        from loop_sci.engine.tools import ToolRegistry
+        from loop_sci.hypothesis.tools import register_hypothesis_tools
+
+        class _NoStoreExecutor:
+            pass  # no ranked_store method
+
+        registry = ToolRegistry()
+        register_hypothesis_tools(registry, executor=_NoStoreExecutor())
+
+        result_str = await registry.dispatch("rank", {"topic": "neuro"})
+        result = json.loads(result_str)
+        assert result == [], (
+            f"rank with no ranked_store must return [], got {result!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_rank_executor_ranked_store_raises_returns_tool_error(self):
+        """rank where ranked_store().get_ranked raises returns tool_error (lines 150-152)."""
+        from loop_sci.engine.tools import ToolRegistry
+        from loop_sci.hypothesis.tools import register_hypothesis_tools
+
+        class _CrashStore:
+            def get_ranked(self, **kwargs):
+                raise RuntimeError("rank crash")
+
+        class _CrashExecutor:
+            def ranked_store(self):
+                return _CrashStore()
+
+        registry = ToolRegistry()
+        register_hypothesis_tools(registry, executor=_CrashExecutor())
+
+        result_str = await registry.dispatch("rank", {"topic": "neuro"})
+        result = json.loads(result_str)
+        assert result.get("error") == "tool_error", (
+            f"rank crash must yield tool_error, got {result!r}"
+        )
