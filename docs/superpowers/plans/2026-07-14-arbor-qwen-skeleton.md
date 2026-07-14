@@ -1522,7 +1522,7 @@ git commit -m "feat(state): RunSession with checkpoint/resume and already-comple
 **Interfaces:**
 - Produces: `from loop_sci.events import EventBus, NullBus`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/unit/test_event_bus.py
@@ -1577,7 +1577,7 @@ def test_subscriber_exception_does_not_propagate():
     bus.emit("boom", {})  # must not raise
 ```
 
-- [ ] **Step 2: Run to verify FAIL**
+- [x] **Step 2: Run to verify FAIL**
 
 ```bash
 uv run pytest tests/unit/test_event_bus.py -v 2>&1 | head -10
@@ -1585,7 +1585,7 @@ uv run pytest tests/unit/test_event_bus.py -v 2>&1 | head -10
 
 Expected: ImportError
 
-- [ ] **Step 3: Implement `loop_sci/events/__init__.py`**
+- [x] **Step 3: Implement `loop_sci/events/__init__.py`**
 
 ```python
 """Re-export vendored EventBus and NullBus."""
@@ -1608,7 +1608,7 @@ __all__ = [
 ]
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 ```bash
 uv run pytest tests/unit/test_event_bus.py -v
@@ -1616,7 +1616,7 @@ uv run pytest tests/unit/test_event_bus.py -v
 
 Expected: all PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/events/ tests/unit/test_event_bus.py

@@ -28,9 +28,11 @@ Reason: open-phase tasks.md text is stale vs design (1.3 says vendor "orchestrat
 ## FORWARD NOTE for Task 8: state/__init__.py must now export RunSession (Task 7 left it out intentionally).
 
 ### Current task
-- Task 9: Event bus re-export + subscriber-parity test
+- Task 10: Agent runtime adapter (hydra_cfg->AgentConfig; build_agent over vendored Agent)
 - Stage: implementing
 - review-fix round: 0 / 2
+
+## PRE-GUARD CLEANUP TODO: (1) add `.superpowers/` to .gitignore (SDD report/diff scratch committed) + git rm --cached tracked scratch; (2) sweep ruff (unused `import pytest` in test_event_bus.py, any others) — Task 17 lint gate.
 - risk task: yes (many files; import-closure rewriting) — expect per-task review to scrutinize vendored edits
 - grok policy: grok:grok-rescue agent for fixes + second-opinion on high-risk tasks (15,16); Opus 4.8 = authoritative per-task gate
 
@@ -63,3 +65,4 @@ Plan→OpenSpec mapping (loose/many-to-many; check off openspec sub-tasks as gen
 - Task 6: complete (impl d59d028 Opus Approved; dispatch provably fail-closed on all escape paths; asyncio.to_thread sync path; 63 passed pristine; 2 Minor [BaseException exclusion is by-design; stronger malformed-args assertion — final review])
 - Task 7: complete (impl cea9e0d Opus Approved; refs = REAL persisted subclass field, round-trip verified; load_json faithfully duplicated; no vendored edits; 10/10 new, 73/73 pristine; 3 Minor [keep-in-sync comment on load_json; refs->MUTABLE_FIELDS for Task12; import json placement — final review])
 - Task 8: complete (impl 920143d Opus Approved; atomic cursor write [tmp+Path.replace]; resume + already-complete-no-op proven by real tests; subclass tree so refs survives resume; 6/6 new, 79/79 pristine; 3 Minor [completed_node_ids YAGNI ok; mark_complete/is_complete contract note for Task12; temp-name cosmetic — final review])
+- Task 9: complete (impl c0ad2da Opus Approved; faithful pure re-export EventBus/NullBus/Event+types; NullBus genuine no-op; exception-swallow test matches vendored; 5/5 new, 84/84 pristine; 2 Minor [tighter parity test; unused pytest import ruff-sweep — final review/T17])
