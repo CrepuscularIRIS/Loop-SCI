@@ -862,7 +862,7 @@ git commit -m "feat(literature/extract): Qwen-driven extractor, drops ungrounded
 - Consumes: `Fact` (Task 4); `SearchClient` protocol (Task 1)
 - Produces: `VerificationPipeline(search_clients: dict[str, SearchClient]).verify_layers_123(fact: Fact) -> VerificationStatus`
 
-- [ ] **Step 6.1: Write failing tests for L1–L3**
+- [x] **Step 6.1: Write failing tests for L1–L3**
 
 ```python
 # tests/unit/literature/test_citation_layers_123.py
@@ -928,7 +928,7 @@ async def test_l1_l2_l3_pass_for_valid_citation():
 Run: `uv run pytest tests/unit/literature/test_citation_layers_123.py -v`
 Expected: FAIL — modules not found
 
-- [ ] **Step 6.2: Implement L1 + L2 + L3 in citation.py**
+- [x] **Step 6.2: Implement L1 + L2 + L3 in citation.py**
 
 ```python
 # loop_sci/literature/verify/citation.py
@@ -995,12 +995,12 @@ def _check_metadata(ref: dict, paper: Any) -> tuple[bool, str]:
     return True, ""
 ```
 
-- [ ] **Step 6.3: Run L1-L3 tests**
+- [x] **Step 6.3: Run L1-L3 tests**
 
 Run: `uv run pytest tests/unit/literature/test_citation_layers_123.py -v`
 Expected: all 3 tests PASS
 
-- [ ] **Step 6.4: Commit**
+- [x] **Step 6.4: Commit**
 
 ```bash
 git add loop_sci/literature/verify/ tests/unit/literature/test_citation_layers_123.py

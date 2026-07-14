@@ -22,8 +22,11 @@
 ## FORWARD: Task 6 (verify) can narrow VerificationStatus.status to Literal/Enum + validate layer_reached 1-4 (T4 deferral). Extractor grounding min-span-length hardening = future (out of scope).
 ## T12 RUFF SWEEP: 3 unused-import violations in dispatch.py/test_dispatch.py (typing.Any + 2 fixable) + earlier minors (unused field import schema.py, etc.).
 
+## HARD GATE for Task 9 (executor): WIRE L3 expected metadata. Currently expected_year/expected_authors are ad-hoc test-only attrs -> L3 INERT in production (all resolving facts pass to pending_l4). Task 9 MUST pass the source PaperResult's authors/year/venue as the expected values to VerificationPipeline (or extend SourceRef to carry them), with an INTEGRATION TEST proving L3 catches a real metadata mismatch on a real fact. Else 4-layer silently becomes 3-layer (rubric 可验证性 risk). Final review must verify L3 is exercised in the real flow.
+## Task 6 minors (final review): year-check false-passes when resolved paper.year is None; surname heuristic=longest-token (loose, false-pass leaning); DOI-fallback to fetch_by_id unverified vs real adapters.
+
 ### Current task
-- Task 6: L1 format + L2 existence + L3 metadata verification layers
+- Task 7: L4 content-grounding — hybrid lexical pre-filter + Qwen judge
 - Stage: implementing
 - review-fix round: 0 / 2
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
@@ -40,6 +43,7 @@
 - Task 3: complete (impl 02553c8 Opus Approved; 3 resilience guarantees [no-propagate/no-sibling-cancel/bounded-retry] all proven by REAL tests [sibling-completion tracked, re-invocation counts]; gather return_exceptions=True + injectable backoff; 9 new/198 pristine; 2 Minor [except BaseException->Exception; O(n2) lookup - final review])
 - Task 4: complete (impl 9dc8b44 Opus Approved; evidence-required 2-layer enforced + 4 independent tests; lossless round-trip nested SourceRef/VerificationStatus; grounding_scope constrained; SourceRef upgraded to typed dataclass; 17 new/219 pristine; 2 Minor deferred [confidence range->T5; status enum->T6])
 - Task 5: complete (impl 6d434cf; Opus found 1 IMPORTANT [anti-fabrication crux: grounding was prompt-only, not runtime-traceable] -> Sonnet fix 08ad881: normalized span-in-text runtime drop before cap + not-in-source drop test + reflowed-keep test -> Opus re-review Approved [no false-keep loophole, no regression]; confidence clamp; bounded; invalid-JSON->[]; 232 passed/5 skipped; 1 Minor [degenerate short-span match - future])
+- Task 6: complete (impl ea34a36 Opus Approved; CORE holds [L2 rejects hallucinated via real adapter lookup - tested; short-circuit call-count proven]; pending_l4 hook clean; VerificationStatus tightened [Literal status + layer 1-4]; 17 new/FULL 249 passed/5 skipped; 1 IMPORTANT [L3 expected-metadata unwired -> INERT in prod -> HARD GATE for T9] + 3 Minor final-review)
 
 ### Completed
 (none yet)
