@@ -24,6 +24,17 @@ from typing import Any
 
 _VALID_SCOPES: frozenset[str] = frozenset({"abstract", "full_text"})
 
+# Valid status values for VerificationStatus (T4 deferral: narrow to explicit set).
+# "flagged" is retained for backwards-compatibility with existing tests/fact-base.
+_VALID_STATUSES: frozenset[str] = frozenset({
+    "pending",
+    "pending_l4",
+    "verified",
+    "rejected",
+    "failed",
+    "flagged",
+})
+
 
 # ---------------------------------------------------------------------------
 # Sub-structures
@@ -73,7 +84,9 @@ class VerificationStatus:
 
     Attributes:
         layer_reached: The highest verification layer executed (1–4).
-        status: Outcome label — ``"verified"`` | ``"rejected"`` | ``"flagged"``.
+            Must be an integer in [1, 4].
+        status: Outcome label.  Valid values: ``"pending"`` | ``"pending_l4"`` |
+            ``"verified"`` | ``"rejected"`` | ``"failed"`` | ``"flagged"``.
         detail: Free-text annotation (e.g. reason for rejection).  Defaults to
             an empty string so callers don't need to supply it.
     """
@@ -81,6 +94,17 @@ class VerificationStatus:
     layer_reached: int
     status: str
     detail: str = ""
+
+    def __post_init__(self) -> None:
+        if not (1 <= self.layer_reached <= 4):
+            raise ValueError(
+                f"layer_reached must be in [1, 4]; got {self.layer_reached!r}"
+            )
+        if self.status not in _VALID_STATUSES:
+            raise ValueError(
+                f"status must be one of {sorted(_VALID_STATUSES)!r}; "
+                f"got {self.status!r}"
+            )
 
     # -- serialization -------------------------------------------------------
 
