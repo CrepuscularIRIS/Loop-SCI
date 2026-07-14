@@ -28,8 +28,10 @@ API notes
 from __future__ import annotations
 
 import logging
+import re
 import xml.etree.ElementTree as ET
 
+import defusedxml.ElementTree as defused_ET
 import httpx
 
 from .schema import PaperResult
@@ -63,7 +65,7 @@ class ArxivClient:
             params={"search_query": f"all:{query}", "max_results": max_results},
         )
         r.raise_for_status()
-        root = ET.fromstring(r.content)
+        root = defused_ET.fromstring(r.content)
         results: list[PaperResult] = []
         for entry in root.findall("atom:entry", _ATOM_NS):
             try:
@@ -82,7 +84,7 @@ class ArxivClient:
         arxiv_id = external_id.removeprefix("arxiv:")
         r = await self._http.get(_BASE, params={"id_list": arxiv_id})
         r.raise_for_status()
-        root = ET.fromstring(r.content)
+        root = defused_ET.fromstring(r.content)
         entries = root.findall("atom:entry", _ATOM_NS)
         if not entries:
             return None
@@ -95,18 +97,30 @@ class ArxivClient:
 
 
 def _strip_version(raw_id: str) -> str:
-    """Strip the trailing version number from an arXiv ``<id>`` value.
+    """Strip the URL prefix and trailing version suffix from an arXiv ``<id>`` value.
+
+    The arXiv Atom ``<id>`` element is a full URL of the form:
+    ``http://arxiv.org/abs/2401.00001v1``
+
+    We:
+    1. Strip the ``http(s)://arxiv.org/abs/`` (or ``export.arxiv.org/abs/``) prefix.
+    2. Remove a trailing ``vN`` version suffix using an anchored regex, so that bare
+       numeric IDs such as ``2401.00001`` and old-style IDs such as ``cs/0501001``
+       are preserved intact.
 
     Examples
     --------
-    ``"http://arxiv.org/abs/2401.00001v1"`` → ``"2401.00001"``
-    ``"http://arxiv.org/abs/2401.00001"``   → ``"2401.00001"``
+    ``"http://arxiv.org/abs/2401.00001v2"`` → ``"2401.00001"``
+    ``"http://arxiv.org/abs/2401.00001"``   → ``"2401.00001"``  (no corruption)
+    ``"http://arxiv.org/abs/cs/0501001"``   → ``"cs/0501001"``  (no corruption)
     """
-    # Remove trailing version suffix (v followed by one or more digits)
-    bare = raw_id.rstrip("0123456789")
-    if bare.endswith("v"):
-        bare = bare[:-1]
-    return bare.split("/abs/")[-1] if "/abs/" in bare else bare
+    # Step 1: extract the id portion after /abs/
+    if "/abs/" in raw_id:
+        arxiv_id = raw_id.split("/abs/", 1)[1]
+    else:
+        arxiv_id = raw_id
+    # Step 2: strip ONLY a trailing vN version suffix (anchored — never strips plain digits)
+    return re.sub(r"v\d+$", "", arxiv_id)
 
 
 def _entry_to_paper(entry: ET.Element) -> PaperResult:

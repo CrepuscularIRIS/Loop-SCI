@@ -179,3 +179,35 @@ async def test_ss_api_key_sent_in_header() -> None:
     await client.search("test")
     assert len(captured) == 1
     assert captured[0].headers.get("x-api-key") == "test-key-abc"
+
+
+# ---------------------------------------------------------------------------
+# Fix 2 — malformed-entry-skipped: missing `paperId` raises KeyError in _to_paper;
+#          the sibling valid entry must be returned; no exception propagates.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_ss_search_malformed_entry_missing_paper_id_skipped_sibling_survives() -> None:
+    """A response item that LACKS the required 'paperId' key crashes _to_paper
+    with KeyError (``d['paperId']`` is an unguarded access).  The adjacent valid
+    entry must still appear in the results — proving the per-entry try/except guard
+    actually absorbs the crash and lets siblings survive.
+    """
+    body = (
+        b'{"data": ['
+        # Malformed: no paperId → KeyError in _to_paper
+        b'{"title": "Crasher no paperId", "authors": [], "externalIds": {}},'
+        # Valid sibling
+        b'{"paperId": "s2valid99", "title": "Valid sibling", "authors": [],'
+        b' "externalIds": {}, "year": 2024, "venue": null, "abstract": null, "url": null}'
+        b"]}"
+    )
+    transport = MockTransport({"graph.api.semanticscholar.org": (200, body, "application/json")})
+    http = httpx.AsyncClient(transport=transport, base_url="https://api.semanticscholar.org")
+    client = SemanticScholarClient(http=http)
+    # Must not raise; malformed entry silently dropped
+    results = await client.search("test")
+    assert len(results) == 1
+    assert results[0].external_id == "s2:s2valid99"
+    assert results[0].title == "Valid sibling"

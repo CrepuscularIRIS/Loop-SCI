@@ -35,6 +35,7 @@ from __future__ import annotations
 import logging
 import xml.etree.ElementTree as ET
 
+import defusedxml.ElementTree as defused_ET
 import httpx
 
 from .schema import PaperResult
@@ -125,7 +126,7 @@ class PubMedClient:
             },
         )
         r.raise_for_status()
-        root = ET.fromstring(r.content)
+        root = defused_ET.fromstring(r.content)
         results: list[PaperResult] = []
         for article in root.findall(".//PubmedArticle"):
             try:

@@ -10,7 +10,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from loop_sci.literature.search.arxiv import ArxivClient
+from loop_sci.literature.search.arxiv import ArxivClient, _strip_version
 from loop_sci.literature.search.schema import PaperResult
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -162,3 +162,80 @@ async def test_arxiv_fetch_by_id_empty_feed_returns_none() -> None:
     client = ArxivClient(http=http)
     result = await client.fetch_by_id("arxiv:9999.00000")
     assert result is None
+
+
+# ---------------------------------------------------------------------------
+# Fix 1 regression — _strip_version must not corrupt bare numeric / old-style IDs
+#
+# RED (before fix): the old `rstrip("0123456789")` implementation produced:
+#   "http://arxiv.org/abs/2401.00001v2" → "2401."   (stripped all trailing digits)
+#   "http://arxiv.org/abs/2401.00001"   → "2401."   (no version, still corrupted)
+#   "http://arxiv.org/abs/cs/0501001"   → "cs/"     (all digits stripped)
+# GREEN (after fix): anchored `re.sub(r"v\d+$", "", ...)` only removes a genuine vN suffix.
+# ---------------------------------------------------------------------------
+
+
+def test_strip_version_with_version_suffix() -> None:
+    """URL with explicit vN suffix → bare arXiv id, version digits removed."""
+    assert _strip_version("http://arxiv.org/abs/2401.00001v2") == "2401.00001"
+
+
+def test_strip_version_without_version_suffix() -> None:
+    """URL without vN suffix → bare arXiv id intact, NOT truncated to '2401.'."""
+    result = _strip_version("http://arxiv.org/abs/2401.00001")
+    assert result == "2401.00001"
+    assert not result.endswith(".")  # guard against old rstrip corruption
+
+
+def test_strip_version_old_style_id() -> None:
+    """Old-style cs/NNNNNNN id → path preserved intact, NOT truncated to 'cs/'."""
+    result = _strip_version("http://arxiv.org/abs/cs/0501001")
+    assert result == "cs/0501001"
+    assert result != "cs/"  # guard against old rstrip corruption
+
+
+def test_strip_version_https_prefix() -> None:
+    """https variant is handled the same way as http."""
+    assert _strip_version("https://arxiv.org/abs/2310.12345v3") == "2310.12345"
+
+
+# ---------------------------------------------------------------------------
+# Fix 2 — malformed-entry-skipped: a crash-inducing entry is silently dropped;
+#          sibling valid entries ARE returned; no exception propagates.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_arxiv_search_malformed_entry_skipped_sibling_survives() -> None:
+    """An entry with a non-numeric <published> field crashes _entry_to_paper via
+    ValueError in int(published[:4]).  The valid sibling must still be returned
+    without any exception propagating.
+    """
+    body = b"""<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <!-- Malformed entry: published is garbage, int("XXXX") raises ValueError -->
+  <entry>
+    <id>http://arxiv.org/abs/2401.99999v1</id>
+    <title>Broken entry bad published date</title>
+    <published>XXXX-garbage</published>
+    <summary>Will crash on year parse.</summary>
+    <link rel="alternate" href="https://arxiv.org/abs/2401.99999"/>
+  </entry>
+  <!-- Valid sibling -->
+  <entry>
+    <id>http://arxiv.org/abs/2401.00099v1</id>
+    <title>Valid sibling paper</title>
+    <published>2024-01-15T00:00:00Z</published>
+    <summary>Good abstract.</summary>
+    <link rel="alternate" href="https://arxiv.org/abs/2401.00099"/>
+    <author><name>Author A</name></author>
+  </entry>
+</feed>"""
+    transport = MockTransport({"export.arxiv.org": (200, body, "application/atom+xml")})
+    http = httpx.AsyncClient(transport=transport, base_url="https://export.arxiv.org")
+    client = ArxivClient(http=http)
+    results = await client.search("test")
+    # No exception raised; exactly the valid sibling returned
+    assert len(results) == 1
+    assert results[0].external_id == "arxiv:2401.00099"
+    assert results[0].title == "Valid sibling paper"

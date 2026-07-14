@@ -8,11 +8,12 @@ verifying the two-hop logic without any real network calls.
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 import httpx
 import pytest
 
-from loop_sci.literature.search.pubmed import PubMedClient
+from loop_sci.literature.search.pubmed import PubMedClient, _article_to_paper
 from loop_sci.literature.search.schema import PaperResult
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -227,3 +228,71 @@ async def test_pubmed_fetch_by_id_missing_article_returns_none() -> None:
     client = PubMedClient(http=http, email="test@example.com", tool="loop-sci-test")
     result = await client.fetch_by_id("pubmed:99999999")
     assert result is None
+
+
+# ---------------------------------------------------------------------------
+# Fix 2 — malformed-entry-skipped for PubMed: one article crashes _article_to_paper;
+#          the valid sibling must survive; no exception propagates.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_pubmed_malformed_article_skipped_sibling_survives(
+    pubmed_http: httpx.AsyncClient,
+) -> None:
+    """Simulate a crash in _article_to_paper for the FIRST article by patching it
+    to raise RuntimeError on the first call and delegate normally on subsequent calls.
+    The valid second article must appear in results without any exception.
+    """
+    efetch_body = b"""<?xml version="1.0"?>
+<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation><PMID>99000001</PMID>
+      <Article><ArticleTitle>Crasher article</ArticleTitle></Article>
+    </MedlineCitation>
+  </PubmedArticle>
+  <PubmedArticle>
+    <MedlineCitation><PMID>38000001</PMID>
+      <Article>
+        <ArticleTitle>Valid sibling article</ArticleTitle>
+        <Abstract><AbstractText>Good abstract.</AbstractText></Abstract>
+        <AuthorList><Author><LastName>Lee</LastName></Author></AuthorList>
+        <Journal>
+          <Title>Nature</Title>
+          <JournalIssue><PubDate><Year>2023</Year></PubDate></JournalIssue>
+        </Journal>
+      </Article>
+    </MedlineCitation>
+    <PubmedData><ArticleIdList>
+      <ArticleId IdType="doi">10.1234/valid</ArticleId>
+    </ArticleIdList></PubmedData>
+  </PubmedArticle>
+</PubmedArticleSet>"""
+
+    esearch_body = b'{"esearchresult": {"idlist": ["99000001", "38000001"]}}'
+    transport = MockTransport(
+        {
+            "esearch.fcgi": (200, esearch_body, "application/json"),
+            "efetch.fcgi": (200, efetch_body, "application/xml"),
+        }
+    )
+    http = httpx.AsyncClient(transport=transport, base_url="https://eutils.ncbi.nlm.nih.gov")
+    client = PubMedClient(http=http, email="test@example.com", tool="loop-sci-test")
+
+    call_count = 0
+    real_article_to_paper = _article_to_paper
+
+    def _crashing_first_call(article):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            raise RuntimeError("Simulated crash in _article_to_paper")
+        return real_article_to_paper(article)
+
+    with patch("loop_sci.literature.search.pubmed._article_to_paper", side_effect=_crashing_first_call):
+        results = await client.search("anything")
+
+    # Malformed entry skipped; valid sibling returned
+    assert len(results) == 1
+    assert results[0].external_id == "pubmed:38000001"
+    assert results[0].title == "Valid sibling article"

@@ -1,7 +1,7 @@
 """Unified PaperResult schema — the canonical record all search adapters map to."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
