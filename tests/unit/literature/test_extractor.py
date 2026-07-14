@@ -87,7 +87,7 @@ async def test_extractor_returns_grounded_facts() -> None:
 
 
 @pytest.mark.asyncio
-async def test_extractor_drops_ungrounded_claims() -> None:
+async def test_extractor_drops_empty_span_claims() -> None:
     """A claim with an empty evidence_span is dropped (returns empty list)."""
     provider = MockProvider(responses=[UNGROUNDED_RESPONSE])
     extractor = FactExtractor(provider, max_facts_per_paper=5)
@@ -98,19 +98,30 @@ async def test_extractor_drops_ungrounded_claims() -> None:
 @pytest.mark.asyncio
 async def test_extractor_respects_per_paper_bound() -> None:
     """max_facts_per_paper=3 caps a 6-item model response to at most 3 facts."""
+    # Use a long abstract so all 6 spans are traceable; only the cap limits the count.
+    abstract = (
+        "SNNs outperform ANNs on sparse data by 12%. "
+        "Energy is reduced by 30%. "
+        "Latency drops by 20%. "
+        "Memory usage falls by 15%. "
+        "Accuracy improves by 5%. "
+        "Training time decreases by 25%."
+    )
+    def _item(claim: str, span: str) -> dict:
+        return {"claim": claim, "evidence_span": span, "confidence": 0.8, "entities": []}
+
     items = [
-        {
-            "claim": f"Claim {i}",
-            "evidence_span": f"Evidence {i}",
-            "confidence": 0.8,
-            "entities": [],
-        }
-        for i in range(6)
+        _item("Claim 0", "SNNs outperform ANNs on sparse data by 12%"),
+        _item("Claim 1", "Energy is reduced by 30%"),
+        _item("Claim 2", "Latency drops by 20%"),
+        _item("Claim 3", "Memory usage falls by 15%"),
+        _item("Claim 4", "Accuracy improves by 5%"),
+        _item("Claim 5", "Training time decreases by 25%"),
     ]
     provider = MockProvider(responses=[json.dumps(items)])
     extractor = FactExtractor(provider, max_facts_per_paper=3)
-    facts = await extractor.extract(_paper())
-    assert len(facts) <= 3
+    facts = await extractor.extract(_paper(abstract=abstract))
+    assert len(facts) == 3
 
 
 @pytest.mark.asyncio
@@ -213,16 +224,74 @@ async def test_extractor_grounding_scope_is_abstract() -> None:
 
 @pytest.mark.asyncio
 async def test_extractor_bound_applied_after_grounding_filter() -> None:
-    """Bound is checked on grounded facts; ungrounded ones don't count toward cap."""
-    # 4 items: 2 grounded, 2 ungrounded; max=2 → both grounded survive
+    """Bound is checked on grounded facts; ungrounded (empty-span) ones don't count toward cap."""
+    # Abstract has two traceable phrases; empty-span items are dropped before the cap.
+    abstract = "SNNs outperform ANNs on sparse data by 12%. Energy is reduced by 30%."
+    def _g(claim: str, span: str) -> dict:
+        return {"claim": claim, "evidence_span": span, "confidence": 0.8, "entities": []}
+
+    def _b(claim: str) -> dict:
+        return {"claim": claim, "evidence_span": "", "confidence": 0.5, "entities": []}
+
     items = [
-        {"claim": "Claim 0", "evidence_span": "Evidence 0", "confidence": 0.8, "entities": []},
-        {"claim": "Bad 1", "evidence_span": "", "confidence": 0.5, "entities": []},
-        {"claim": "Claim 2", "evidence_span": "Evidence 2", "confidence": 0.8, "entities": []},
-        {"claim": "Bad 3", "evidence_span": "", "confidence": 0.5, "entities": []},
+        _g("Claim 0", "SNNs outperform ANNs on sparse data by 12%"),  # grounded
+        _b("Bad 1"),   # dropped — empty span
+        _g("Claim 2", "Energy is reduced by 30%"),                     # grounded
+        _b("Bad 3"),   # dropped — empty span
     ]
     provider = MockProvider(responses=[json.dumps(items)])
     extractor = FactExtractor(provider, max_facts_per_paper=2)
-    facts = await extractor.extract(_paper())
+    facts = await extractor.extract(_paper(abstract=abstract))
     assert len(facts) == 2
-    assert all(f.evidence_span.startswith("Evidence") for f in facts)
+    assert facts[0].claim == "Claim 0"
+    assert facts[1].claim == "Claim 2"
+
+
+@pytest.mark.asyncio
+async def test_extractor_drops_span_absent_from_source() -> None:
+    """A non-empty evidence_span not present in the source text is dropped (anti-fabrication).
+
+    The model returns a fluent, non-empty span that is not a substring of the
+    abstract.  The traceability check must catch this and drop the fact.
+    """
+    fabricated_response = json.dumps(
+        [
+            {
+                "claim": "SNNs require 50% less memory than ANNs",
+                "evidence_span": "SNNs require 50% less memory than ANNs in all benchmarks",
+                "confidence": 0.85,
+                "entities": ["SNN", "ANN"],
+            }
+        ]
+    )
+    # Abstract does NOT contain the fabricated span
+    provider = MockProvider(responses=[fabricated_response])
+    extractor = FactExtractor(provider, max_facts_per_paper=5)
+    facts = await extractor.extract(_paper())
+    assert facts == []
+
+
+@pytest.mark.asyncio
+async def test_extractor_keeps_span_with_reflowed_whitespace() -> None:
+    """A span matching the source modulo whitespace/case differences is KEPT.
+
+    Proves that normalisation prevents false drops on spans the model returns
+    with collapsed/expanded whitespace or different capitalisation.
+    """
+    abstract = "SNNs outperform  ANNs on sparse data by 12%."
+    # Model returns the span with single spaces and different case — still traceable
+    reflowed_response = json.dumps(
+        [
+            {
+                "claim": "SNNs outperform ANNs on sparse data",
+                "evidence_span": "snns outperform anns on sparse data by 12%",
+                "confidence": 0.9,
+                "entities": ["SNN", "ANN"],
+            }
+        ]
+    )
+    provider = MockProvider(responses=[reflowed_response])
+    extractor = FactExtractor(provider, max_facts_per_paper=5)
+    facts = await extractor.extract(_paper(abstract=abstract))
+    assert len(facts) == 1
+    assert facts[0].claim == "SNNs outperform ANNs on sparse data"
