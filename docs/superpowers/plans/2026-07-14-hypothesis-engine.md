@@ -992,7 +992,7 @@ git commit -m "feat(hypothesis): implement derivation contract freeze before jur
 - Deterministic gate fires first: if mechanism contradicts a grounding fact OR any load-bearing derivation step is `[guess]`, returns `Verdict(decided_by="deterministic-gate", result="DOWN")` — no reviewer call.
 - Structural no-self-acquit: if `reviewer.model == generator_model`, result is DOWN regardless.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```python
 # tests/unit/hypothesis/test_adversary.py
@@ -1055,13 +1055,13 @@ async def test_incoherent_hypothesis_downed_by_jury(tmp_path):
     assert verdict.decided_by == "jury"
 ```
 
-- [ ] **Step 2: Run test — verify FAIL**
+- [x] **Step 2: Run test — verify FAIL**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_adversary.py -v 2>&1 | tail -5
 ```
 
-- [ ] **Step 3: Implement `loop_sci/hypothesis/stages/adversary.py`**
+- [x] **Step 3: Implement `loop_sci/hypothesis/stages/adversary.py`**
 
 ```python
 # loop_sci/hypothesis/stages/adversary.py
@@ -1157,14 +1157,14 @@ async def run_adversary(
     )
 ```
 
-- [ ] **Step 4: Run test — verify PASS**
+- [x] **Step 4: Run test — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_adversary.py -v
 ```
 Expected: `3 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/hypothesis/stages/adversary.py tests/unit/hypothesis/test_adversary.py

@@ -25,7 +25,8 @@
 - Interpreter: `.venv/bin/python` (hydra 1.3.4, ruff 0.15.21). Bare python=conda (no deps). All implementer/fix dispatches MUST use `.venv/bin/python -m pytest` + `.venv/bin/ruff`.
 
 ## Current
-- Tasks 1-5 COMPLETE. Task: 6 (contract freeze) -> osp 2.1
-- Stage: task-review
-- Commit: 83dead5 (contract.py 101 + test 194, +297); 7/7, 41 total, 0 regressions; ruff clean
-- review-fix round: 0/2; Reviewer: Opus dispatched (review-9bac221..83dead5.diff)
+- Tasks 1-6 COMPLETE. Task: 7 (adversary' jury) -> osp 2.2,2.3,2.4,2.5 [CRITICAL]
+- Stage: task-review (fix round 1)
+- Commit: c1c01c1; adversarial review: 2.2 & 2.3 VERIFIED unbreakable; 2.4 FAIL (real anti-fab hole: ungrounded [paper] w/ absent fact_id passes gate).
+- Fix round 1 dispatched: add deterministic id-resolution gate branch ([paper]/[inferred] must cite ≥1 resolvable fact_id else DOWN, no jury call) + absent-fact-id tests; dedup anti-fab helper w/ scoring; hoist stopwords; guard reasons.
+- Fix round: 1/2
