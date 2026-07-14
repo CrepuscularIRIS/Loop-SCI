@@ -19,10 +19,14 @@
 
 ## FORWARD: Task 5 (extractor) should CLAMP confidence to [0,1] (Fact has no range check). Task 6 (verify) may narrow VerificationStatus.status to a Literal/Enum + validate layer_reached 1-4.
 
+## FORWARD: Task 6 (verify) can narrow VerificationStatus.status to Literal/Enum + validate layer_reached 1-4 (T4 deferral). Extractor grounding min-span-length hardening = future (out of scope).
+## T12 RUFF SWEEP: 3 unused-import violations in dispatch.py/test_dispatch.py (typing.Any + 2 fixable) + earlier minors (unused field import schema.py, etc.).
+
 ### Current task
-- Task 5: Qwen-driven fact extractor (bounded, evidence-required, drops ungrounded)
+- Task 6: L1 format + L2 existence + L3 metadata verification layers
 - Stage: implementing
 - review-fix round: 0 / 2
+- NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 
@@ -35,6 +39,7 @@
 - Task 2: complete (impl eeff586 mapping/offline/PubMed-2-hop correct; Opus found 1 IMPORTANT [arXiv _strip_version corrupts external_id] -> Sonnet fix e125629 (grok down): anchored vN$ regex + 3 regression tests + malformed-skip tests all 3 adapters + defusedxml -> Opus re-review Approved no regression; 193 passed/5 skipped, ruff clean)
 - Task 3: complete (impl 02553c8 Opus Approved; 3 resilience guarantees [no-propagate/no-sibling-cancel/bounded-retry] all proven by REAL tests [sibling-completion tracked, re-invocation counts]; gather return_exceptions=True + injectable backoff; 9 new/198 pristine; 2 Minor [except BaseException->Exception; O(n2) lookup - final review])
 - Task 4: complete (impl 9dc8b44 Opus Approved; evidence-required 2-layer enforced + 4 independent tests; lossless round-trip nested SourceRef/VerificationStatus; grounding_scope constrained; SourceRef upgraded to typed dataclass; 17 new/219 pristine; 2 Minor deferred [confidence range->T5; status enum->T6])
+- Task 5: complete (impl 6d434cf; Opus found 1 IMPORTANT [anti-fabrication crux: grounding was prompt-only, not runtime-traceable] -> Sonnet fix 08ad881: normalized span-in-text runtime drop before cap + not-in-source drop test + reflowed-keep test -> Opus re-review Approved [no false-keep loophole, no regression]; confidence clamp; bounded; invalid-JSON->[]; 232 passed/5 skipped; 1 Minor [degenerate short-span match - future])
 
 ### Completed
 (none yet)

@@ -703,7 +703,7 @@ git commit -m "feat(literature/extract): Fact schema with evidence-span guard"
 - Consumes: `Fact` (Task 4); `LLMProvider` from `loop_sci._vendor.arbor.llm.base`; `MockProvider` from `tests/conftest.py`
 - Produces: `FactExtractor(provider, *, max_facts_per_paper=5).extract(paper: PaperResult) -> list[Fact]`
 
-- [ ] **Step 5.1: Write failing tests**
+- [x] **Step 5.1: Write failing tests**
 
 ```python
 # tests/unit/literature/test_extractor.py
@@ -767,7 +767,7 @@ async def test_extractor_respects_per_paper_bound():
 Run: `uv run pytest tests/unit/literature/test_extractor.py -v`
 Expected: FAIL — module not found
 
-- [ ] **Step 5.2: Implement FactExtractor**
+- [x] **Step 5.2: Implement FactExtractor**
 
 ```python
 # loop_sci/literature/extract/extractor.py
@@ -835,12 +835,12 @@ class FactExtractor:
         return facts
 ```
 
-- [ ] **Step 5.3: Run extractor tests**
+- [x] **Step 5.3: Run extractor tests**
 
 Run: `uv run pytest tests/unit/literature/test_extractor.py -v`
 Expected: all 3 tests PASS
 
-- [ ] **Step 5.4: Commit**
+- [x] **Step 5.4: Commit**
 
 ```bash
 git add loop_sci/literature/extract/extractor.py tests/unit/literature/test_extractor.py
