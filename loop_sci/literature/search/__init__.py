@@ -5,6 +5,7 @@ from .client import SearchClient, make_async_client
 from .semantic_scholar import SemanticScholarClient
 from .arxiv import ArxivClient
 from .pubmed import PubMedClient
+from .dispatch import dispatch, SourceError
 
 __all__ = [
     "PaperResult",
@@ -13,4 +14,6 @@ __all__ = [
     "SemanticScholarClient",
     "ArxivClient",
     "PubMedClient",
+    "dispatch",
+    "SourceError",
 ]
