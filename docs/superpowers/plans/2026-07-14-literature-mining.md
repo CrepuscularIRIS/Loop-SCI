@@ -1238,7 +1238,7 @@ git commit -m "feat(literature/verify): L4 hybrid grounding — lexical pre-filt
   - `FactStore(path: Path).add(fact: Fact) -> str` (returns fact_id); `.all() -> list[Fact]`; `.filter(*, source=None, topic=None) -> list[Fact]`
   - `persist_fact(fact: Fact, *, tree: IdeaTree, paper_node_id: str, store: FactStore) -> str` (returns fact_id)
 
-- [ ] **Step 8.1: Write failing tests**
+- [x] **Step 8.1: Write failing tests**
 
 ```python
 # tests/unit/literature/test_factbase.py
@@ -1321,7 +1321,7 @@ def test_persist_rejected_fact_raises(tmp_path):
 Run: `uv run pytest tests/unit/literature/test_factbase.py -v`
 Expected: FAIL — modules not found
 
-- [ ] **Step 8.2: Implement FactStore**
+- [x] **Step 8.2: Implement FactStore**
 
 ```python
 # loop_sci/literature/factbase/store.py
@@ -1396,7 +1396,7 @@ class FactStore:
         tmp.replace(self._path)
 ```
 
-- [ ] **Step 8.3: Implement persist_fact**
+- [x] **Step 8.3: Implement persist_fact**
 
 ```python
 # loop_sci/literature/factbase/persist.py
@@ -1456,12 +1456,12 @@ def persist_fact(
     return fact_id
 ```
 
-- [ ] **Step 8.4: Run factbase tests**
+- [x] **Step 8.4: Run factbase tests**
 
 Run: `uv run pytest tests/unit/literature/test_factbase.py -v`
 Expected: all 4 tests PASS
 
-- [ ] **Step 8.5: Commit**
+- [x] **Step 8.5: Commit**
 
 ```bash
 git add loop_sci/literature/factbase/ tests/unit/literature/test_factbase.py

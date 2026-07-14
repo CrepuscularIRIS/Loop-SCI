@@ -25,11 +25,15 @@
 ## HARD GATE for Task 9 (executor): WIRE L3 expected metadata. Currently expected_year/expected_authors are ad-hoc test-only attrs -> L3 INERT in production (all resolving facts pass to pending_l4). Task 9 MUST pass the source PaperResult's authors/year/venue as the expected values to VerificationPipeline (or extend SourceRef to carry them), with an INTEGRATION TEST proving L3 catches a real metadata mismatch on a real fact. Else 4-layer silently becomes 3-layer (rubric 可验证性 risk). Final review must verify L3 is exercised in the real flow.
 ## Task 6 minors (final review): year-check false-passes when resolved paper.year is None; surname heuristic=longest-token (loose, false-pass leaning); DOI-fallback to fetch_by_id unverified vs real adapters.
 
+## TASK 9 (LitMinerExecutor) — CARRIES 3 HARD REQUIREMENTS:
+## (A) WIRE L3: pass source PaperResult authors/year/venue as the EXPECTED metadata into VerificationPipeline so L3 metadata-match is NOT inert; INTEGRATION TEST proving L3 catches a real mismatch on a real fact (else 4-layer -> 3-layer).
+## (B) PAPER-NODE DEDUP: dedup by DOI/normalized external_id (deferred from T8) — one paper node per unique paper across the run.
+## (C) Persist via persist_fact (guarded), NOT store.add directly (T8 minor).
+
 ### Current task
-- Task 8: JSON fact store + persist verified facts to idea-tree
+- Task 9: LitMinerExecutor — search->extract->verify->record with resumability
 - Stage: implementing
 - review-fix round: 0 / 2
-- T12 RUFF SWEEP now 5 violations (dispatch.py + test_dispatch.py + test_citation_verify.py 324-326) + earlier.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
 - NOTE: grok auth expired -> Sonnet-fallback fixes. `grok login` to restore.
@@ -47,6 +51,7 @@
 - Task 5: complete (impl 6d434cf; Opus found 1 IMPORTANT [anti-fabrication crux: grounding was prompt-only, not runtime-traceable] -> Sonnet fix 08ad881: normalized span-in-text runtime drop before cap + not-in-source drop test + reflowed-keep test -> Opus re-review Approved [no false-keep loophole, no regression]; confidence clamp; bounded; invalid-JSON->[]; 232 passed/5 skipped; 1 Minor [degenerate short-span match - future])
 - Task 6: complete (impl ea34a36 Opus Approved; CORE holds [L2 rejects hallucinated via real adapter lookup - tested; short-circuit call-count proven]; pending_l4 hook clean; VerificationStatus tightened [Literal status + layer 1-4]; 17 new/FULL 249 passed/5 skipped; 1 IMPORTANT [L3 expected-metadata unwired -> INERT in prod -> HARD GATE for T9] + 3 Minor final-review)
 - Task 7: complete (impl 5db0e5a L4 hybrid grounding [lexical HIGH/LOW->no Qwen, borderline->Qwen judge; genuinely cost-controlled, tested _index==0/==1]; misattributed->reject@L4; Opus found 1 IMPORTANT [double-resolve 2x fetch/fact] -> Sonnet fix d26cb78 resolve-once reuse L2 paper + fetch==1 test -> Opus re-review Approved [byte-identical L1-L3, zero regression]; 265 passed/5 skipped. FULL 4-LAYER VERIFICATION DONE. 1 Minor [L123 block dup])
+- Task 8: complete (impl 23e1133 Opus Approved; ONLY-verified guard airtight [persist_fact guards before any write; rejected/pending/None -> NEITHER tree nor store, all tested]; root->paper->fact nodes + Node.refs payload round-trips disk; JSON store retrieve-all/filter lossless; same-paper dedup test present; 26 new/291 passed/5 skipped; 1 Minor [store.add unguarded - use persist_fact in T9])
 
 ### Completed
 (none yet)
