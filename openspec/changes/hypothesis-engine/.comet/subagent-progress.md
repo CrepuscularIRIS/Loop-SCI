@@ -25,9 +25,7 @@
 - Interpreter: `.venv/bin/python` (hydra 1.3.4, ruff 0.15.21). Bare python=conda (no deps). All implementer/fix dispatches MUST use `.venv/bin/python -m pytest` + `.venv/bin/ruff`.
 
 ## Current
-- Tasks 1-4 COMPLETE. Task: 5 (forge') -> osp 1.3,1.4,1.5,1.6
-- Stage: task-review (fix round 1)
-- Commit: 067fc8a; reviewer APPROVED w/ 2 Important -> fixing:
-  (1) strengthen relabeling filter to token-subset check (osp 1.4 fidelity)
-  (2) real parent/sibling linkage test attaching triples to IdeaTree
-- Fix round: 1/2 dispatched
+- Tasks 1-5 COMPLETE. Task: 6 (contract freeze) -> osp 2.1
+- Stage: task-review
+- Commit: 83dead5 (contract.py 101 + test 194, +297); 7/7, 41 total, 0 regressions; ruff clean
+- review-fix round: 0/2; Reviewer: Opus dispatched (review-9bac221..83dead5.diff)

@@ -9,7 +9,7 @@
 
 ## 2. Hypothesis critique (derivation contract + Qwen-vs-Qwen jury + anti-fabrication)
 
-- [ ] 2.1 Implement the derivation contract (HYPOTHESIS/LATENT-ROOT/ACCEPT-IF/KILL-IF as derivation tripwires, no `eval_cmd`); freeze on the node before any verdict
+- [x] 2.1 Implement the derivation contract (HYPOTHESIS/LATENT-ROOT/ACCEPT-IF/KILL-IF as derivation tripwires, no `eval_cmd`); freeze on the node before any verdict
 - [ ] 2.2 Implement the adversarial jury: generator vs a distinct reviewer configuration (different Qwen tier, KILL-biased persona, varied sampling); route verdicts so the generator configuration cannot issue an accept
 - [ ] 2.3 Implement `adversary'` Checks C/D (claim decomposition → each step needs an artifact; generalization test) as the plan-grade critique
 - [ ] 2.4 Implement evidence-grade annotation `[paper]/[inferred]/[guess]` + "no artifact/fact ⇒ downgrade to hypothesis" grounded in the fact base

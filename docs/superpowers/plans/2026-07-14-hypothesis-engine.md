@@ -890,7 +890,7 @@ git commit -m "feat(hypothesis): implement forge' stage with relabeling filter a
 - Consumes: `hyp_refs` dict, `LLMProvider`.
 - Produces: `async freeze_contract(hyp_refs: dict, provider: LLMProvider) -> Contract` — LLM returns `{"HYPOTHESIS": "...", "LATENT_ROOT": "...", "ACCEPT_IF": "...", "KILL_IF": "..."}`.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```python
 # tests/unit/hypothesis/test_contract.py
@@ -918,13 +918,13 @@ async def test_contract_frozen_with_required_fields():
     assert contract.KILL_IF != ""
 ```
 
-- [ ] **Step 2: Run test — verify FAIL**
+- [x] **Step 2: Run test — verify FAIL**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_contract.py -v 2>&1 | tail -5
 ```
 
-- [ ] **Step 3: Implement `loop_sci/hypothesis/stages/contract.py`**
+- [x] **Step 3: Implement `loop_sci/hypothesis/stages/contract.py`**
 
 ```python
 # loop_sci/hypothesis/stages/contract.py
@@ -963,13 +963,13 @@ async def freeze_contract(hyp_refs: dict, provider) -> Contract:
                     ACCEPT_IF="(unavailable)", KILL_IF="(unavailable)")
 ```
 
-- [ ] **Step 4: Run test — verify PASS**
+- [x] **Step 4: Run test — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_contract.py -v
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/hypothesis/stages/contract.py tests/unit/hypothesis/test_contract.py
