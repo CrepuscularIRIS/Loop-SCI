@@ -281,7 +281,7 @@ git commit -m "feat(hypothesis): add HypothesisRefs schema and Node.refs payload
 - Consumes: `DerivationStep`, `Scores` (from Task 1); `list[Fact]` (from `FactStore.all()`).
 - Produces: `score_hypothesis(mechanism: str, derivation: list[DerivationStep], facts: list[Fact], *, w_n: float = 0.5, w_c: float = 0.5, low: float = 0.15, high: float = 0.60) -> Scores`.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```python
 # tests/unit/hypothesis/test_scoring.py
@@ -327,13 +327,13 @@ def test_overall_score_is_weighted_average():
     assert abs(expected - (0.5 * s.novelty + 0.5 * s.self_consistency)) < 1e-9
 ```
 
-- [ ] **Step 2: Run test — verify FAIL**
+- [x] **Step 2: Run test — verify FAIL**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_scoring.py -v 2>&1 | tail -5
 ```
 
-- [ ] **Step 3: Implement `loop_sci/hypothesis/scoring.py`**
+- [x] **Step 3: Implement `loop_sci/hypothesis/scoring.py`**
 
 ```python
 # loop_sci/hypothesis/scoring.py
@@ -382,14 +382,14 @@ def score_hypothesis(
     return Scores(novelty=n, self_consistency=c, decided_by="deterministic")
 ```
 
-- [ ] **Step 4: Run test — verify PASS**
+- [x] **Step 4: Run test — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_scoring.py -v
 ```
 Expected: `5 passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add loop_sci/hypothesis/scoring.py tests/unit/hypothesis/test_scoring.py
