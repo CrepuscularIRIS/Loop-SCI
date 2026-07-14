@@ -25,9 +25,9 @@
 - Interpreter: `.venv/bin/python` (hydra 1.3.4, ruff 0.15.21). Bare python=conda (no deps). All implementer/fix dispatches MUST use `.venv/bin/python -m pytest` + `.venv/bin/ruff`.
 
 ## Current
-- Tasks 1-9 COMPLETE. Task: 10a (HypothesisExecutor) -> osp 4.3 (+resume tail 3.5)
-- Stage: task-review (fix round 1 re-review)
-- Commit: 570e063; fixer reports all 3 Important fixed + minors; executor 9 passed, full suite 409/0 regressions.
-- Stage sig changes (backward-compat): run_prospect/run_forge context="" kwarg; RegionTracker(threshold=2).
-- Re-review (Opus) dispatched on fix diff 6d284b2..570e063.
-- Fix round: 1/2 (re-review pending)
+- Tasks 1-9 + 10a COMPLETE. Task: 10b (coordinator+tools+config) -> osp 4.4,4.5,4.6
+- Stage: task-review (fix round 1 — test-tightening)
+- Commit: 7828ae9; review APPROVED, backward-compat clean; 3 near-vacuous tests + __all__ omission.
+- Fix round 1 dispatched: tighten generate(status/count)/critique(verdict UP)/plan(context substring) asserts + export HypothesisConf.
+- Minors for final review: HypothesisConf/HypothesisConfig duplicate dataclasses (drift risk); import-in-_generate.
+- Fix round: 1/2

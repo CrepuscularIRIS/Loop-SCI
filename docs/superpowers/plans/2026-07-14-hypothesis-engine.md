@@ -1490,7 +1490,7 @@ git commit -m "feat(hypothesis): implement stable ranked-hypothesis query interf
 - `HypothesisCoordinator(cfg, *, executor, bus, step_budget)` — overrides `_observe()` (score-sorted) and `_plan()` (injects fact-base context).
 - Tools: `register_hypothesis_tools(registry: ToolRegistry, executor: HypothesisExecutor)` — registers `generate`, `critique`, `rank`.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/unit/hypothesis/test_executor.py
@@ -1583,13 +1583,13 @@ async def test_tools_registered_and_return_json():
     assert "rank" in names
 ```
 
-- [ ] **Step 2: Run tests — verify FAIL**
+- [x] **Step 2: Run tests — verify FAIL**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_executor.py tests/unit/hypothesis/test_tools.py -v 2>&1 | tail -10
 ```
 
-- [ ] **Step 3: Implement `loop_sci/hypothesis/executor.py`**
+- [x] **Step 3: Implement `loop_sci/hypothesis/executor.py`**
 
 ```python
 # loop_sci/hypothesis/executor.py
@@ -1727,7 +1727,7 @@ class HypothesisExecutor:
         )
 ```
 
-- [ ] **Step 4: Implement `loop_sci/hypothesis/coordinator.py`**
+- [x] **Step 4: Implement `loop_sci/hypothesis/coordinator.py`**
 
 ```python
 # loop_sci/hypothesis/coordinator.py
@@ -1756,7 +1756,7 @@ class HypothesisCoordinator(Coordinator):
         return DispatchUnit(node_id=node.id, goal=node.hypothesis, context=context, tools=[])
 ```
 
-- [ ] **Step 5: Implement `loop_sci/hypothesis/tools.py`**
+- [x] **Step 5: Implement `loop_sci/hypothesis/tools.py`**
 
 ```python
 # loop_sci/hypothesis/tools.py
@@ -1798,7 +1798,7 @@ def register_hypothesis_tools(registry: ToolRegistry, executor) -> None:
                       fn=_rank)
 ```
 
-- [ ] **Step 6: Create `conf/hypothesis/default.yaml`**
+- [x] **Step 6: Create `conf/hypothesis/default.yaml`**
 
 ```yaml
 # conf/hypothesis/default.yaml
@@ -1827,7 +1827,7 @@ defaults:
   - _self_
 ```
 
-- [ ] **Step 7: Update `loop_sci/hypothesis/__init__.py`**
+- [x] **Step 7: Update `loop_sci/hypothesis/__init__.py`**
 
 ```python
 from loop_sci.hypothesis.executor import HypothesisExecutor
@@ -1837,13 +1837,13 @@ from loop_sci.hypothesis.ranked import RankedHypothesisStore
 __all__ = ["HypothesisExecutor", "HypothesisCoordinator", "RankedHypothesisStore"]
 ```
 
-- [ ] **Step 8: Run tests — verify PASS**
+- [x] **Step 8: Run tests — verify PASS**
 
 ```bash
 cd /home/lingxufeng/cli/Loop-SCI && python -m pytest tests/unit/hypothesis/test_executor.py tests/unit/hypothesis/test_tools.py -v
 ```
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add loop_sci/hypothesis/executor.py loop_sci/hypothesis/coordinator.py \
