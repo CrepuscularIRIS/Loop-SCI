@@ -25,7 +25,8 @@
 - Interpreter: `.venv/bin/python` (hydra 1.3.4, ruff 0.15.21). Bare python=conda (no deps). All implementer/fix dispatches MUST use `.venv/bin/python -m pytest` + `.venv/bin/ruff`.
 
 ## Current
-- ALL 11 TASKS COMPLETE — all 25 OpenSpec tasks checked. suite 443 passed/7 skipped/0 regressions; coverage loop_sci/hypothesis 95.84%; ruff clean.
-- Stage: final-review (thorough mode: one final complete whole-branch review)
-- MERGE_BASE for final review = git merge-base main HEAD
-- After final review passes -> return to comet-build exit checks -> build guard -> verify phase.
+- ALL 11 TASKS + final whole-branch review COMPLETE. READY TO MERGE.
+- Final state: 449 passed/7 skipped/0 regressions; coverage loop_sci/hypothesis 95% (all modules >=80%); ruff clean.
+- Merge-blockers all closed (d7665c9 + 1bfa142); production fixes confirmed correct; regression guards now bite.
+- Stage: subagent build loop DONE -> comet-build exit checks -> build guard (COMET_SKIP_BUILD=1, Python no inferred build) -> verify phase.
+- FOLLOW-UPs for #5/cleanup (accepted, non-blocking): autopsy substring dead->deadline word-boundary; consolidate HypothesisConf/HypothesisConfig; hoist import in _generate; document refs["scores"] superset-of-Scores.
