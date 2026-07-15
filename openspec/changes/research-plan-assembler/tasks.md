@@ -20,9 +20,9 @@
 
 ## 4. Output, gate, and foundation integration
 
-- [ ] 4.1 Implement canonical JSON emission (all 12 fields under stable keys) as the source of truth
-- [ ] 4.2 Implement Markdown rendering derived from the canonical JSON (no independent content; the two never diverge)
-- [ ] 4.3 Implement the deterministic gate (all 12 fields present + non-empty; every reference verified; no ungrounded load-bearing claim); provider-free; fail → flagged incomplete
+- [x] 4.1 Implement canonical JSON emission (all 12 fields under stable keys) as the source of truth
+- [x] 4.2 Implement Markdown rendering derived from the canonical JSON (no independent content; the two never diverge)
+- [x] 4.3 Implement the deterministic gate (all 12 fields present + non-empty; every reference verified; no ungrounded load-bearing claim); provider-free; fail → flagged incomplete
 - [ ] 4.4 Implement `PlanAssemblerExecutor` over the foundation Executor seam (consume ranked hypothesis → assemble → derive Results → verify refs → gate → record); no coordinator-interface change; `auto_git` off; resumable via `RunSession` (completed plan not re-assembled)
 - [ ] 4.5 Register the `assemble` tool in the ToolRegistry wrapping the same pipeline with injected deps; structured results/errors; add the Hydra config group `conf/plan/default.yaml` (domain default, call budget, thresholds) wired into `LoopSCIConfig`
 - [ ] 4.6 Unit tests: JSON + Markdown both carry all 12 fields (no divergence); gate fails on missing field / empty field / unverified reference and passes on a complete verified plan; tool exercises the pipeline offline

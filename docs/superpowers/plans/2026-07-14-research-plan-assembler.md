@@ -513,7 +513,7 @@ Covers OpenSpec task group 4 (4.1, 4.2, 4.3).
   `def assert_json_markdown_parity(plan: ResearchPlan) -> None` — raises `AssertionError` if any of the 12 field titles is missing from the rendered Markdown.
   `def run_gate(plan: ResearchPlan) -> GateResult` — deterministic, provider-free.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```python
 # tests/unit/plan/test_render.py
@@ -565,22 +565,22 @@ def test_gate_fails_on_ungrounded_load_bearing_claim():
 
 > `_plan` must be importable — mark `tests/unit/plan/test_schemas.py::_plan` as a plain module-level helper (it already is). If cross-test import is undesirable, copy the builder into a shared `tests/unit/plan/_helpers.py` and import from there in Tasks 5–7.
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_render.py tests/unit/plan/test_gate.py -v`
 Expected: FAIL with `ModuleNotFoundError` for `loop_sci.plan.render` / `loop_sci.plan.gate`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 `loop_sci/plan/render.py`: define `PLAN_FIELD_TITLES: dict[str, str]` (12 keys → PDF titles in order). `render_markdown` walks `PLAN_JSON_KEYS`, emits `## <Title>` then a rendered body per field type (Candidates as bullet list with `(candidate)` flag; ExperimentsBlock as "Baselines: …\nMetrics: …\nDesign: …"; ResultsBlock as graded derivation bullets + conclusion + confidence; References as bullet list `source:external_id (verified)`). `assert_json_markdown_parity` renders once and asserts each `## <Title>` present.
 `loop_sci/plan/gate.py`: `run_gate` collects failures: for each of the 12 keys, non-empty check (str fields truthy; list fields have ≥1 entry; DST fields satisfied by ≥1 candidate incl. grounding-absent marker); every `Reference.verified` true else failure `"unverified reference: <id>"`; Results check — if `plan.results.confidence != "final"` add `"load-bearing ungrounded claim / confidence != final"`. `passed = not failures`.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_render.py tests/unit/plan/test_gate.py -v`
 Expected: PASS (6 passed).
 
-- [ ] **Step 5: Lint + commit**
+- [x] **Step 5: Lint + commit**
 
 ```bash
 .venv/bin/ruff check loop_sci/plan/render.py loop_sci/plan/gate.py tests/unit/plan/test_render.py tests/unit/plan/test_gate.py

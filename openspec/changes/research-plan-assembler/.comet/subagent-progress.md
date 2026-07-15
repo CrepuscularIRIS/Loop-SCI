@@ -7,10 +7,10 @@
 - interpreter: .venv/bin/python  | linter: .venv/bin/ruff
 
 ## Current task
-- Task 4: Real-only reference verification (`loop_sci/plan/references.py`)
-- OpenSpec map: group 3 tasks 3.1, 3.2 (+ 3.3 tests)
+- Task 5: Render (JSON+Markdown parity) + gate (`render.py`, `gate.py`)
+- OpenSpec map: group 4 tasks 4.1, 4.2, 4.3
 - Stage: implementing
-- Base commit (for review-package): 73e05b3
+- Base commit (for review-package): c3e5b70
 - Impl commit: —
 - RED/GREEN: —
 - Task-review round: 0 / 2
@@ -18,4 +18,6 @@
 ## Ledger (completed tasks)
 - Task 1: complete (commit 2487672, checkoff 6f53237, spec OK/quality Approved, osp 1.1).
 - Task 2: complete (commit 45f7656, checkoff 988f69c, spec OK/quality Approved, anti-fab DST verified, osp 1.2/1.3/1.5).
-- Task 3: complete (commit cf29a1d, checkoff 73e05b3, spec OK/quality Approved, downgrade last-step-decides ACCEPT, osp 2.1/2.2/2.3). See .superpowers/sdd/progress.md
+- Task 3: complete (commit cf29a1d, checkoff 73e05b3, spec OK/quality Approved, downgrade last-step-decides ACCEPT, osp 2.1/2.2/2.3).
+- Task 4: complete (commit 241a5e9, checkoff c3e5b70, spec OK/quality Approved, anti-fab audit CLEAN, osp 3.1/3.2/3.3).
+- Task 5: complete (commit b1adde6, checkoff <pending>, spec OK/quality Approved, gate sound, osp 4.1/4.2/4.3). See .superpowers/sdd/progress.md
