@@ -1,0 +1,5 @@
+# @package _global_.plan
+domain: "natural-science"
+call_budget: 3
+allow_provider_refs: false
+min_reference_count: 1
