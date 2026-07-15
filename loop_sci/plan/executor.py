@@ -255,17 +255,21 @@ class PlanAssemblerExecutor:
         assert_json_markdown_parity(plan)
 
         # ── Step 9: Persist plan files ────────────────────────────────────────
+        # Write .md FIRST, then .json.  The resume guard keys on .json alone,
+        # so .json is the sentinel.  Writing it last guarantees: if the .md write
+        # fails the sentinel never exists and the next run re-assembles cleanly;
+        # whenever .json exists, .md is already present.
         plans_dir = self._plans_dir()
         plans_dir.mkdir(parents=True, exist_ok=True)
+
+        md_path = plans_dir / f"{node_id}.md"
+        md_path.write_text(md, encoding="utf-8")
 
         json_path = plans_dir / f"{node_id}.json"
         json_path.write_text(
             json.dumps(plan.to_dict(), indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
-
-        md_path = plans_dir / f"{node_id}.md"
-        md_path.write_text(md, encoding="utf-8")
 
         self._session.advance_step()
 
