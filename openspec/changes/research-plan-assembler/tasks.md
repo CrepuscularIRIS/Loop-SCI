@@ -29,6 +29,6 @@
 
 ## 5. End-to-end, tests & docs
 
-- [ ] 5.1 Offline integration test: the executor assembles a gated, complete 12-field plan (JSON + Markdown) from a ranked hypothesis + seeded fact base + mocked verification seam → real references, no network, no git; resume does not re-assemble a completed plan
-- [ ] 5.2 Opt-in `@pytest.mark.live` e2e: real Qwen assembly over a small domain-parameterized topic on a seeded fact base (skip-verified without `DASHSCOPE_API_KEY`)
-- [ ] 5.3 Coverage gate (≥80% on new code, excl. vendored) + ruff clean + README section (12-field plan overview, formula-derivation Results, real-reference verification, domain parameter, JSON+Markdown output, live-tests-need-keys)
+- [x] 5.1 Offline integration test: the executor assembles a gated, complete 12-field plan (JSON + Markdown) from a ranked hypothesis + seeded fact base + mocked verification seam → real references, no network, no git; resume does not re-assemble a completed plan
+- [x] 5.2 Opt-in `@pytest.mark.live` e2e: real Qwen assembly over a small domain-parameterized topic on a seeded fact base (skip-verified without `DASHSCOPE_API_KEY`)
+- [x] 5.3 Coverage gate (≥80% on new code, excl. vendored) + ruff clean + README section (12-field plan overview, formula-derivation Results, real-reference verification, domain parameter, JSON+Markdown output, live-tests-need-keys)

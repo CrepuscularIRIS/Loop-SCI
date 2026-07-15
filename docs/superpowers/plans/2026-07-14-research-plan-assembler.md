@@ -760,7 +760,7 @@ Covers OpenSpec task group 5 (5.1, 5.2, 5.3) and the group-4 unit tie-together (
 **Interfaces:**
 - Consumes: `PlanAssemblerExecutor`, `VerificationPipeline`, `MockSearchClient`, `MockProvider`, a seeded `RunSession` + `FactStore` + `RankedHypothesis` (reuse the `_session_with_hyp` builder from Task 6; factor it into `tests/integration/` or import).
 
-- [ ] **Step 1: Write the failing integration test**
+- [x] **Step 1: Write the failing integration test**
 
 ```python
 # tests/integration/test_plan_assembler_e2e.py
@@ -798,12 +798,12 @@ async def test_e2e_offline_gated_complete_plan_and_resume(tmp_path):
     assert prov._index == idx  # resume: no re-spend
 ```
 
-- [ ] **Step 2: Run to verify it fails, then passes**
+- [x] **Step 2: Run to verify it fails, then passes**
 
 Run: `.venv/bin/python -m pytest tests/integration/test_plan_assembler_e2e.py -v`
 Expected first: FAIL (helper not defined) → define `_session_with_hyp`/`_c1`/`_c2`/`_c3` in the file (copy from Task 6) → PASS.
 
-- [ ] **Step 3: Write the live opt-in test**
+- [x] **Step 3: Write the live opt-in test**
 
 ```python
 # tests/live/test_plan_assembler_live.py
@@ -824,7 +824,7 @@ async def test_live_assembly_small_domain_topic(tmp_path):
 Run (must be skipped without key): `.venv/bin/python -m pytest tests/live/test_plan_assembler_live.py -v`
 Expected: SKIPPED (no `DASHSCOPE_API_KEY`).
 
-- [ ] **Step 4: Full suite + coverage + lint**
+- [x] **Step 4: Full suite + coverage + lint**
 
 ```bash
 .venv/bin/python -m pytest tests/unit/plan tests/integration/test_plan_assembler_e2e.py \
@@ -837,7 +837,7 @@ Expected: all pass, coverage on `loop_sci/plan` ≥ 80%. Add tests for any uncov
 ```
 Expected: no errors.
 
-- [ ] **Step 5: README section + commit**
+- [x] **Step 5: README section + commit**
 
 Add a "Research Plan Assembler (change #5)" section to `README.md` covering: the 12-field 《科学假设与研究计划》 overview; Results by formula-derivation (evidence-graded, no execution); real-reference verification (grounding-only default, verify()-gated extras); the runtime domain parameter; JSON (source of truth) + derived Markdown output; and "live tests need `DASHSCOPE_API_KEY`". Then:
 
