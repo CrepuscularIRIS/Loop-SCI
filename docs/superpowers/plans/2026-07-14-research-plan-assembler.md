@@ -387,7 +387,7 @@ Covers OpenSpec task group 3 (3.1, 3.2).
   `async def collect_references(hyp: RankedHypothesis, facts: list[Fact], *, provider_refs: list[dict] | None = None, allow_provider_refs: bool = False, pipeline: VerificationPipeline | None = None) -> list[Reference]`.
   Seeds `Reference(verified=True)` from each distinct grounding fact `SourceRef`. When `allow_provider_refs` and `pipeline` are set, wraps each `provider_refs` dict as a `Fact` and calls `await pipeline.verify(fact)`; admits only `status == "verified"` (dropped otherwise). With flag OFF: zero verify calls.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/plan/test_references.py
@@ -468,24 +468,24 @@ async def test_verified_provider_ref_admitted(tmp_path):
 
 > Note: confirm `PaperResult`'s field names against `loop_sci/literature/search/schema.py` before writing the test; adjust the constructor kwargs to match.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_references.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'loop_sci.plan.references'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `loop_sci/plan/references.py`. `collect_references`:
 1. Resolve grounding facts from `hyp.grounding_fact_ids` against `facts` (match `fact.fact_id`); for each distinct `source_ref`, append `Reference(source=ref.source, external_id=ref.external_id, doi=ref.doi, verified=True, fact_id=fact.fact_id)`. Dedupe by `(source, external_id)`.
 2. If `allow_provider_refs` and `pipeline` and `provider_refs`: for each dict, build a `Fact(claim=..., source_ref=SourceRef(...), evidence_span=... or claim, confidence=0.5, grounding_scope="abstract")`; `status = await pipeline.verify(fact)`; if `status.status == "verified"` append `Reference(..., verified=True, fact_id=None)`; else drop (or append `verified=False` if a "flag" mode is desired — default: drop). Guard each wrap in try/except so a malformed extra is skipped, not fatal.
 3. With flag OFF, never touch `pipeline` → zero verify calls.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_references.py -v`
 Expected: PASS (4 passed).
 
-- [ ] **Step 5: Lint + commit**
+- [x] **Step 5: Lint + commit**
 
 ```bash
 .venv/bin/ruff check loop_sci/plan/references.py tests/unit/plan/test_references.py

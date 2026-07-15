@@ -14,9 +14,9 @@
 
 ## 3. Real-only reference verification
 
-- [ ] 3.1 Implement reference collection: seed from the hypothesis grounding facts' `SourceRef`s (already verified) + optional provider-proposed citations
-- [ ] 3.2 Route candidate references through change #2 `VerificationPipeline.verify`; include only verified, drop/flag unverifiable (严禁虚构); mockable seam (offline)
-- [ ] 3.3 Unit tests: only verified references appear; a fabricated/unverifiable citation is dropped; a grounded hypothesis yields real references (count ≥ distinct grounding sources)
+- [x] 3.1 Implement reference collection: seed from the hypothesis grounding facts' `SourceRef`s (already verified) + optional provider-proposed citations
+- [x] 3.2 Route candidate references through change #2 `VerificationPipeline.verify`; include only verified, drop/flag unverifiable (严禁虚构); mockable seam (offline)
+- [x] 3.3 Unit tests: only verified references appear; a fabricated/unverifiable citation is dropped; a grounded hypothesis yields real references (count ≥ distinct grounding sources)
 
 ## 4. Output, gate, and foundation integration
 
