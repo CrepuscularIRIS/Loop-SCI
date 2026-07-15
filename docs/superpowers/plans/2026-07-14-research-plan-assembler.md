@@ -77,7 +77,7 @@ Every task's requirements implicitly include this section. Copy values verbatim.
   `ResearchPlan` with fields `problem_statement: str`, `rationale: str`, `technical_details: str`, `datasets: list[Candidate]`, `source: list[Candidate]`, `target: list[Candidate]`, `paper_title: str`, `abstract: str`, `methods: str`, `experiments: ExperimentsBlock`, `results: ResultsBlock`, `references: list[Reference]`, `node_id: str`, `gate: GateResult`; plus `ResearchPlan.to_dict() -> dict` and `ResearchPlan.from_dict(d) -> ResearchPlan` (lossless round-trip).
 - Module constant `PLAN_JSON_KEYS: tuple[str, ...]` = the 12 snake_case keys in PDF order.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/plan/test_schemas.py
@@ -122,21 +122,21 @@ def test_from_dict_roundtrips():
     assert ResearchPlan.from_dict(p.to_dict()).to_dict() == p.to_dict()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_schemas.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'loop_sci.plan'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `loop_sci/plan/__init__.py` (empty for now, exports added in later tasks). Create `loop_sci/plan/schemas.py` with all leaf dataclasses above, `PLAN_JSON_KEYS`, and `ResearchPlan`. `to_dict` walks `PLAN_JSON_KEYS` in order, serialising `Candidate`/`Reference`/`ResultsBlock`/`ExperimentsBlock`/`GateResult` via `dataclasses.asdict`, then appends `node_id` and `gate`. `from_dict` reconstructs each nested dataclass. Use `from __future__ import annotations` and full type hints. Keep derivation items as plain dicts `{"step","grade"}` (grade is one of the three bracketed literals).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_schemas.py -v`
 Expected: PASS (3 passed).
 
-- [ ] **Step 5: Lint + commit**
+- [x] **Step 5: Lint + commit**
 
 ```bash
 .venv/bin/ruff check loop_sci/plan/schemas.py loop_sci/plan/__init__.py tests/unit/plan/test_schemas.py
