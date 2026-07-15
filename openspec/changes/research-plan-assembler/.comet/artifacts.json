@@ -2,5 +2,7 @@
   "openspec_proposal": "openspec/changes/research-plan-assembler/proposal.md",
   "openspec_design": "openspec/changes/research-plan-assembler/design.md",
   "openspec_tasks": "openspec/changes/research-plan-assembler/tasks.md",
-  "openspec_delta_spec": "openspec/changes/research-plan-assembler/specs/plan-assembly-integration/spec.md"
+  "openspec_delta_spec": "openspec/changes/research-plan-assembler/specs/plan-assembly-integration/spec.md",
+  "handoff_context": "openspec/changes/research-plan-assembler/.comet/handoff/design-context.json",
+  "handoff_markdown": "openspec/changes/research-plan-assembler/.comet/handoff/design-context.md"
 }

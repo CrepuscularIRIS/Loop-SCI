@@ -1,0 +1,17 @@
+{
+  "change": "research-plan-assembler",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "2ca1a095e253e313463c99ba3633958281440c9b6ababa4056a7356bbd667ca5",
+  "files": [
+    { "path": "openspec/changes/research-plan-assembler/proposal.md", "sha256": "11627c6d855f60cf7833cd6336a8b5c7c2660b9ae4d50acf2644091b9b9d518f" },
+    { "path": "openspec/changes/research-plan-assembler/design.md", "sha256": "6a54eab1171674c6bbff2e98248af54c1aacb7d471c65db07a43f672c273ddd2" },
+    { "path": "openspec/changes/research-plan-assembler/tasks.md", "sha256": "b53448304b52797abc4ccbcd0cf9ac7268abdabe57ce8d6f607a8202740a4e00" },
+    { "path": "openspec/changes/research-plan-assembler/specs/plan-assembly-integration/spec.md", "sha256": "b30c8e55c3ca71dbba2496878f98c2608e5d48eb77e94b4a056f011a4fe1b6bc" },
+    { "path": "openspec/changes/research-plan-assembler/specs/plan-field-assembly/spec.md", "sha256": "9e4c1aa07ba8a3bba1ee08ffd0cf2c19e00861d8eb22511c48e6d88d8a126bde" },
+    { "path": "openspec/changes/research-plan-assembler/specs/reference-verification-assembly/spec.md", "sha256": "48a99919dc7e9279842e7c17e05d8c379bf289e683c0a2e61a7b67abae555812" },
+    { "path": "openspec/changes/research-plan-assembler/specs/results-derivation/spec.md", "sha256": "4f4b422600e97395f5c71c7ff2aabdb2229c8daf528224194f4b05925c30b704" }
+  ]
+}

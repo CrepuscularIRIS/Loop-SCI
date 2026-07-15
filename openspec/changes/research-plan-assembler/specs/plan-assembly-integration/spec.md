@@ -28,3 +28,7 @@ The system SHALL provide a `PlanAssemblerExecutor` over the foundation Executor 
 #### Scenario: Tool wraps the same pipeline
 - **WHEN** the `assemble` tool is invoked through the registry with injected dependencies
 - **THEN** it exercises the same underlying assembly pipeline and returns a structured result (or a structured error), offline
+
+#### Scenario: Completed plan is not re-assembled on resume
+- **WHEN** the executor is dispatched a second time for a hypothesis whose plan was already assembled and persisted under `plans/<node_id>.json`
+- **THEN** the existing plan is returned without re-invoking the provider or re-running verification (no re-spend), and the persisted plan is left unchanged
