@@ -75,6 +75,25 @@ class HypothesisConf:
 
 
 @dataclass
+class PlanConf:
+    """Plan-assembler settings surfaced by conf/plan/default.yaml.
+
+    Fields mirror :class:`~loop_sci.plan.config.PlanConfig` so that
+    ``LoopSCIConfig.plan`` carries the same domain, call budget, and flags.
+    Callers may convert to a ``PlanConfig`` via::
+
+        from loop_sci.plan.config import PlanConfig
+        plan_cfg = PlanConfig(**{f: getattr(cfg.plan, f)
+                                 for f in vars(PlanConfig())})
+    """
+
+    domain: str = "natural-science"
+    call_budget: int = 3
+    allow_provider_refs: bool = False
+    min_reference_count: int = 1
+
+
+@dataclass
 class LoopSCIConfig:
     """Top-level config composed of all sub-configs."""
 
@@ -83,3 +102,4 @@ class LoopSCIConfig:
     engine: EngineConf = field(default_factory=EngineConf)
     run: RunConf = field(default_factory=RunConf)
     hypothesis: HypothesisConf = field(default_factory=HypothesisConf)
+    plan: PlanConf = field(default_factory=PlanConf)

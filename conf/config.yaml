@@ -4,4 +4,5 @@ defaults:
   - engine: default
   - run: default
   - hypothesis: default
+  - plan: default
   - _self_
