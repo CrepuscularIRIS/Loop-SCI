@@ -295,7 +295,7 @@ Covers OpenSpec task group 2 (2.1, 2.2).
   `async def derive_results(hyp: RankedHypothesis, provider, *, domain: str) -> ResultsBlock` — Call 2 producing `{derivation: [{step, grade}], conclusion}`; then applies the deterministic downgrade and sets `confidence`.
   `def apply_load_bearing_downgrade(derivation: list[dict], conclusion: str) -> str` — returns `"final"` unless a load-bearing step is `[guess]` with no `[paper]`/`[inferred]` support, in which case `"low"`. Load-bearing = the LAST derivation step (the decisive step the conclusion rests on).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/plan/test_results.py
@@ -347,21 +347,21 @@ async def test_load_bearing_guess_downgrades_to_low():
     assert rb.confidence == "low"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_results.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'loop_sci.plan.results'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `loop_sci/plan/results.py`. `derive_results`: system prompt instructs an analytical feasibility argument (expected bound/effect size) from `hyp.mechanism` + `hyp.diff_prediction`, each step graded `[paper]`/`[inferred]`/`[guess]`, and EXPLICITLY forbids reporting any executed measurement or shell/eval command. Retry-once→drop; `isinstance` guard; coerce each step to `{"step": str, "grade": <one of the three; default "[guess]">}`. On both-attempts failure return `ResultsBlock(derivation=[], conclusion="", confidence="low")`. Then `confidence = apply_load_bearing_downgrade(derivation, conclusion)`. `apply_load_bearing_downgrade`: if `not derivation` → `"low"`; let `last = derivation[-1]`; if `last["grade"] == "[guess]"` and no other step is `[paper]`/`[inferred]` → `"low"`, else `"final"`. NO subprocess/eval imports anywhere in this module.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_results.py -v`
 Expected: PASS (4 passed).
 
-- [ ] **Step 5: Lint + commit**
+- [x] **Step 5: Lint + commit**
 
 ```bash
 .venv/bin/ruff check loop_sci/plan/results.py tests/unit/plan/test_results.py

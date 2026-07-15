@@ -8,9 +8,9 @@
 
 ## 2. Results by formula-derivation
 
-- [ ] 2.1 Implement formula-derivation of the Results field (analytical feasibility bound/effect from mechanism + diff-prediction) with each step evidence-graded `[paper]/[inferred]/[guess]`; NO execution, no shell/eval
-- [ ] 2.2 Implement the load-bearing-guess downgrade (a Results conclusion resting on an ungrounded load-bearing step is marked low-confidence / non-final)
-- [ ] 2.3 Unit tests: Results is a graded derivation, no execution path; load-bearing `[guess]` downgrades the result; grounded derivation reaches a feasibility conclusion
+- [x] 2.1 Implement formula-derivation of the Results field (analytical feasibility bound/effect from mechanism + diff-prediction) with each step evidence-graded `[paper]/[inferred]/[guess]`; NO execution, no shell/eval
+- [x] 2.2 Implement the load-bearing-guess downgrade (a Results conclusion resting on an ungrounded load-bearing step is marked low-confidence / non-final)
+- [x] 2.3 Unit tests: Results is a graded derivation, no execution path; load-bearing `[guess]` downgrades the result; grounded derivation reaches a feasibility conclusion
 
 ## 3. Real-only reference verification
 
