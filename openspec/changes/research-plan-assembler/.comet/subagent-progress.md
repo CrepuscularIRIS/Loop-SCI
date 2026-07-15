@@ -7,13 +7,13 @@
 - interpreter: .venv/bin/python  | linter: .venv/bin/ruff
 
 ## Current task
-- Task 1: Canonical schema (`loop_sci/plan/schemas.py`)
-- OpenSpec map: group 1 task 1.1 (canonical 12-field plan schema)
+- Task 2: Reasoning fields + Datasets/Source/Target (`loop_sci/plan/fields.py`)
+- OpenSpec map: group 1 tasks 1.2, 1.3 (+ 1.5 tests)
 - Stage: implementing
-- Base commit (for review-package): 9320b04
+- Base commit (for review-package): 6f53237
 - Impl commit: —
 - RED/GREEN: —
 - Task-review round: 0 / 2
 
 ## Ledger (completed tasks)
-(none yet — see .superpowers/sdd/progress.md)
+- Task 1: complete (commit 2487672, checkoff 6f53237, spec OK/quality Approved, osp 1.1). See .superpowers/sdd/progress.md

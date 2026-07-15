@@ -164,7 +164,7 @@ Covers OpenSpec task group 1 (1.2, 1.3) and the domain-parameterization requirem
   `async def assemble_title_abstract(plan_context: dict, provider, *, domain: str) -> dict` returning `{"paper_title": str, "abstract": str}` (Call 3).
   `def build_dst_candidates(hyp: RankedHypothesis, facts: list[Fact]) -> dict` returning `{"datasets": list[Candidate], "source": list[Candidate], "target": list[Candidate]}` — DETERMINISTIC, no provider.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/unit/plan/test_fields.py
@@ -252,24 +252,24 @@ async def test_title_abstract_produced_last(tmp_path):
     assert out["paper_title"] == "T" and out["abstract"] == "A"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_fields.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'loop_sci.plan.fields'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `loop_sci/plan/fields.py`:
 - `assemble_reasoning_fields`: build a system prompt anchored to `hyp.problem`, `hyp.mechanism`, `hyp.derivation_chain`, `hyp.diff_prediction`, and `domain`; require a JSON object with keys `problem_statement, rationale, technical_details, methods, experiments{baselines,metrics,design}`. Retry-once→drop pattern from `contract.py`: `for attempt in range(2): try: resp = await provider.create(...); d = json.loads(resp.get_text()); isinstance guard; return {...}`. On both-attempts failure, return empties (`""` and `ExperimentsBlock([], [], "")`) so the gate fails downstream. Parse `experiments` into an `ExperimentsBlock` (coerce `baselines`/`metrics` to `list[str]`).
 - `assemble_title_abstract`: same discipline, JSON with `paper_title, abstract`; system prompt passes `plan_context` + `domain`.
 - `build_dst_candidates` (deterministic): resolve grounding facts by `hyp.grounding_fact_ids` against the `facts` list (match `fact.fact_id`); for each grounding fact whose claim/entities mention dataset-like tokens, emit a dataset `Candidate(value=<entity or claim snippet>, candidate=True, source_ref=fact.source_ref.to_dict())`. `source` = candidates from grounding facts' claims (historical data derivation rests on). `target` = candidates derived deterministically from `hyp.diff_prediction` tokens (to-be-collected features), `Candidate(value=..., candidate=True)` (no source_ref). When no grounding fact exists, return a single grounding-absent marker per field: `[Candidate(value="", candidate=True, source_ref=None)]` — NEVER invent a concrete dataset.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_fields.py -v`
 Expected: PASS (5 passed).
 
-- [ ] **Step 5: Lint + commit**
+- [x] **Step 5: Lint + commit**
 
 ```bash
 .venv/bin/ruff check loop_sci/plan/fields.py tests/unit/plan/test_fields.py

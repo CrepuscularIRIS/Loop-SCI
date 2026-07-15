@@ -1,10 +1,10 @@
 ## 1. Plan field assembly (domain-parameterized)
 
 - [x] 1.1 Define the 12-field plan schema (canonical JSON keys for Problem Statement, Rationale, Technical Details, Datasets, Source, Target, Paper Title, Abstract, Methods, Experiments, Results, References) + a `PlanField`/`ResearchPlan` payload with evidence-graded provenance where applicable
-- [ ] 1.2 Implement domain-parameterized assembly of the reasoning/context fields (Problem Statement, Rationale, Technical Details, Paper Title, Abstract, Methods, Experiments) from a `RankedHypothesis` + fact base via the Qwen provider (domain as a runtime param; retry-once→drop + isinstance guard like the #4 stages)
-- [ ] 1.3 Implement Datasets/Source/Target population from grounding facts as candidates (with source refs); no fabricated dataset when grounding is absent
+- [x] 1.2 Implement domain-parameterized assembly of the reasoning/context fields (Problem Statement, Rationale, Technical Details, Paper Title, Abstract, Methods, Experiments) from a `RankedHypothesis` + fact base via the Qwen provider (domain as a runtime param; retry-once→drop + isinstance guard like the #4 stages)
+- [x] 1.3 Implement Datasets/Source/Target population from grounding facts as candidates (with source refs); no fabricated dataset when grounding is absent
 - [ ] 1.4 Bound assembly by a per-plan Qwen call budget (field-group calls); stop cleanly
-- [ ] 1.5 Unit tests (offline, mock provider): all reasoning fields non-empty; Experiments carries baselines + metrics; domain parameterized (two domains, no code change); dataset/source/target candidates trace to grounding facts; no fabricated dataset
+- [x] 1.5 Unit tests (offline, mock provider): all reasoning fields non-empty; Experiments carries baselines + metrics; domain parameterized (two domains, no code change); dataset/source/target candidates trace to grounding facts; no fabricated dataset
 
 ## 2. Results by formula-derivation
 
