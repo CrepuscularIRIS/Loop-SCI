@@ -614,7 +614,7 @@ Covers OpenSpec task group 4 (4.4, 4.5) and group 1 (1.4 call budget).
   `PlanAssemblerExecutor(session, *, provider, ranked_store, fact_store, verification_pipeline=None, config=None)` with `async def run(unit: DispatchUnit) -> ExecutorResult` and helper `async def assemble_for_node(node_id: str) -> ResearchPlan`.
   `register_plan_tools(registry: ToolRegistry, executor)` registering the `assemble` tool.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```python
 # tests/unit/plan/test_executor.py
@@ -717,12 +717,12 @@ def test_plan_config_group_loads_with_defaults():
 
 > Confirm `ToolRegistry.call` / `register` signatures against `loop_sci/engine/tools.py` and `Node`/`IdeaTree`/`RunSession.create` signatures against their modules before writing; adjust kwargs to match. Mirror `register_hypothesis_tools` for the tool structure.
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_executor.py tests/unit/plan/test_tools.py tests/unit/plan/test_plan_config.py -v`
 Expected: FAIL with `ModuleNotFoundError` / `AttributeError: 'LoopSCIConfig' object has no attribute 'plan'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 - `loop_sci/plan/config.py`: `@dataclass PlanConfig` with `domain: str = "natural-science"`, `call_budget: int = 3`, `allow_provider_refs: bool = False`, plus any thresholds (e.g. `min_reference_count: int = 1`). Full docstring like `HypothesisConfig`.
 - `loop_sci/plan/executor.py`: `PlanAssemblerExecutor`. `run` wraps `_assemble(unit)` in try/except → `ExecutorResult(status="error", ...)`. `_assemble`: (1) resolve `RankedHypothesis` by `unit.node_id` via `ranked_store.get_ranked(...)` (match `r.node_id`); if none → `ExecutorResult(status="error", summary="unknown node ...")`. (2) Resume: if `session_dir/plans/<node_id>.json` exists → load JSON, return `ExecutorResult(status="done", ...)` with NO provider/verify calls. (3) Call 1 + `build_dst_candidates`; (4) Call 2 `derive_results`; (5) Call 3 `assemble_title_abstract`; (6) `collect_references(...)` (extras only if `config.allow_provider_refs`); (7) build `ResearchPlan`, run `run_gate`, set `plan.gate`; (8) `render_markdown` + `assert_json_markdown_parity`; (9) mkdir `plans/`, write `<node_id>.json` (from `plan.to_dict()`) and `<node_id>.md`; `session.advance_step()`. Respect `call_budget` (default 3): if budget < 3, skip the lowest-priority call(s) cleanly (Title/Abstract first) so the run stops without crashing. Return `ExecutorResult(status="done", summary=..., refs={"node_id":..., "gate_passed": plan.gate.passed})`.
@@ -730,12 +730,12 @@ Expected: FAIL with `ModuleNotFoundError` / `AttributeError: 'LoopSCIConfig' obj
 - Wiring: add `PlanConf` to `loop_sci/config/schemas.py` mirroring `PlanConfig` fields; add `plan: PlanConf = field(default_factory=PlanConf)` to `LoopSCIConfig`. Add `plan: default` under `defaults:` in `conf/config.yaml`. Create `conf/plan/default.yaml` (`# @package _global_.plan` + `domain: "natural-science"`, `call_budget: 3`, `allow_provider_refs: false`, `min_reference_count: 1`). In `loader.py` add `plan_fields = {f for f in vars(PlanConf())}` and `plan=PlanConf(**{k: v for k, v in d.get("plan", {}).items() if k in plan_fields})`.
 - `loop_sci/plan/__init__.py`: export `PlanAssemblerExecutor`, `PlanConfig`, `ResearchPlan`, `register_plan_tools`, and the schema dataclasses, with `__all__`.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `.venv/bin/python -m pytest tests/unit/plan/test_executor.py tests/unit/plan/test_tools.py tests/unit/plan/test_plan_config.py -v`
 Expected: PASS.
 
-- [ ] **Step 5: Lint + commit**
+- [x] **Step 5: Lint + commit**
 
 ```bash
 .venv/bin/ruff check loop_sci/plan/ conf/plan/default.yaml loop_sci/config/schemas.py loop_sci/config/loader.py tests/unit/plan/
