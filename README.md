@@ -222,6 +222,81 @@ Skipped automatically when `DASHSCOPE_API_KEY` is absent.
 
 ---
 
+## Research Plan Assembler (change #5)
+
+`PlanAssemblerExecutor` converts a `RankedHypothesis` into a full 《科学假设与研究计划》 (Scientific Hypothesis and Research Plan) — a 12-field structured document persisted as both JSON (source of truth) and derived Markdown.
+
+### 12-field plan overview
+
+| # | JSON key | Description |
+|---|----------|-------------|
+| 1 | `problem_statement` | Research problem anchored to the hypothesis |
+| 2 | `rationale` | Why this hypothesis is worth pursuing |
+| 3 | `technical_details` | Implementation-level specifics |
+| 4 | `datasets` | Dataset candidates traced to grounding facts |
+| 5 | `source` | Source-domain candidates from grounding facts |
+| 6 | `target` | Target-domain tokens from `diff_prediction` |
+| 7 | `paper_title` | Proposed paper title |
+| 8 | `abstract` | Proposed abstract |
+| 9 | `methods` | Methodological approach |
+| 10 | `experiments` | Baselines, metrics, and experimental design |
+| 11 | `results` | Evidence-graded feasibility derivation |
+| 12 | `references` | Verified bibliographic references |
+
+### Results by formula-derivation (no execution)
+
+`results` is an evidence-graded analytical derivation chain — never an executed measurement.
+Each step carries a grade literal: `[paper]` (cited literature), `[inferred]` (logical derivation), or `[guess]` (speculative).
+`confidence` is set deterministically by `apply_load_bearing_downgrade`: when the decisive last step is `[guess]`, confidence downgrades to `"low"`, and the quality gate fails.
+
+### Real-reference verification (anti-fabrication)
+
+References are assembled from grounding facts only (default, zero verify calls):
+
+- **Seed path** (always active): each `fact_id` in `hyp.grounding_fact_ids` is resolved against the `FactStore` and lifted to a `Reference(verified=True)` entry.  Real by construction.
+- **Extras path** (opt-in, `allow_provider_refs=True`): provider-proposed citations are routed through `VerificationPipeline.verify()`; only `status="verified"` results are admitted.  All others are silently dropped.
+
+### Runtime domain parameter
+
+`PlanConfig(domain="neuroscience")` injects the domain string into all LLM prompts (Calls 1–3), so the same pipeline adapts to any research domain without code changes.
+
+### Output format
+
+The `plans/` subdirectory of the session contains:
+
+- `<node_id>.json` — canonical 12-field JSON (source of truth); includes `gate` and `node_id` provenance.
+- `<node_id>.md` — Markdown derived from JSON via `render_markdown`; structural parity is asserted by `assert_json_markdown_parity`.
+
+Resume is zero-cost: if `<node_id>.json` already exists, the executor returns immediately without any provider call.
+
+### Usage
+
+```python
+from loop_sci.plan.executor import PlanAssemblerExecutor
+from loop_sci.plan.config import PlanConfig
+from loop_sci.hypothesis.ranked import RankedHypothesisStore
+
+executor = PlanAssemblerExecutor(
+    session,
+    provider=provider,
+    ranked_store=RankedHypothesisStore(session.tree),
+    fact_store=fact_store,
+    config=PlanConfig(domain="neuroscience"),
+)
+result = await executor.run(DispatchUnit(node_id="hyp_node1", goal="scaling"))
+# result.status == "done"; plans/hyp_node1.json + plans/hyp_node1.md written
+```
+
+### Live tests
+
+```bash
+DASHSCOPE_API_KEY=<key> python -m pytest tests/live/test_plan_assembler_live.py -v -m live
+```
+
+Skipped automatically when `DASHSCOPE_API_KEY` is absent.
+
+---
+
 ## Vendored Arbor
 
 `loop_sci/_vendor/arbor/` is a pinned snapshot of
